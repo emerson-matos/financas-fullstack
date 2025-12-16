@@ -29,7 +29,7 @@ import {
   useBulkCreateTransactions,
   useParseFileImport,
 } from "@/hooks/use-transactions";
-import type { CreateTransactionRequest, ImportResult } from "@/lib/types";
+import type { CreateTransactionRequest, ImportResult, ParsedTransaction } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { validateFile } from "@/lib/file-validation";
 
@@ -200,7 +200,8 @@ export function DataImport() {
     try {
       // Parse all files
       const fileInfos: FileInfo[] = [];
-      const allTransactions: CreateTransactionRequest[] = [];
+      const allTransactionsToCreate: CreateTransactionRequest[] = [];
+      const allParsedTransactions: ParsedTransaction[] = []; // New array to collect all ParsedTransactions
       let totalSuccess = 0;
       let totalFailed = 0;
       const allErrors: string[] = [];
@@ -223,7 +224,20 @@ export function DataImport() {
             accountId: selectedAccountId,
           });
 
-          allTransactions.push(...result.transactions);
+          // Collect all ParsedTransactions
+          allParsedTransactions.push(...result.transactions);
+
+          // Map ParsedTransaction to CreateTransactionRequest
+          const mappedTransactionsForCreation: CreateTransactionRequest[] =
+            result.transactions.map((t) => ({
+              accountId: selectedAccountId,
+              description: t.description,
+              amount: t.amount,
+              transactedDate: t.transacted_date, // This is ParsedTransaction's property
+              kind: t.kind,
+            }));
+
+          allTransactionsToCreate.push(...mappedTransactionsForCreation);
           totalSuccess += result.statistics.successfulRecords;
           totalFailed += result.statistics.failedRecords;
           allErrors.push(...result.errors);
@@ -235,9 +249,9 @@ export function DataImport() {
       }
 
       setFiles(fileInfos);
-      setTransactions(allTransactions);
+      setTransactions(allTransactionsToCreate);
       setImportResult({
-        transactions: allTransactions,
+        transactions: allParsedTransactions, // Use allParsedTransactions for ImportResult
         statistics: {
           totalRecords: totalSuccess + totalFailed,
           successfulRecords: totalSuccess,
@@ -246,10 +260,10 @@ export function DataImport() {
         errors: allErrors,
       });
 
-      if (allTransactions.length > 0) {
+      if (allTransactionsToCreate.length > 0) {
         setCurrentStep("review");
         toast.success(
-          `${allTransactions.length} transações prontas para revisão`,
+          `${allTransactionsToCreate.length} transações prontas para revisão`,
         );
       } else {
         toast.error("Nenhuma transação encontrada nos arquivos");
