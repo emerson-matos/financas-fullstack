@@ -28,8 +28,8 @@ export async function GET(request: NextRequest) {
         amount,
         transacted_date,
         kind,
-        category:categories(name)
-      `,
+        category:categories!transactions_category_id_fkey(name)
+        `,
       )
       .is("deactivated_at", null);
 
@@ -68,8 +68,8 @@ export async function GET(request: NextRequest) {
 
       const month = monthlyData.get(monthKey)!;
       const amount = Number(tx.amount) || 0;
-      const categoryName = tx.category?.[0].name || "Sem categoria";
-
+      const categoryName =
+        (tx.category as { name?: string } | null)?.name ?? "Sem categoria";
       // Track by category
       const currentCategoryAmount = month.categories.get(categoryName) || 0;
       month.categories.set(categoryName, currentCategoryAmount + amount);

@@ -1,11 +1,6 @@
 "use client";
-/*
- * NOTE: This file intentionally uses array index as key in preview/review tables.
- * The data does not have a unique identifier, and the order is static for these cases.
- * The biome lint error (noArrayIndexKey) is acknowledged and intentionally ignored for this file.
- * If unique keys become available in the future, please update the key prop accordingly.
- */
-import { FileText, Inbox, Upload } from "lucide-react";
+
+import { AlertCircle, FileText, Upload } from "lucide-react";
 import { useState } from "react";
 import { type FileRejection, useDropzone } from "react-dropzone";
 import { toast } from "sonner";
@@ -34,211 +29,275 @@ import {
   useBulkCreateTransactions,
   useParseFileImport,
 } from "@/hooks/use-transactions";
-import type {
-  CreateTransactionRequest,
-  ImportRequest,
-  ImportResult,
-} from "@/lib/types";
+import type { CreateTransactionRequest, ImportResult } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { validateFile } from "@/lib/file-validation";
-type ImportStep = "upload" | "mapping" | "review";
+
+type ImportStep = "upload" | "review";
+
 interface FileInfo {
   name: string;
   content: string;
-  format: "ofx";
-  detectedBank?: string;
+  bank?: string;
 }
+
+// Bank detection
 const detectBank = (content: string): string | undefined => {
   if (content.includes("<BANKID>0260") || content.includes("<FID>260")) {
     return "Nubank";
   }
-  if (content.includes("<BANKID>0341")) {
+  if (content.includes("<BANKID>0341") || content.includes("<FID>0341")) {
     return "Itaú";
   }
-  return "Desconhecido";
+  if (content.includes("<BANKID>0033") || content.includes("<FID>033")) {
+    return "Santander";
+  }
+  if (content.includes("<BANKID>0237") || content.includes("<FID>237")) {
+    return "Bradesco";
+  }
+  return undefined;
 };
-async function parseOfxFiles(
-  ofxFiles: Array<FileInfo>,
-  selectedAccountId: string,
-  parseFn: (request: ImportRequest) => Promise<ImportResult>,
-): Promise<{
-  transactions: Array<CreateTransactionRequest>;
-  aggregated: ImportResult | null;
-  failedCount: number;
-}> {
-  if (ofxFiles.length === 0) {
-    return { transactions: [], aggregated: null, failedCount: 0 };
-  }
-  const settled = await Promise.allSettled(
-    ofxFiles.map((f) =>
-      parseFn({
-        fileContent: f.content,
-        fileName: f.name,
-        fileFormat: f.format,
-        accountId: selectedAccountId,
-      }),
-    ),
-  );
-  const successful = settled.filter(
-    (r): r is PromiseFulfilledResult<ImportResult> => r.status === "fulfilled",
-  );
-  const failedCount = settled.length - successful.length;
-  let aggregated: ImportResult | null = null;
-  if (successful.length > 0) {
-    const initial: ImportResult = {
-      transactions: [],
-      statistics: {
-        totalRecords: 0,
-        successfulRecords: 0,
-        failedRecords: 0,
-      },
-      errors: [],
-    };
-    aggregated = successful.reduce((acc, cur) => {
-      const res = cur.value;
-      acc.transactions.push(...res.transactions);
-      acc.statistics.totalRecords += res.statistics.totalRecords;
-      acc.statistics.successfulRecords += res.statistics.successfulRecords;
-      acc.statistics.failedRecords += res.statistics.failedRecords;
-      acc.errors.push(...res.errors);
-      return acc;
-    }, initial);
-  }
-  const transactions: Array<CreateTransactionRequest> = (
-    aggregated?.transactions || []
-  ).map((transaction) => {
-    let amountValue = (
-      transaction as unknown as {
-        amount: number | { parsedValue?: number };
-      }
-    ).amount as number | { parsedValue?: number };
-    if (typeof amountValue === "object" && amountValue !== null) {
-      const amountObj = amountValue as { parsedValue?: number };
-      amountValue = amountObj.parsedValue || (amountValue as unknown as number);
-    }
-    return {
-      accountId: selectedAccountId,
-      name: transaction.description || "Imported Transaction",
-      description: transaction.description,
-      currency: undefined,
-      kind: transaction.kind,
-      transactedDate: transaction.transacted_date,
-      amount: amountValue as number,
-    };
-  });
-  return { transactions, aggregated, failedCount };
-}
-function computeAggregatedResult(
-  base: ImportResult | null,
-  csvCount: number,
-): ImportResult | null {
-  if (!base && csvCount === 0) {
-    return null;
-  }
-  const safeBase: ImportResult =
-    base ||
-    ({
-      transactions: [],
-      statistics: {
-        totalRecords: 0,
-        successfulRecords: 0,
-        failedRecords: 0,
-      },
-      errors: [],
-    } as ImportResult);
-  return {
-    transactions: safeBase.transactions,
-    statistics: {
-      totalRecords: safeBase.statistics.totalRecords + csvCount,
-      successfulRecords: safeBase.statistics.successfulRecords + csvCount,
-      failedRecords: safeBase.statistics.failedRecords,
-    },
-    errors: safeBase.errors,
+
+// Statistics Card Component
+function StatCard({
+  value,
+  label,
+  variant = "default",
+}: {
+  value: number;
+  label: string;
+  variant?: "default" | "success" | "error";
+}) {
+  const colors = {
+    default: "bg-blue-50 text-blue-600",
+    success: "bg-green-50 text-green-600",
+    error: "bg-red-50 text-red-600",
   };
+
+  return (
+    <div className={cn("text-center p-4 rounded-lg", colors[variant])}>
+      <div className="text-2xl font-bold">{value}</div>
+      <div className="text-sm text-gray-600">{label}</div>
+    </div>
+  );
 }
+
+// File List Component
+function FileList({ files }: { files: FileInfo[] }) {
+  return (
+    <div className="mb-6">
+      <div className="flex items-center gap-2 mb-3">
+        <FileText className="h-4 w-4" />
+        <span className="font-semibold">
+          {files.length} arquivo{files.length !== 1 ? "s" : ""} selecionado
+          {files.length !== 1 ? "s" : ""}
+        </span>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {files.map((file, idx) => (
+          <div
+            key={idx}
+            className="flex items-center gap-2 p-2 bg-secondary rounded-md"
+          >
+            <Badge variant="outline">{file.name}</Badge>
+            {file.bank && <Badge variant="secondary">{file.bank}</Badge>}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// Review Table Component
+function ReviewTable({
+  transactions,
+}: {
+  transactions: CreateTransactionRequest[];
+}) {
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    }).format(amount);
+  };
+
+  const formatDate = (date: string) => {
+    return new Date(date).toLocaleDateString("pt-BR");
+  };
+
+  const getKindBadge = (kind: string) => {
+    const variants: Record<string, "default" | "secondary" | "destructive"> = {
+      CREDIT: "default",
+      DEBIT: "destructive",
+      TRANSFER: "secondary",
+    };
+    return <Badge variant={variants[kind] || "secondary"}>{kind}</Badge>;
+  };
+
+  return (
+    <div className="overflow-auto rounded-md border">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Tipo</TableHead>
+            <TableHead>Descrição</TableHead>
+            <TableHead className="text-right">Valor</TableHead>
+            <TableHead>Data</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {transactions.map((transaction, index) => (
+            <TableRow key={index}>
+              <TableCell>{getKindBadge(transaction.kind)}</TableCell>
+              <TableCell className="max-w-md truncate">
+                {transaction.description}
+              </TableCell>
+              <TableCell className="text-right font-mono">
+                {formatCurrency(transaction.amount)}
+              </TableCell>
+              <TableCell>{formatDate(transaction.transactedDate)}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  );
+}
+
+// Main Component
 export function DataImport() {
   const [currentStep, setCurrentStep] = useState<ImportStep>("upload");
-  const [files, setFiles] = useState<Array<FileInfo>>([]);
-  const [selectedAccountId, setSelectedAccountId] = useState<string | null>(
-    null,
-  );
-  const [reviewData, setReviewData] = useState<Array<CreateTransactionRequest>>(
+  const [files, setFiles] = useState<FileInfo[]>([]);
+  const [selectedAccountId, setSelectedAccountId] = useState<string>("");
+  const [transactions, setTransactions] = useState<CreateTransactionRequest[]>(
     [],
   );
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
-  // Use hooks instead of services directly
+
   const { data: accountsData } = useAccounts({ sort: ["identification,asc"] });
   const parseFileMutation = useParseFileImport();
   const importMutation = useBulkCreateTransactions();
   const isMobile = useIsMobile();
+
   const reset = () => {
     setCurrentStep("upload");
     setFiles([]);
-    setReviewData([]);
-    setSelectedAccountId(null);
+    setTransactions([]);
+    setSelectedAccountId("");
     setImportResult(null);
     setIsProcessing(false);
   };
-  const handleParseMany = async (
-    filesToParse: Array<File>,
-  ): Promise<{
-    infos: Array<FileInfo>;
-  }> => {
-    const results = await Promise.all(
-      filesToParse.map(async (file) => {
+
+  const processFiles = async (filesToProcess: File[]) => {
+    if (!selectedAccountId) {
+      toast.error("Por favor, selecione uma conta antes de fazer upload.");
+      return;
+    }
+
+    setIsProcessing(true);
+
+    try {
+      // Parse all files
+      const fileInfos: FileInfo[] = [];
+      const allTransactions: CreateTransactionRequest[] = [];
+      let totalSuccess = 0;
+      let totalFailed = 0;
+      const allErrors: string[] = [];
+
+      for (const file of filesToProcess) {
         const content = await file.text();
-        const detectedBank = detectBank(content);
-        const info: FileInfo = {
-          format: "ofx",
+        const bank = detectBank(content);
+
+        fileInfos.push({
           name: file.name,
           content,
-          detectedBank,
-        };
-        return { info } as const;
-      }),
-    );
-    const infos: Array<FileInfo> = results.map((r) => r.info);
-    return { infos };
+          bank,
+        });
+
+        try {
+          const result = await parseFileMutation.mutateAsync({
+            fileContent: content,
+            fileName: file.name,
+            fileFormat: "ofx",
+            accountId: selectedAccountId,
+          });
+
+          allTransactions.push(...result.transactions);
+          totalSuccess += result.statistics.successfulRecords;
+          totalFailed += result.statistics.failedRecords;
+          allErrors.push(...result.errors);
+        } catch (error) {
+          console.error(`Failed to parse ${file.name}:`, error);
+          toast.error(`Falha ao processar ${file.name}`);
+          totalFailed += 1;
+        }
+      }
+
+      setFiles(fileInfos);
+      setTransactions(allTransactions);
+      setImportResult({
+        transactions: allTransactions,
+        statistics: {
+          totalRecords: totalSuccess + totalFailed,
+          successfulRecords: totalSuccess,
+          failedRecords: totalFailed,
+        },
+        errors: allErrors,
+      });
+
+      if (allTransactions.length > 0) {
+        setCurrentStep("review");
+        toast.success(
+          `${allTransactions.length} transações prontas para revisão`,
+        );
+      } else {
+        toast.error("Nenhuma transação encontrada nos arquivos");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Erro ao processar arquivos");
+    } finally {
+      setIsProcessing(false);
+    }
   };
+
   const onDrop = async (
-    acceptedFiles: Array<File>,
-    rejectedFiles: Array<FileRejection>,
+    acceptedFiles: File[],
+    rejectedFiles: FileRejection[],
   ) => {
     if (rejectedFiles.length > 0) {
       toast.error("Arquivo rejeitado. Por favor, selecione arquivos OFX.");
       return;
     }
+
     if (acceptedFiles.length === 0) {
       return;
     }
+
     const validFiles = acceptedFiles.filter((file) => {
       const validation = validateFile(file, file.name);
       if (!validation.isValid) {
         toast.error(validation.error || "Tipo de arquivo não suportado");
         return false;
       }
-      // Only allow OFX
-      const nameLower = file.name.toLowerCase();
-      if (!nameLower.endsWith(".ofx")) {
-        toast.error("Apenas arquivos OFX são suportados.");
+
+      if (!file.name.toLowerCase().endsWith(".ofx")) {
+        toast.error(`${file.name}: Apenas arquivos OFX são suportados`);
         return false;
       }
+
       return true;
     });
+
     if (validFiles.length === 0) {
       return;
     }
-    try {
-      const { infos } = await handleParseMany(validFiles);
-      setFiles(infos);
-      setCurrentStep("mapping");
-    } catch (error) {
-      console.error(error);
-      toast.error("Falha ao processar arquivos selecionados");
-    }
+
+    await processFiles(validFiles);
   };
-  const dropzoneConfig = {
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: isMobile
       ? undefined
@@ -249,244 +308,158 @@ export function DataImport() {
         },
     maxFiles: 10,
     multiple: true,
-    noClick: false,
-    noKeyboard: false,
-  };
-  const { getRootProps, getInputProps, isDragActive } =
-    useDropzone(dropzoneConfig);
-  const handleReview = () => {
-    if (!selectedAccountId) {
-      toast.error("Por favor, selecione uma conta para a importação.");
-      return;
-    }
-    const ofxFiles = files.filter((f) => f.format === "ofx");
-    setIsProcessing(true);
-    (async () => {
-      try {
-        const combined: Array<CreateTransactionRequest> = [];
-        const {
-          transactions: ofxTxs,
-          aggregated,
-          failedCount,
-        } = await parseOfxFiles(ofxFiles, selectedAccountId, (request) =>
-          parseFileMutation.mutateAsync(request),
-        );
-        combined.push(...ofxTxs);
-        if (failedCount > 0) {
-          toast.error("Falha ao processar um ou mais arquivos OFX");
-        }
-        const aggregatedAll = computeAggregatedResult(aggregated, 0);
-        if (aggregatedAll) {
-          setImportResult(aggregatedAll);
-        }
-        if (combined.length > 0) {
-          setReviewData(combined);
-          setCurrentStep("review");
-        } else {
-          toast.error("Nenhuma transação encontrada nos arquivos selecionados");
-        }
-      } catch (error) {
-        console.error(error);
-        toast.error("Falha ao processar arquivos.");
-      } finally {
-        setIsProcessing(false);
-      }
-    })();
-  };
+    disabled: !selectedAccountId || isProcessing,
+  });
+
   const handleConfirmImport = () => {
-    importMutation.mutate(reviewData, {
+    importMutation.mutate(transactions, {
       onSuccess: () => {
         toast.success("Transações importadas com sucesso!");
         reset();
       },
       onError: (error) => {
-        toast.error("Falha ao importar transações.");
+        toast.error("Falha ao importar transações");
         console.error(error);
       },
     });
   };
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Importar Transações</CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <div className="grid-cols-1">
-            <span className="font-semibold">Conta</span>
-            <Select onValueChange={setSelectedAccountId}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione uma conta" />
-              </SelectTrigger>
-              <SelectContent>
-                {accountsData?.map((account) => (
-                  <SelectItem key={account.id} value={account.id}>
-                    {account.identification}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className=" text-gray-500 text-sm">
-            <p>Formatos suportados:</p>
-            <ul>
-              <li>Nubank OFX</li>
-              <li>Itaú OFX</li>
-            </ul>
-          </div>
-          {currentStep === "mapping" && (
-            <Button
+      <CardContent className="space-y-6">
+        {/* Account Selection */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Conta de Destino</label>
+          <Select
+            value={selectedAccountId}
+            onValueChange={setSelectedAccountId}
+            disabled={currentStep === "review"}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Selecione uma conta" />
+            </SelectTrigger>
+            <SelectContent>
+              {accountsData?.map((account) => (
+                <SelectItem key={account.id} value={account.id}>
+                  {account.identification}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Upload Step */}
+        {currentStep === "upload" && (
+          <>
+            <div
               {...getRootProps()}
-              className="border-2 border-dashed border-gray-300 rounded-lg items-end text-center cursor-pointer hover:border-gray-400 transition-colors"
+              className={cn(
+                "border-2 border-dashed rounded-lg p-12 text-center cursor-pointer transition-colors space-y-4",
+                !selectedAccountId
+                  ? "border-gray-200 bg-gray-50 cursor-not-allowed opacity-50"
+                  : isDragActive
+                    ? "border-primary bg-primary/5"
+                    : "border-border hover:border-primary/50",
+              )}
             >
               <input {...getInputProps()} />
-              <div className="flex items-center justify-center gap-4">
-                <Inbox className="size-4 text-gray-400" />
-                <div className="text-center">
-                  <p>&quot;Toque para selecionar arquivos OFX&quot;</p>
-                </div>
+              <div className="flex justify-center">
+                <Upload
+                  className={cn(
+                    "h-16 w-16",
+                    selectedAccountId ? "text-primary" : "text-gray-400",
+                  )}
+                />
               </div>
-            </Button>
-          )}
-        </div>
-        {currentStep === "upload" && (
-          <div
-            {...getRootProps()}
-            className={cn(
-              "border-2 border-dashed border-border rounded-lg p-12 text-center cursor-pointer hover:border-primary/50 transition-colors space-y-4",
-              isDragActive && "bg-accent/10",
-            )}
-          >
-            <input {...getInputProps()} />
-            <div className="flex justify-center">
-              <Upload className="h-16 w-16 text-primary" />
-            </div>
-            <div className="space-y-2">
-              <h3 className="text-xl font-semibold text-foreground">
-                {isDragActive
-                  ? "Solte os arquivos aqui"
-                  : isMobile
-                    ? "Toque para selecionar arquivos OFX"
-                    : "Arraste arquivos OFX ou clique para selecionar"}
-              </h3>
-              <p className="text-muted-foreground">
-                Suporte para múltiplos arquivos • Formato aceito: .ofx
-              </p>
-            </div>
-            <Button size="lg" className="mt-4">
-              <Upload className="mr-2 h-4 w-4" />
-              Selecionar Arquivos
-            </Button>
-          </div>
-        )}
-        {currentStep === "mapping" && (
-          <>
-            <div>
-              {files.length > 0 && (
-                <div>
-                  <div className="mb-6">
-                    <div className="flex items-center gap-2 mb-2">
-                      <FileText className="h-4 w-4" />
-                      <span className="font-semibold">
-                        Arquivos selecionados
-                      </span>
-                    </div>
-                    <div className="grid grid-cols-5 flex-wrap gap-2">
-                      {files.map((f, idx) => (
-                        <div key={idx} className="flex items-center gap-2">
-                          <Badge variant="secondary">{f.name}</Badge>
-                          <Badge variant="outline">
-                            {f.format.toUpperCase()}
-                          </Badge>
-                          {f.detectedBank && (
-                            <Badge variant="outline">{f.detectedBank}</Badge>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+              <div className="space-y-2">
+                <h3 className="text-xl font-semibold">
+                  {!selectedAccountId
+                    ? "Selecione uma conta primeiro"
+                    : isDragActive
+                      ? "Solte os arquivos aqui"
+                      : isMobile
+                        ? "Toque para selecionar arquivos OFX"
+                        : "Arraste arquivos OFX ou clique para selecionar"}
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Suporte para múltiplos arquivos • Formato: .ofx
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Bancos suportados: Nubank, Itaú, Santander, Bradesco
+                </p>
+              </div>
+              {selectedAccountId && !isProcessing && (
+                <Button size="lg" type="button">
+                  <Upload className="mr-2 h-4 w-4" />
+                  Selecionar Arquivos
+                </Button>
+              )}
+              {isProcessing && (
+                <div className="flex items-center justify-center gap-2 text-primary">
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary" />
+                  <span>Processando...</span>
                 </div>
               )}
             </div>
-            <div className="flex justify-end mt-6">
-              <Button onClick={handleReview} disabled={isProcessing}>
-                {isProcessing ? "Processando..." : "Revisar Transações"}
-              </Button>
-            </div>
           </>
         )}
-        {currentStep === "review" && (
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Revisar Importação</h3>
-            {importResult && (
-              <div className="mb-6">
-                <div className="grid grid-cols-3 gap-4 mb-4">
-                  <div className="text-center p-4 bg-blue-50 rounded-lg">
-                    <div className="text-2xl font-bold text-blue-600">
-                      {importResult.statistics.totalRecords}
-                    </div>
-                    <div className="text-sm text-gray-600">Total</div>
-                  </div>
-                  <div className="text-center p-4 bg-green-50 rounded-lg">
-                    <div className="text-2xl font-bold text-green-600">
-                      {importResult.statistics.successfulRecords}
-                    </div>
-                    <div className="text-sm text-gray-600">Sucessos</div>
-                  </div>
-                  <div className="text-center p-4 bg-red-50 rounded-lg">
-                    <div className="text-2xl font-bold text-red-600">
-                      {importResult.statistics.failedRecords}
-                    </div>
-                    <div className="text-sm text-gray-600">Erros</div>
-                  </div>
-                </div>
-                {importResult.errors.length > 0 && (
-                  <Alert className="mb-4">
-                    <AlertDescription>
-                      <div className="font-semibold mb-2">
-                        Erros encontrados:
-                      </div>
-                      <ul className="list-disc list-inside space-y-1">
-                        {importResult.errors.map((error, index) => (
-                          <li key={index} className="text-sm">
-                            {error}
-                          </li>
-                        ))}
-                      </ul>
-                    </AlertDescription>
-                  </Alert>
-                )}
-              </div>
-            )}
-            <div className="overflow-auto rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Tipo</TableHead>
-                    <TableHead>Descrição</TableHead>
-                    <TableHead>Valor</TableHead>
-                    <TableHead>Data</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {reviewData.map((transaction, index) => (
-                    // Using index as key is not ideal, but no unique id is available in review data
-                    <TableRow key={index}>
-                      <TableCell>{transaction.kind}</TableCell>
-                      <TableCell>{transaction.description}</TableCell>
-                      <TableCell>{transaction.amount.toFixed(2)}</TableCell>
-                      <TableCell>{transaction.transactedDate}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+
+        {/* Review Step */}
+        {currentStep === "review" && importResult && (
+          <div className="space-y-6">
+            <FileList files={files} />
+
+            {/* Statistics */}
+            <div className="grid grid-cols-3 gap-4">
+              <StatCard
+                value={importResult.statistics.totalRecords}
+                label="Total"
+                variant="default"
+              />
+              <StatCard
+                value={importResult.statistics.successfulRecords}
+                label="Sucesso"
+                variant="success"
+              />
+              <StatCard
+                value={importResult.statistics.failedRecords}
+                label="Erros"
+                variant="error"
+              />
             </div>
-            <div className="flex justify-end mt-6 gap-4">
-              <Button
-                variant="outline"
-                onClick={() => setCurrentStep("mapping")}
-              >
-                Voltar
+
+            {/* Errors */}
+            {importResult.errors.length > 0 && (
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  <div className="font-semibold mb-2">
+                    {importResult.errors.length} erro(s) encontrado(s):
+                  </div>
+                  <ul className="list-disc list-inside space-y-1 text-sm">
+                    {importResult.errors.map((error, index) => (
+                      <li key={index}>{error}</li>
+                    ))}
+                  </ul>
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {/* Transactions Table */}
+            <div>
+              <h3 className="text-lg font-semibold mb-4">
+                Transações a Importar ({transactions.length})
+              </h3>
+              <ReviewTable transactions={transactions} />
+            </div>
+
+            {/* Actions */}
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={reset}>
+                Cancelar
               </Button>
               <Button
                 onClick={handleConfirmImport}
@@ -494,7 +467,7 @@ export function DataImport() {
               >
                 {importMutation.isPending
                   ? "Importando..."
-                  : "Confirmar Importação"}
+                  : `Importar ${transactions.length} Transações`}
               </Button>
             </div>
           </div>

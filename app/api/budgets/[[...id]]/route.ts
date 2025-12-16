@@ -2,9 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { createErrorResponse, createSuccessResponse } from "@/lib/api/handlers";
 import { requireAuth } from "@/lib/api/auth";
 import { BadRequestAlertException, NotFoundException } from "@/lib/api/errors";
-import { update, deleteById } from "@/lib/supabase/queries";
+import { deleteById, update } from "@/lib/supabase/queries";
 import { createClient } from "@/lib/supabase/server";
-import { BudgetItem } from "@/lib/types";
+import type { BudgetItemInput } from "@/lib/types";
+
+/* ============================================================================
+ * GET
+ * ========================================================================== */
 
 export async function GET(
   request: NextRequest,
@@ -12,22 +16,26 @@ export async function GET(
 ) {
   try {
     await requireAuth();
+    const supabase = await createClient();
+
     const resolvedParams = await params;
     const id = resolvedParams?.id?.[0];
 
     const { searchParams } = new URL(request.url);
-    const supabase = await createClient();
 
-    // Single budget by ID with budget_items
+    /* ----------------------------------------------------------------------
+     * Single budget
+     * -------------------------------------------------------------------- */
     if (id) {
       const { data: budget, error } = await supabase
         .from("budgets")
         .select(
           `
           *,
-          budget_items(
+          budget_items:budget_items_with_spent(
             id,
-            amount,
+            amount:planned,
+            spent,
             category:categories(id, name)
           )
         `,
@@ -42,48 +50,47 @@ export async function GET(
           "notfound",
         );
       }
+
       return createSuccessResponse(budget);
     }
 
-    // List all budgets with budget_items
-    const page = parseInt(searchParams.get("page") || "0");
-    const size = parseInt(searchParams.get("size") || "20");
-    const sort = searchParams.get("sort") || "start_date,desc";
+    /* ----------------------------------------------------------------------
+     * List budgets (paged)
+     * -------------------------------------------------------------------- */
+    const page = Number(searchParams.get("page") ?? 0);
+    const size = Number(searchParams.get("size") ?? 20);
+    const sort = searchParams.get("sort") ?? "start_date,desc";
     const [sortField, sortOrder] = sort.split(",");
 
-    const {
-      data: budgets,
-      error,
-      count,
-    } = await supabase
+    const { data, error, count } = await supabase
       .from("budgets")
       .select(
         `
         *,
-        budget_items(
+        budget_items:budget_items_with_spent(
           id,
-          amount,
+          amount:planned,
+          spent,
           category:categories(id, name)
         )
       `,
         { count: "exact" },
       )
       .is("deactivated_at", null)
-      .order(sortField || "start_date", { ascending: sortOrder === "desc" })
-      .range(page * size, (page + 1) * size - 1);
+      .order(sortField || "start_date", {
+        ascending: sortOrder === "asc",
+      })
+      .range(page * size, page * size + size - 1);
 
     if (error) throw error;
 
-    const totalElements = count || 0;
-    const totalPages = Math.ceil(totalElements / size);
-
     return createSuccessResponse({
-      content: budgets || [],
+      content: data ?? [],
       page: {
-        size,
-        total_elements: totalElements,
-        total_pages: totalPages,
         number: page,
+        size,
+        total_elements: count ?? 0,
+        total_pages: Math.ceil((count ?? 0) / size),
       },
     });
   } catch (error) {
@@ -91,11 +98,16 @@ export async function GET(
   }
 }
 
+/* ============================================================================
+ * POST
+ * ========================================================================== */
+
 export async function POST(request: NextRequest) {
   try {
     await requireAuth();
-    const body = await request.json();
+    const supabase = await createClient();
 
+    const body = await request.json();
     if (!body) {
       throw new BadRequestAlertException(
         "Request body is required",
@@ -104,18 +116,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const supabase = await createClient();
-
-    // Extract and transform budget_items
-    const budgetItems = (body.budget_items as Array<BudgetItem>).map(
+    const budgetItems = (body.budget_items as BudgetItemInput[]).map(
       (item) => ({
         category_id: item.category.id,
         amount: item.amount,
       }),
     );
 
-    // Use RPC function to create budget with items in a transaction
-    const { data: budgetId, error: rpcError } = await supabase.rpc(
+    const { data: budgetId, error } = await supabase.rpc(
       "create_budget_with_items",
       {
         p_name: body.name,
@@ -126,17 +134,17 @@ export async function POST(request: NextRequest) {
       },
     );
 
-    if (rpcError) throw rpcError;
+    if (error) throw error;
 
-    // Fetch the complete budget with items
     const { data: completeBudget, error: fetchError } = await supabase
       .from("budgets")
       .select(
         `
         *,
-        budget_items(
+        budget_items:budget_items_with_spent(
           id,
-          amount,
+          amount:planned,
+          spent,
           category:categories(id, name)
         )
       `,
@@ -152,12 +160,18 @@ export async function POST(request: NextRequest) {
   }
 }
 
+/* ============================================================================
+ * PUT
+ * ========================================================================== */
+
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id?: string[] }> },
 ) {
   try {
     await requireAuth();
+    const supabase = await createClient();
+
     const resolvedParams = await params;
     const id = resolvedParams?.id?.[0];
 
@@ -170,18 +184,15 @@ export async function PUT(
     }
 
     const body = await request.json();
-    const supabase = await createClient();
 
-    // Extract and transform budget_items
-    const budgetItems = (body.budget_items as Array<BudgetItem>).map(
+    const budgetItems = (body.budget_items as BudgetItemInput[]).map(
       (item) => ({
-        category_id: item.category?.id,
+        category_id: item.category.id,
         amount: item.amount,
       }),
     );
 
-    // Use RPC function to update budget with items in a transaction
-    const { data: budgetId, error: rpcError } = await supabase.rpc(
+    const { data: budgetId, error } = await supabase.rpc(
       "update_budget_with_items",
       {
         p_budget_id: id,
@@ -193,17 +204,17 @@ export async function PUT(
       },
     );
 
-    if (rpcError) throw rpcError;
+    if (error) throw error;
 
-    // Fetch the complete budget with items
     const { data: completeBudget, error: fetchError } = await supabase
       .from("budgets")
       .select(
         `
         *,
-        budget_items(
+        budget_items:budget_items_with_spent(
           id,
-          amount,
+          amount:planned,
+          spent,
           category:categories(id, name)
         )
       `,
@@ -219,12 +230,17 @@ export async function PUT(
   }
 }
 
+/* ============================================================================
+ * PATCH
+ * ========================================================================== */
+
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id?: string[] }> },
 ) {
   try {
     const { userId } = await requireAuth();
+
     const resolvedParams = await params;
     const id = resolvedParams?.id?.[0];
 
@@ -237,9 +253,10 @@ export async function PATCH(
     }
 
     const body = await request.json();
+
     const budget = await update("budgets", id, {
       ...body,
-      updated_by: userId,
+      last_modified_by: userId,
     });
 
     return createSuccessResponse(budget);
@@ -248,12 +265,17 @@ export async function PATCH(
   }
 }
 
+/* ============================================================================
+ * DELETE
+ * ========================================================================== */
+
 export async function DELETE(
   _: NextRequest,
   { params }: { params: Promise<{ id?: string[] }> },
 ) {
   try {
     await requireAuth();
+
     const resolvedParams = await params;
     const id = resolvedParams?.id?.[0];
 

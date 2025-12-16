@@ -8,9 +8,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useBudgets } from "@/hooks/use-budgets";
+import { BudgetDetails } from "@/components/layout/budget/budget-list";
+
 export function BudgetCategories({ className }: { className?: string }) {
   const { data: budgets, isLoading } = useBudgets();
   if (isLoading) {
@@ -101,32 +102,9 @@ export function BudgetCategories({ className }: { className?: string }) {
       </CardHeader>
       <CardContent className="space-y-4">
         {activeBudget.budget_items?.length ? (
-          activeBudget.budget_items.map((item) => {
-            const spent = item.spent ?? 0;
-            const amount = item.amount ?? 0;
-            return (
-              <Card key={item.id}>
-                <CardHeader>
-                  <CardTitle className="text-sm">
-                    {item.category.name}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span>Gasto</span>
-                      <span>R${spent}</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span>Orçamento</span>
-                      <span>R${item.amount}</span>
-                    </div>
-                    <Progress value={(spent / amount) * 100} />
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })
+          activeBudget.budget_items.map((item, index) => (
+            <BudgetDetails key={index} {...item} />
+          ))
         ) : (
           <div className="text-center text-muted-foreground py-4">
             Nenhum item de orçamento encontrado

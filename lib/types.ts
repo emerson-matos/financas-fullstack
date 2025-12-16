@@ -1,9 +1,13 @@
 // This type is used to define the shape of our data.
 
-
 import { z } from "zod";
 
-
+export type BudgetItemInput = {
+  amount: number | null;
+  category: {
+    id: string;
+  };
+};
 export type BudgetItem = {
   amount: number | null;
   spent: number | null;

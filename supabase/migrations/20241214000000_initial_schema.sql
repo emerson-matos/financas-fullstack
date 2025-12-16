@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS user_accounts (
 CREATE TABLE IF NOT EXISTS transactions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     account_id UUID NOT NULL REFERENCES user_accounts(id),
-    category_id UUID REFERENCES categories(id),
+    category_id UUID REFERENCES categories(id) default '00000000-0000-0000-0000-000000000000',
     related_transaction_id UUID REFERENCES transactions(id) ON DELETE SET NULL, -- For linking transfer pairs
     amount NUMERIC(21, 2),
     currency VARCHAR(255),

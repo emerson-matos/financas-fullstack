@@ -8,7 +8,12 @@ export const useBudgets = (params?: {
   size?: number;
   sort?: Array<string>;
 }) => {
-  const queryParams = { page: 0, size: 10, sort: ["name,asc"], ...params };
+  const queryParams = {
+    page: 0,
+    size: 10,
+    sort: ["start_date,desc"],
+    ...params,
+  };
   return useQuery({
     queryKey: ["budgets", "all", queryParams],
     queryFn: () => budgetService.getBudgets(queryParams),

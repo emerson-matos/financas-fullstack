@@ -1,5 +1,3 @@
-"use client";
-
 import { Heading } from "@/components/heading";
 import { DataImport } from "@/components/layout/import/data-import";
 import { Separator } from "@/components/ui/separator";
