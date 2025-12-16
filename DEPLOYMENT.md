@@ -28,10 +28,10 @@ This project uses a dedicated `thc` schema to isolate tables from other apps sha
 
 In Vercel Dashboard → Project Settings → Environment Variables, add:
 
-| Variable                           | Value                              | Environment |
-| ---------------------------------- | ---------------------------------- | ----------- |
-| `NEXT_PUBLIC_SUPABASE_URL`         | `https://your-project.supabase.co` | All         |
-| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE` | Your anon key                      | All         |
+| Variable                               | Value                              | Environment |
+| -------------------------------------- | ---------------------------------- | ----------- |
+| `NEXT_PUBLIC_SUPABASE_URL`             | `https://your-project.supabase.co` | All         |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Your anon key                      | All         |
 
 ### Step 3: Deploy
 
