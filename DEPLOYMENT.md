@@ -28,10 +28,10 @@ This project uses a dedicated `thc` schema to isolate tables from other apps sha
 
 In Vercel Dashboard → Project Settings → Environment Variables, add:
 
-| Variable | Value | Environment |
-|----------|-------|-------------|
-| `NEXT_PUBLIC_SUPABASE_URL` | `https://your-project.supabase.co` | All |
-| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY` | Your anon key | All |
+| Variable                           | Value                              | Environment |
+| ---------------------------------- | ---------------------------------- | ----------- |
+| `NEXT_PUBLIC_SUPABASE_URL`         | `https://your-project.supabase.co` | All         |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE` | Your anon key                      | All         |
 
 ### Step 3: Deploy
 
@@ -48,12 +48,14 @@ Migrations are run separately via **GitHub Actions** (not during Vercel build).
 When you push changes to `supabase/migrations/**` on the `main` branch, the GitHub Action `.github/workflows/migrations.yml` runs automatically.
 
 **Setup:**
+
 1. Go to GitHub repo → Settings → Secrets and variables → Actions
 2. Add secret: `SUPABASE_DB_URL` with your database connection string
 
 ### Manual Migration
 
 Run locally with:
+
 ```bash
 SUPABASE_DB_URL="postgresql://..." pnpm db:migrate:prod
 ```
@@ -62,16 +64,16 @@ SUPABASE_DB_URL="postgresql://..." pnpm db:migrate:prod
 
 ## NPM Scripts Reference
 
-| Script | Description |
-|--------|-------------|
-| `pnpm dev` | Start development server |
-| `pnpm build` | Build for production |
-| `pnpm db:migrate` | Push migrations to local Supabase |
+| Script                 | Description                                             |
+| ---------------------- | ------------------------------------------------------- |
+| `pnpm dev`             | Start development server                                |
+| `pnpm build`           | Build for production                                    |
+| `pnpm db:migrate`      | Push migrations to local Supabase                       |
 | `pnpm db:migrate:prod` | Push migrations to production (uses `$SUPABASE_DB_URL`) |
-| `pnpm db:reset` | Reset local database and run migrations + seed |
-| `pnpm db:status` | List migration status |
-| `pnpm supabase:start` | Start local Supabase |
-| `pnpm supabase:stop` | Stop local Supabase |
+| `pnpm db:reset`        | Reset local database and run migrations + seed          |
+| `pnpm db:status`       | List migration status                                   |
+| `pnpm supabase:start`  | Start local Supabase                                    |
+| `pnpm supabase:stop`   | Stop local Supabase                                     |
 
 ---
 
@@ -84,6 +86,7 @@ In Supabase Dashboard → Authentication → URL Configuration:
 1. **Site URL**: `https://your-app.vercel.app`
 
 2. **Redirect URLs** (add all):
+
    ```
    https://your-app.vercel.app/auth/confirm
    https://your-app.vercel.app/auth/oauth
@@ -98,6 +101,7 @@ In Supabase Dashboard → Authentication → URL Configuration:
 ### Expose thc Schema in Supabase API
 
 In Supabase Dashboard → Settings → API → Exposed schemas:
+
 - Add `thc` to the list of exposed schemas
 
 This allows the Supabase client to query tables in the `thc` schema.
@@ -107,6 +111,7 @@ This allows the Supabase client to query tables in the `thc` schema.
 Migrations run automatically during Vercel build via `pnpm vercel-build`.
 
 For manual migration:
+
 ```bash
 # Using npm script with SUPABASE_DB_URL env var
 pnpm db:migrate:prod
@@ -132,17 +137,21 @@ supabase db push --db-url "postgresql://postgres.[ref]:[password]@aws-0-[region]
 ## Troubleshooting
 
 ### "Invalid JWT" or auth errors
+
 - Ensure the anon key matches your Supabase project
 - Check that the Supabase URL is correct (no trailing slash)
 
 ### "relation does not exist" errors
+
 - Migration not applied, or applied to wrong schema
 - Check search_path if using custom schema
 
 ### CORS errors
+
 - Add your Vercel domain to Supabase allowed origins
 
 ### Users randomly logged out
+
 - The proxy.ts should call `supabase.auth.getUser()` to refresh sessions
 - This is already configured in `lib/supabase/proxy.ts`
 
