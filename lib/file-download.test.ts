@@ -78,7 +78,8 @@ describe("DownloadManager", () => {
     it("should download a file successfully", async () => {
       fetchSpy.mockResolvedValue(createMockFetchResponse("test data") as unknown as Response);
 
-      const result = await downloadManager.downloadFile("/api/test.csv", {
+      // Note: function prepends /api/ to URL
+      const result = await downloadManager.downloadFile("/test.csv", {
         filename: "test.csv",
       });
 
@@ -102,7 +103,7 @@ describe("DownloadManager", () => {
       const data = "test data for progress";
       fetchSpy.mockResolvedValue(createMockFetchResponse(data) as unknown as Response);
 
-      await downloadManager.downloadFile("/api/test.csv", {
+      await downloadManager.downloadFile("/test.csv", {
         onProgress,
       });
 
@@ -115,7 +116,7 @@ describe("DownloadManager", () => {
     it("should use the filename from the URL if not provided", async () => {
       fetchSpy.mockResolvedValue(createMockFetchResponse("test data") as unknown as Response);
 
-      const result = await downloadManager.downloadFile("/api/test.csv");
+      const result = await downloadManager.downloadFile("/test.csv");
 
       expect(result.success).toBe(true);
       expect(result.filename).toBe("test.csv");
@@ -128,7 +129,7 @@ describe("DownloadManager", () => {
       // mocking fetch bypasses the network error, but we must check getFilenameFromUrl logic.
       // The implementation does: pathname = url.startsWith("http") ? new URL(url).pathname : url;
 
-      const result = await downloadManager.downloadFile("/api/download");
+      const result = await downloadManager.downloadFile("/download");
 
       expect(result.success).toBe(true);
       expect(result.filename).toBe("download");
@@ -137,7 +138,7 @@ describe("DownloadManager", () => {
     it("should handle download failure (HTTP error)", async () => {
       fetchSpy.mockResolvedValue(createMockFetchResponse("", { ok: false, status: 404 }) as unknown as Response);
 
-      const result = await downloadManager.downloadFile("/api/test.csv");
+      const result = await downloadManager.downloadFile("/test.csv");
 
       expect(result.success).toBe(false);
       expect(result.error).toContain("HTTP error! status: 404");
@@ -146,7 +147,7 @@ describe("DownloadManager", () => {
     it("should handle network failure", async () => {
       fetchSpy.mockRejectedValue(new Error("Network Error"));
 
-      const result = await downloadManager.downloadFile("/api/test.csv");
+      const result = await downloadManager.downloadFile("/test.csv");
 
       expect(result.success).toBe(false);
       expect(result.error).toBe("Network Error");
@@ -156,7 +157,7 @@ describe("DownloadManager", () => {
       const abortError = new DOMException("AbortError", "AbortError");
       fetchSpy.mockRejectedValue(abortError);
 
-      const result = await downloadManager.downloadFile("/api/test.csv");
+      const result = await downloadManager.downloadFile("/test.csv");
 
       expect(result.success).toBe(false);
       expect(result.error).toBe("Download cancelled");
@@ -171,7 +172,7 @@ describe("DownloadManager", () => {
     it("should abort the download", async () => {
       fetchSpy.mockRejectedValue(new DOMException("AbortError", "AbortError"));
 
-      const downloadPromise = downloadManager.downloadFile("/api/test.csv");
+      const downloadPromise = downloadManager.downloadFile("/test.csv");
       downloadManager.cancelDownload();
 
       await expect(downloadPromise).resolves.toEqual({
@@ -209,7 +210,8 @@ describe("downloadFile convenience function", () => {
     const fetchSpy = vi.spyOn(global, "fetch").mockResolvedValue(createMockFetchResponse("test") as unknown as Response);
     const onProgress = vi.fn();
 
-    const result = await downloadFile("/api/test.csv", "test.csv", onProgress);
+    // Function now prepends /api to URL
+    const result = await downloadFile("/test.csv", "test.csv", onProgress);
 
     expect(fetchSpy).toHaveBeenCalledWith("/api/test.csv", expect.any(Object));
     expect(result.success).toBe(true);

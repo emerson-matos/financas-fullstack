@@ -29,6 +29,7 @@ describe("TransactionForm", () => {
   ];
   const mockTransaction: Transaction = {
     id: "1",
+    name: "Test Transaction",
     account_id: "1",
     category_id: "1",
     amount: 100,

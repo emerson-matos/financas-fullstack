@@ -31,15 +31,6 @@ interface MockDataTableProps {
 }
 // Create a mock component that stores its props for testing
 let lastProps: MockDataTableProps | undefined;
-// Mock useNavigate from @tanstack/react-router
-vi.mock("@tanstack/react-router", async (importOriginal) => {
-  const actual =
-    (await importOriginal()) as typeof import("@tanstack/react-router");
-  return {
-    ...actual,
-    useNavigate: () => vi.fn(),
-  };
-});
 describe("TransactionList", () => {
   beforeEach(() => {
     vi.clearAllMocks();

@@ -226,7 +226,7 @@ describe("AppSidebar", () => {
       expect(sidebar).toBeInTheDocument();
     });
     it("accepts custom collapsible prop", () => {
-      renderWithRouter(<AppSidebar collapsible="offcanvas" />);
+      renderWithRouter(<AppSidebar collapsible="none" />);
       // Component should render without errors with different collapsible values
       expect(screen.getByText("TopHat")).toBeInTheDocument();
     });
