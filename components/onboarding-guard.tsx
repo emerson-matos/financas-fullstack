@@ -1,7 +1,7 @@
 "use client";
 
 import { Loader2, RefreshCw } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import type React from "react";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -13,14 +13,11 @@ export const OnboardingGuard: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const { data: user, isLoading, isError, refetch } = useUser();
   const router = useRouter();
+  const pathname = usePathname();
 
   // Handle redirect to welcome page if onboarding not completed
   useEffect(() => {
-    if (
-      user &&
-      !user.onboardingCompleted &&
-      window.location.pathname !== "/welcome"
-    ) {
+    if (user && !user.onboardingCompleted && pathname !== "/welcome") {
       router.push("/welcome");
     }
 
@@ -28,7 +25,7 @@ export const OnboardingGuard: React.FC<{ children: React.ReactNode }> = ({
     if (!isLoading && !user) {
       router.push("/auth/login");
     }
-  }, [isLoading, user, router]);
+  }, [isLoading, user, router, pathname]);
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">

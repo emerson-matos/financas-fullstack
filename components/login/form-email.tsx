@@ -46,13 +46,22 @@ export function LoginFormEmail() {
     setError(null);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: values.email,
         password: values.password,
       });
 
       if (error) throw error;
-      router.push(redirectTo);
+
+      // Check if onboarding is completed
+      const onboardingCompleted =
+        data.user?.user_metadata?.onboarding_completed;
+
+      if (onboardingCompleted) {
+        router.push(redirectTo);
+      } else {
+        router.push("/welcome");
+      }
     } catch (err: unknown) {
       console.error("Login error:", err);
       setError(err instanceof Error ? err.message : "Ocorreu um erro");

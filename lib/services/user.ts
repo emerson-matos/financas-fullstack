@@ -1,4 +1,4 @@
-import type { AppUser, AppUserBackend } from "@/lib/types";
+import type { AppUser, AppUserBackend, WelcomeFormData } from "@/lib/types";
 import { transformAppUser } from "@/lib/types";
 
 import { api } from "@/lib/api";
@@ -20,9 +20,10 @@ export const userService = {
     return response.data;
   },
 
-  async completeOnboarding(): Promise<AppUser> {
+  async completeOnboarding(data: WelcomeFormData): Promise<AppUser> {
     const response = await api.put<AppUserBackend>(
       "/users/complete-onboarding",
+      data,
     );
     return transformAppUser(response.data);
   },

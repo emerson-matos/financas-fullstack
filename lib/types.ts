@@ -444,6 +444,12 @@ export const welcomeFormSchema = z.object({
     transactionReminders: z.boolean(),
   }),
   financialGoals: z.string().optional(),
+  // First account configuration
+  firstAccount: z.object({
+    name: z.string().min(1, "Nome da conta é obrigatório"),
+    kind: z.string().min(1, "Tipo de conta é obrigatório"),
+    initialAmount: z.number().min(0, "Saldo não pode ser negativo"),
+  }),
 });
 
 export type WelcomeFormData = z.infer<typeof welcomeFormSchema>;

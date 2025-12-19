@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS categories (
     updated_at TIMESTAMPTZ DEFAULT NOW(),
     created_by VARCHAR(50) NOT NULL DEFAULT 'system',
     last_modified_by VARCHAR(50) DEFAULT 'system',
-    CONSTRAINT uk_categories_name UNIQUE (name)
+    CONSTRAINT uk_categories_name UNIQUE (user_id, name)
 );
 
 -- App Groups table
@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS app_groups (
     deactivated_at TIMESTAMPTZ,
     created_by VARCHAR(50) NOT NULL DEFAULT 'system',
     last_modified_by VARCHAR(50) DEFAULT 'system',
-    CONSTRAINT uk_app_groups_name UNIQUE (name)
+    CONSTRAINT uk_app_groups_name UNIQUE (created_by, name)
 );
 
 -- User Accounts table
@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS user_accounts (
     deactivated_at TIMESTAMPTZ,
     created_by VARCHAR(50) NOT NULL DEFAULT 'system',
     last_modified_by VARCHAR(50) DEFAULT 'system',
-    CONSTRAINT uk_user_accounts_identification UNIQUE (identification)
+    CONSTRAINT uk_user_accounts_identification UNIQUE (user_id, identification)
 );
 
 -- Transactions table

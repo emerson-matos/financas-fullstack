@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { Loader2, Rocket } from "lucide-react";
+import { Loader2, Rocket, Wallet } from "lucide-react";
 import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -21,12 +21,21 @@ import {
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useCompleteOnboarding, useUser } from "@/hooks/use-user";
+import { accountKinds, defaultFirstAccount } from "@/lib/constants";
 import {
   budgetingOptions,
   currencyOptions,
@@ -52,17 +61,25 @@ const WelcomePage = () => {
         transactionReminders: false,
       },
       financialGoals: "",
+      firstAccount: {
+        name: defaultFirstAccount.name,
+        kind: defaultFirstAccount.kind,
+        initialAmount: defaultFirstAccount.initialAmount,
+      },
     },
   });
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (data: WelcomeFormData) => {
     try {
-      await completeOnboardingMutation.mutateAsync();
+      await completeOnboardingMutation.mutateAsync(data);
       toast({
         title: `Bem-vindo(a)! ${user?.name ?? ""}`,
         description: "Sua conta foi configurada com sucesso.",
       });
-    } catch {
+      // Explicit redirect after success
+      router.push("/dashboard/home");
+    } catch (error) {
+      console.error("Onboarding error:", error);
       toast({
         title: "Erro na Configuração",
         description:
@@ -285,6 +302,109 @@ const WelcomePage = () => {
                 </div>
               </div>
             </FieldGroup>
+
+            <Separator />
+
+            {/* First Account Configuration */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Wallet className="h-5 w-5 text-primary" />
+                <Label className="text-base font-semibold">
+                  Sua Primeira Conta
+                </Label>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Vamos criar sua primeira conta financeira. Você pode adicionar
+                mais contas depois.
+              </p>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Controller
+                  control={form.control}
+                  name="firstAccount.name"
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor="first-account-name">
+                        Nome da Conta
+                      </FieldLabel>
+                      <Input
+                        {...field}
+                        id="first-account-name"
+                        placeholder="Ex: Carteira, Nubank..."
+                        aria-invalid={fieldState.invalid}
+                      />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+
+                <Controller
+                  control={form.control}
+                  name="firstAccount.kind"
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor="first-account-kind">
+                        Tipo de Conta
+                      </FieldLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <SelectTrigger
+                          id="first-account-kind"
+                          aria-invalid={fieldState.invalid}
+                        >
+                          <SelectValue placeholder="Selecione o tipo" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {accountKinds.map((kind) => (
+                            <SelectItem key={kind.value} value={kind.value}>
+                              {kind.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+              </div>
+
+              <Controller
+                control={form.control}
+                name="firstAccount.initialAmount"
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor="first-account-amount">
+                      Saldo Inicial
+                    </FieldLabel>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      id="first-account-amount"
+                      placeholder="0.00"
+                      value={field.value}
+                      onChange={(e) => {
+                        const value =
+                          e.target.value === "" ? 0 : Number(e.target.value);
+                        field.onChange(value);
+                      }}
+                      onBlur={field.onBlur}
+                      name={field.name}
+                      ref={field.ref}
+                      aria-invalid={fieldState.invalid}
+                    />
+                    <FieldDescription>
+                      Quanto você tem atualmente nesta conta
+                    </FieldDescription>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+            </div>
 
             <Separator />
 

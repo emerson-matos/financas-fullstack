@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 
 import { createClient } from "@/lib/supabase/client";
 import { userService } from "@/lib/services/user";
-import type { AppUser } from "@/lib/types";
+import type { AppUser, WelcomeFormData } from "@/lib/types";
 import type { User } from "@supabase/supabase-js";
 
 /**
@@ -73,7 +73,7 @@ export const useCompleteOnboarding = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: () => userService.completeOnboarding(),
+    mutationFn: (data: WelcomeFormData) => userService.completeOnboarding(data),
     onSuccess: (updatedUser) => {
       // Update the user data in cache
       queryClient.setQueryData(["user"], updatedUser);

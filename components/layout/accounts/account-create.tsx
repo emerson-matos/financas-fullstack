@@ -41,6 +41,7 @@ import {
 import { useCreateAccount } from "@/hooks/use-accounts";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/hooks/use-toast";
+import { accountKinds, currencies } from "@/lib/constants";
 
 const formSchema = z.object({
   initial_amount: z.number().optional(),
@@ -53,22 +54,6 @@ const formSchema = z.object({
 });
 
 type FormValues = z.infer<typeof formSchema>;
-
-const currencies = [
-  { value: "BRL", label: "Real Brasileiro (BRL)" },
-  { value: "USD", label: "Dólar Americano (USD)" },
-  { value: "EUR", label: "Euro (EUR)" },
-  { value: "GBP", label: "Libra Esterlina (GBP)" },
-] as const;
-
-const accountKinds = [
-  { value: "CHECKING", label: "Conta Corrente" },
-  { value: "SAVINGS", label: "Poupança" },
-  { value: "CREDIT_CARD", label: "Cartão de Crédito" },
-  { value: "INVESTMENT", label: "Investimento" },
-  { value: "CASH", label: "Dinheiro" },
-  { value: "OTHER", label: "Outro" },
-] as const;
 
 interface AccountFormProps {
   onSubmit: (values: FormValues) => void;
