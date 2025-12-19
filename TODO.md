@@ -81,3 +81,45 @@ This file tracks architectural decisions, outstanding features, and future enhan
 - [ ] **Mobile Polish**: Final pass on all complex tables and charts for mobile responsiveness.
 - [ ] **PWA Support**: Configure manifest and service workers for "Install as App" experience.
 - [ ] **Query Optimization**: Perform load testing on `unified_timeline` view for large datasets.
+
+## 6. Transactions form: time is not correct
+
+- [ ] after inserting a new transaction we need to flush our query provider? info is not up to date after we create one.
+- [ ] account select the ONLY option if ONLY one is available.
+
+## 7. Perf
+
+- [ ] Interaction to Next Paint: 464 ms (/dashboard/transactions/new)
+
+## 8. Import data page
+
+- [ ] long scroll to find the buttons, poor UX
+- [ ] why don't we categorize stuff?
+- [ ] after importing we dont show default category "desconhecido" badge at transaction list
+
+## 9. Budget Default
+
+- [ ] We could improve onboarding so customer already have at least one budget available
+- [ ] Budget Form is using wrong date format, not using locale
+
+## 10. Trasnaction details
+
+- [ ] Tipo de Conta shows nothign, why? empty badge
+
+## 11. Transaction edit
+
+- [ ] weird UI, completely off the way
+
+## 12. Transaction list
+
+- [ ] We shoul;d be able to deactivate the sorting, one click, sort, second click, sort again other direction, other click undo both sorting
+
+## 13. Datatable component
+
+- [ ] sorting icon for what?
+- [ ] search box trigger entire component rerender, not just the list
+
+# 14. Account details:
+
+- [ ] Maybe we want a timeline here?
+- [ ] UI is odd
