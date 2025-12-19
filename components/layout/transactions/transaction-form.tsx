@@ -7,13 +7,12 @@ import {
   CalendarIcon,
   CreditCardIcon,
   HelpCircleIcon,
-  PlusIcon,
-  Trash2Icon,
   TrendingDownIcon,
   TrendingUpIcon,
+  UsersIcon,
 } from "lucide-react";
 import { useEffect, useTransition } from "react";
-import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import type { z } from "zod";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -53,11 +52,17 @@ import {
   useTransaction,
   useUpdateTransaction,
 } from "@/hooks/use-transactions";
+import { useGroup, useGroups } from "@/hooks/use-groups";
 import {
   defaultTransactionFormValues,
   transactionFormSchema,
 } from "@/lib/schemas/transaction-form";
-import type { Account, Category, CreateTransactionRequest } from "@/lib/types";
+import type {
+  Account,
+  Category,
+  CreateTransactionRequest,
+  Group,
+} from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 type TransactionFormValues = z.infer<typeof transactionFormSchema>;
@@ -116,6 +121,7 @@ export function TransactionForm({
   const { data: categories, isLoading: categoriesLoading } = useCategories();
   const { data: transactionData, isLoading: transactionLoading } =
     useTransaction(transactionId || "");
+  const { data: groups } = useGroups();
 
   const { mutate: createTransaction, isPending: isCreating } =
     useCreateTransaction();
@@ -133,12 +139,8 @@ export function TransactionForm({
         accountId ||
         "",
       splits: transactionData?.splits || [],
+      groupId: transactionData?.group_id || "",
     },
-  });
-
-  const { fields, append, remove } = useFieldArray({
-    control: form.control,
-    name: "splits",
   });
 
   const selectedKind = useWatch({ control: form.control, name: "kind" });
@@ -146,6 +148,13 @@ export function TransactionForm({
     control: form.control,
     name: "account_id",
   });
+  const watchedGroupId = useWatch({ control: form.control, name: "groupId" });
+  useGroup(watchedGroupId === "none" ? "" : watchedGroupId || ""); // Prefetch or just keep hook active
+
+  // If we don't need selectedGroup for members anymore, we can ignore the return.
+  // But wait, the Group Selector disables itself if transactionData.group_id is set.
+  // Do we need selectedGroup for anything else? No.
+
   const selectedAccount = accounts?.find(
     (account: Account) => account.id === watchedAccountId,
   );
@@ -735,121 +744,49 @@ export function TransactionForm({
               />
             )}
 
-            {/* Splits Section */}
+            {/* Group Selection */}
             {selectedKind !== "TRANSFER" && (
-              <div className="space-y-4 border-t pt-6 mt-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-sm font-medium">Divisões (Splits)</h3>
-                    <p className="text-xs text-muted-foreground">
-                      Divida esta transação em múltiplas categorias
-                    </p>
-                  </div>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      append({ categoryId: "", amount: 0, description: "" })
-                    }
-                  >
-                    <PlusIcon className="h-4 w-4 mr-2" />
-                    Adicionar Divisão
-                  </Button>
-                </div>
-
-                {fields.length > 0 && (
-                  <div className="space-y-4 bg-muted/30 p-4 rounded-lg border border-dashed text-foreground">
-                    {fields.map((field, index) => (
-                      <div
-                        key={field.id}
-                        className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end pb-4 border-b border-muted last:border-0 last:pb-0"
+              <Controller
+                control={form.control}
+                name="groupId"
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel
+                      htmlFor={field.name}
+                      className="flex items-center gap-2"
+                    >
+                      <UsersIcon className="h-4 w-4" />
+                      Grupo (Opcional)
+                    </FieldLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      disabled={!!transactionData?.group_id}
+                    >
+                      <SelectTrigger
+                        id={field.name}
+                        aria-invalid={fieldState.invalid}
                       >
-                        <div className="sm:col-span-4 text-foreground">
-                          <Controller
-                            control={form.control}
-                            name={`splits.${index}.categoryId`}
-                            render={({ field, fieldState }) => (
-                              <Field data-invalid={fieldState.invalid}>
-                                <FieldLabel className="text-xs">
-                                  Categoria
-                                </FieldLabel>
-                                <Select
-                                  onValueChange={field.onChange}
-                                  value={field.value}
-                                >
-                                  <SelectTrigger className="h-9">
-                                    <SelectValue placeholder="Categoria" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {categories?.map((cat) => (
-                                      <SelectItem key={cat.id} value={cat.id}>
-                                        {cat.name}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              </Field>
-                            )}
-                          />
-                        </div>
-                        <div className="sm:col-span-3">
-                          <Controller
-                            control={form.control}
-                            name={`splits.${index}.amount`}
-                            render={({ field, fieldState }) => (
-                              <Field data-invalid={fieldState.invalid}>
-                                <FieldLabel className="text-xs">
-                                  Valor
-                                </FieldLabel>
-                                <Input
-                                  {...field}
-                                  type="number"
-                                  step="0.01"
-                                  className="h-9"
-                                  onChange={(e) =>
-                                    field.onChange(
-                                      Number.parseFloat(e.target.value) || 0,
-                                    )
-                                  }
-                                />
-                              </Field>
-                            )}
-                          />
-                        </div>
-                        <div className="sm:col-span-4 text-foreground">
-                          <Controller
-                            control={form.control}
-                            name={`splits.${index}.description`}
-                            render={({ field }) => (
-                              <Field>
-                                <FieldLabel className="text-xs">
-                                  Descrição (opcional)
-                                </FieldLabel>
-                                <Input
-                                  {...field}
-                                  className="h-9 text-foreground"
-                                />
-                              </Field>
-                            )}
-                          />
-                        </div>
-                        <div className="sm:col-span-1 flex justify-end">
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            className="h-9 w-9 text-destructive"
-                            onClick={() => remove(index)}
-                          >
-                            <Trash2Icon className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                        <SelectValue placeholder="Sem grupo" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Nenhum</SelectItem>
+                        {groups?.content?.map((group: Group) => (
+                          <SelectItem key={group.id} value={group.id}>
+                            {group.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FieldDescription>
+                      Associe esta transação a um grupo para dividir despesas
+                    </FieldDescription>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
                 )}
-              </div>
+              />
             )}
 
             {/* Description */}

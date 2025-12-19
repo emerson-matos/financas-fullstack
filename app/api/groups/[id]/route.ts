@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { createErrorResponse, createSuccessResponse } from "@/lib/api/handlers";
 import { requireAuth } from "@/lib/api/auth";
 import { BadRequestAlertException, NotFoundException } from "@/lib/api/errors";
-import { findById, update, deleteById } from "@/lib/supabase/queries";
+import { update, deleteById } from "@/lib/supabase/queries";
+import { createClient } from "@/lib/supabase/server";
 
 export async function GET(
   _request: NextRequest,
@@ -20,11 +21,30 @@ export async function GET(
       );
     }
 
-    const group = await findById("app_groups", id);
-    if (!group) {
+    const supabase = await createClient();
+    const { data: group, error } = await supabase
+      .from("app_groups")
+      .select(
+        `
+        *,
+        members:group_memberships(
+          id,
+          user_id,
+          user_role
+        )
+      `,
+      )
+      .eq("id", id)
+      .single();
+
+    if (error || !group) {
+      if (error && error.code !== "PGRST116") {
+        throw error;
+      }
       throw new NotFoundException("Group not found", "appGroups", "notfound");
     }
-    return createSuccessResponse(group);
+
+    return createSuccessResponse({ ...group });
   } catch (error) {
     return createErrorResponse(error);
   }

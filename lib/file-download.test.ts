@@ -9,7 +9,7 @@ const mockRevokeObjectURL = vi.fn();
 
 // Mock DOM elements
 global.document.createElement = vi.fn((tag) => {
-  if (tag === 'a') {
+  if (tag === "a") {
     return {
       href: "",
       download: "",
@@ -34,7 +34,7 @@ global.window = {
 // Helper to create a mock fetch response with streamable body
 const createMockFetchResponse = (
   data: Uint8Array | string,
-  options: { ok?: boolean; status?: number; contentLength?: number } = {}
+  options: { ok?: boolean; status?: number; contentLength?: number } = {},
 ) => {
   const encoder = new TextEncoder();
   const chunks = typeof data === "string" ? encoder.encode(data) : data;
@@ -53,7 +53,8 @@ const createMockFetchResponse = (
     status: options.status ?? 200,
     headers: {
       get: (name: string) => {
-        if (name === "Content-Length") return (options.contentLength ?? chunks.length).toString();
+        if (name === "Content-Length")
+          return (options.contentLength ?? chunks.length).toString();
         return null;
       },
     },
@@ -63,7 +64,7 @@ const createMockFetchResponse = (
 
 describe("DownloadManager", () => {
   let downloadManager: DownloadManager;
-  let fetchSpy: any; // Using any to simplify type casting interactions for spy
+  let fetchSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
     downloadManager = new DownloadManager();
@@ -76,16 +77,21 @@ describe("DownloadManager", () => {
 
   describe("downloadFile", () => {
     it("should download a file successfully", async () => {
-      fetchSpy.mockResolvedValue(createMockFetchResponse("test data") as unknown as Response);
+      fetchSpy.mockResolvedValue(
+        createMockFetchResponse("test data") as unknown as Response,
+      );
 
       // Note: function prepends /api/ to URL
       const result = await downloadManager.downloadFile("/test.csv", {
         filename: "test.csv",
       });
 
-      expect(fetchSpy).toHaveBeenCalledWith("/api/test.csv", expect.objectContaining({
-        signal: expect.any(AbortSignal),
-      }));
+      expect(fetchSpy).toHaveBeenCalledWith(
+        "/api/test.csv",
+        expect.objectContaining({
+          signal: expect.any(AbortSignal),
+        }),
+      );
 
       expect(mockCreateObjectURL).toHaveBeenCalled(); // Called with Blob
       expect(document.createElement).toHaveBeenCalledWith("a");
@@ -101,7 +107,9 @@ describe("DownloadManager", () => {
     it("should call onProgress callback during download", async () => {
       const onProgress = vi.fn();
       const data = "test data for progress";
-      fetchSpy.mockResolvedValue(createMockFetchResponse(data) as unknown as Response);
+      fetchSpy.mockResolvedValue(
+        createMockFetchResponse(data) as unknown as Response,
+      );
 
       await downloadManager.downloadFile("/test.csv", {
         onProgress,
@@ -114,7 +122,9 @@ describe("DownloadManager", () => {
     });
 
     it("should use the filename from the URL if not provided", async () => {
-      fetchSpy.mockResolvedValue(createMockFetchResponse("test data") as unknown as Response);
+      fetchSpy.mockResolvedValue(
+        createMockFetchResponse("test data") as unknown as Response,
+      );
 
       const result = await downloadManager.downloadFile("/test.csv");
 
@@ -123,9 +133,11 @@ describe("DownloadManager", () => {
     });
 
     it("should use a default filename if not provided and not in URL", async () => {
-      fetchSpy.mockResolvedValue(createMockFetchResponse("test data") as unknown as Response);
+      fetchSpy.mockResolvedValue(
+        createMockFetchResponse("test data") as unknown as Response,
+      );
 
-      // Note: In JSDOM/Node fetch needs absolute URL usually, but implementation handles relative string in getFilenameFromUrl 
+      // Note: In JSDOM/Node fetch needs absolute URL usually, but implementation handles relative string in getFilenameFromUrl
       // mocking fetch bypasses the network error, but we must check getFilenameFromUrl logic.
       // The implementation does: pathname = url.startsWith("http") ? new URL(url).pathname : url;
 
@@ -136,7 +148,12 @@ describe("DownloadManager", () => {
     });
 
     it("should handle download failure (HTTP error)", async () => {
-      fetchSpy.mockResolvedValue(createMockFetchResponse("", { ok: false, status: 404 }) as unknown as Response);
+      fetchSpy.mockResolvedValue(
+        createMockFetchResponse("", {
+          ok: false,
+          status: 404,
+        }) as unknown as Response,
+      );
 
       const result = await downloadManager.downloadFile("/test.csv");
 
@@ -163,7 +180,7 @@ describe("DownloadManager", () => {
       expect(result.error).toBe("Download cancelled");
     });
 
-    // Note: Testing timeout specifically is tricky with real timers, 
+    // Note: Testing timeout specifically is tricky with real timers,
     // usually requires fake timers which might interfere with other async logic.
     // For now we trust the AbortSignal passing.
   });
@@ -192,13 +209,17 @@ describe("DownloadManager", () => {
     // We access private method implicitly by integration testing or by casting to any
 
     it("should return a default filename for an empty URL", async () => {
-      fetchSpy.mockResolvedValue(createMockFetchResponse("") as unknown as Response);
+      fetchSpy.mockResolvedValue(
+        createMockFetchResponse("") as unknown as Response,
+      );
       const result = await downloadManager.downloadFile("");
       expect(result.filename).toBe("download");
     });
 
     it("should return a default filename for an invalid URL", async () => {
-      fetchSpy.mockResolvedValue(createMockFetchResponse("") as unknown as Response);
+      fetchSpy.mockResolvedValue(
+        createMockFetchResponse("") as unknown as Response,
+      );
       const result = await downloadManager.downloadFile("invalid-url");
       expect(result.filename).toBe("invalid-url");
     });
@@ -207,7 +228,11 @@ describe("DownloadManager", () => {
 
 describe("downloadFile convenience function", () => {
   it("should use DownloadManager correctly", async () => {
-    const fetchSpy = vi.spyOn(global, "fetch").mockResolvedValue(createMockFetchResponse("test") as unknown as Response);
+    const fetchSpy = vi
+      .spyOn(global, "fetch")
+      .mockResolvedValue(
+        createMockFetchResponse("test") as unknown as Response,
+      );
     const onProgress = vi.fn();
 
     // Function now prepends /api to URL

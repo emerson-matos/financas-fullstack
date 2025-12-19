@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
 import { DataTable } from "@/components/datatable/app-datatable";
 import { Button } from "@/components/ui/button";
@@ -9,11 +10,10 @@ import { GroupInviteDialog } from "@/components/layout/groups/group-invite-dialo
 
 export function GroupList() {
   const [isInviteOpen, setIsInviteOpen] = useState(false);
-  const [selectedGroupId, setSelectedGroupId] = useState<string | undefined>();
+  const router = useRouter();
 
   const handleRowClick = (id: string) => {
-    setSelectedGroupId(id);
-    setIsInviteOpen(true);
+    router.push(`/dashboard/groups/${id}`);
   };
 
   return (
@@ -36,7 +36,7 @@ export function GroupList() {
         <GroupInviteDialog
           open={isInviteOpen}
           onOpenChange={setIsInviteOpen}
-          groupId={selectedGroupId}
+          groupId={undefined} // New group
         />
       )}
     </div>
