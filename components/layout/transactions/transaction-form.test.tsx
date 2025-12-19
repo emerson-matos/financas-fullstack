@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import "@/test/setup";
+
 import { useAccounts } from "@/hooks/use-accounts";
 import { useCategories } from "@/hooks/use-categories";
 import { useToast } from "@/hooks/use-toast";
@@ -12,23 +12,12 @@ import {
 } from "@/hooks/use-transactions";
 import type { Account, Category, Transaction } from "@/lib/types";
 import { TransactionForm } from "./transaction-form";
-// Mock apenas o useRouter, deixando o resto intacto
-vi.mock("@tanstack/react-router", async (importOriginal) => {
-  const actual =
-    (await importOriginal()) as typeof import("@tanstack/react-router");
-  return {
-    ...actual,
-    useRouter: vi.fn(() => ({
-      history: {
-        back: vi.fn(),
-      },
-    })),
-  };
-});
+
 vi.mock("@/hooks/use-toast");
 vi.mock("@/hooks/use-transactions");
 vi.mock("@/hooks/use-accounts");
 vi.mock("@/hooks/use-categories");
+
 describe("TransactionForm", () => {
   const mockAccounts = [
     { id: "1", identification: "Account 1" },

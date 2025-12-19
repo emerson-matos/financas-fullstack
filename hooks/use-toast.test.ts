@@ -1,6 +1,6 @@
 import { renderHook } from "@testing-library/react";
 import { toast as sonnerToast } from "sonner";
-import { vi } from "vitest";
+import { vi, describe, it, expect, beforeEach } from "vitest";
 
 import { useToast } from "./use-toast";
 

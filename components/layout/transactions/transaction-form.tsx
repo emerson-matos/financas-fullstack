@@ -303,7 +303,7 @@ export function TransactionForm({
               name="account_id"
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel className="flex items-center gap-2">
+                  <FieldLabel htmlFor={field.name} className="flex items-center gap-2">
                     Conta
                     <RequiredBadge />
                   </FieldLabel>
@@ -317,6 +317,7 @@ export function TransactionForm({
                     }
                   >
                     <SelectTrigger
+                      id={field.name}
                       className={cn(
                         "transition-colors",
                         field.value ? "border-primary/50" : "",
@@ -351,12 +352,13 @@ export function TransactionForm({
               name="kind"
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel className="flex items-center gap-2">
+                  <FieldLabel htmlFor={field.name} className="flex items-center gap-2">
                     Tipo de Transação
                     <RequiredBadge />
                   </FieldLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <SelectTrigger
+                      id={field.name}
                       className={cn(
                         "transition-colors",
                         field.value ? "border-primary/50" : "",
@@ -412,12 +414,13 @@ export function TransactionForm({
                 name="destination_account_id"
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel className="flex items-center gap-2">
+                    <FieldLabel htmlFor={field.name} className="flex items-center gap-2">
                       Conta de Destino
                       <RequiredBadge />
                     </FieldLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <SelectTrigger
+                        id={field.name}
                         className={cn(
                           "transition-colors",
                           field.value ? "border-primary/50" : "",
@@ -464,11 +467,12 @@ export function TransactionForm({
                   name="amount"
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel className="flex items-center gap-2">
+                      <FieldLabel htmlFor={field.name} className="flex items-center gap-2">
                         Valor
                         <RequiredBadge />
                       </FieldLabel>
                       <Input
+                        id={field.name}
                         type="number"
                         step="0.01"
                         placeholder="0,00"
@@ -497,9 +501,9 @@ export function TransactionForm({
                 name="currency"
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel>Moeda</FieldLabel>
+                    <FieldLabel htmlFor={field.name}>Moeda</FieldLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
-                      <SelectTrigger aria-invalid={fieldState.invalid}>
+                      <SelectTrigger id={field.name} aria-invalid={fieldState.invalid}>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -522,13 +526,14 @@ export function TransactionForm({
               name="transacted_date"
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel className="flex items-center gap-2">
+                  <FieldLabel htmlFor={field.name} className="flex items-center gap-2">
                     Data da Transação
                     <RequiredBadge />
                   </FieldLabel>
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
+                        id={field.name}
                         variant="outline"
                         className={cn(
                           "w-full pl-3 text-left font-normal transition-colors",
@@ -581,8 +586,9 @@ export function TransactionForm({
               name="name"
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel>Nome da Transação</FieldLabel>
+                  <FieldLabel htmlFor={field.name}>Nome da Transação</FieldLabel>
                   <Input
+                    id={field.name}
                     {...field}
                     placeholder="Ex: Compra no supermercado, Pagamento de salário..."
                     aria-invalid={fieldState.invalid}
@@ -615,9 +621,9 @@ export function TransactionForm({
                 name="category_id"
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel>Categoria</FieldLabel>
+                    <FieldLabel htmlFor={field.name}>Categoria</FieldLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
-                      <SelectTrigger aria-invalid={fieldState.invalid}>
+                      <SelectTrigger id={field.name} aria-invalid={fieldState.invalid}>
                         <SelectValue placeholder="Selecione uma categoria" />
                       </SelectTrigger>
                       <SelectContent>
@@ -645,11 +651,12 @@ export function TransactionForm({
               name="description"
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel className="flex items-center gap-2">
+                  <FieldLabel htmlFor={field.name} className="flex items-center gap-2">
                     Descrição
                     <RequiredBadge />
                   </FieldLabel>
                   <Textarea
+                    id={field.name}
                     {...field}
                     placeholder="Descreva os detalhes da transação..."
                     className="min-h-[80px] resize-none"

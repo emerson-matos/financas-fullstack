@@ -1,33 +1,39 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { vi } from "vitest";
+import { vi, describe, beforeEach, expect, it } from "vitest";
+
+
 // Mock React Router explicitly in this test file only
-const mockNavigate = vi.fn();
-vi.mock("@tanstack/react-router", () => ({
+const mockPush = vi.fn();
+vi.mock("next/navigation", () => ({
   useRouter: vi.fn(() => ({
-    navigate: mockNavigate,
+    push: mockPush,
     history: {
       back: vi.fn(),
     },
   })),
 }));
+
 // Mock the userService
 vi.mock("@/lib/services/user", () => ({
   userService: {
     deleteUser: vi.fn(),
   },
 }));
+
 // Mock useToast
 vi.mock("@/hooks/use-toast", () => ({
   useToast: () => ({
     toast: vi.fn(),
   }),
 }));
+
 import { userService } from "@/lib/services/user";
-// Now import components after mocks are set up
 import { CustomerAccountForm } from "./customer-account-form";
+
 beforeEach(() => {
   // Reset mocks before each test
   vi.clearAllMocks();
+  mockPush.mockClear(); // Clear mockPush calls
 });
 describe("AccountForm", () => {
   it("renderiza aviso e botão de apagar usuário", () => {
@@ -70,7 +76,7 @@ describe("AccountForm", () => {
     fireEvent.click(screen.getByRole("button", { name: /ok/i }));
     // Should redirect
     await waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalledWith({ to: "/", replace: true });
+      expect(mockPush).toHaveBeenCalledWith("/");
     });
   });
   it("mostra feedback de erro quando a exclusão falha", async () => {

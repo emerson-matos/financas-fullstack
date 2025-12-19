@@ -2,7 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import "@/test/setup";
+
 // Add polyfill for scrollIntoView which is needed by Radix Select
 Element.prototype.scrollIntoView = vi.fn();
 import { useCreateAccount } from "@/hooks/use-accounts";
@@ -109,6 +109,7 @@ describe("CreateAccount", () => {
           identification: "Nubank",
           initial_amount: 1500.5,
           currency: "BRL",
+          kind: "",
         });
       });
     });
@@ -136,6 +137,7 @@ describe("CreateAccount", () => {
           identification: "Cartão de Crédito",
           initial_amount: -2500.75,
           currency: "BRL",
+          kind: "",
         });
       });
     });
@@ -244,10 +246,8 @@ describe("CreateAccount", () => {
       const triggerButton = screen.getByRole("button", { name: /nova conta/i });
       await user.click(triggerButton);
       // Check that currency selector is present
-      const currencySelect = screen.getByRole("combobox");
+      const currencySelect = screen.getByRole("combobox", { name: /moeda/i });
       expect(currencySelect).toBeInTheDocument();
-      // Check that the label is correct
-      expect(screen.getByText("Moeda")).toBeInTheDocument();
     });
     it("handles decimal amounts correctly", async () => {
       const user = userEvent.setup();
@@ -272,6 +272,7 @@ describe("CreateAccount", () => {
           identification: "Savings",
           initial_amount: 123.45,
           currency: "BRL",
+          kind: "",
         });
       });
     });
@@ -321,8 +322,7 @@ describe("CreateAccount", () => {
       const triggerButton = screen.getByRole("button", { name: /nova conta/i });
       await user.click(triggerButton);
       // Check that currency selector is present
-      expect(screen.getByLabelText(/moeda/i)).toBeInTheDocument();
-      expect(screen.getByRole("combobox")).toBeInTheDocument();
+      expect(screen.getByRole("combobox", { name: /moeda/i })).toBeInTheDocument();
     });
   });
   describe("Form validation", () => {
@@ -391,6 +391,7 @@ describe("CreateAccount", () => {
           identification: "Credit Card",
           initial_amount: -1000,
           currency: "BRL",
+          kind: "",
         });
       });
       // Should not show validation error for negative amount
@@ -418,6 +419,7 @@ describe("CreateAccount", () => {
           identification: "New Account",
           initial_amount: 0,
           currency: "BRL",
+          kind: "",
         });
       });
     });

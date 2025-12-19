@@ -9,36 +9,24 @@ vi.mock("@/components/layout/header/user-nav", () => ({
   UserNav: () => <div data-testid="user-nav">User Navigation</div>,
 }));
 // Mock the TopHatLogo component
-vi.mock("./top-hat-logo", () => ({
+vi.mock("@/components/top-hat-logo", () => ({
   TopHatLogo: () => <div data-testid="top-hat-logo">TopHat Logo</div>,
 }));
-// Mock the Link component from TanStack Router
-vi.mock("@tanstack/react-router", async () => {
-  const actual = await vi.importActual("@tanstack/react-router");
-  return {
-    ...actual,
-    Link: ({
-      to,
-      children,
-      disabled,
-      ...props
-    }: {
-      to: string;
-      children: React.ReactNode;
-      activeProps: React.HTMLAttributes<HTMLAnchorElement>;
-      disabled?: boolean;
-    }) => (
-      <a
-        href={to}
-        data-testid={`link-${to}`}
-        data-disabled={disabled}
-        {...props}
-      >
-        {children}
-      </a>
-    ),
-  };
-});
+// Mock Next.js Link
+vi.mock("next/link", () => ({
+  default: ({
+    href,
+    children,
+    ...props
+  }: {
+    href: string;
+    children: React.ReactNode;
+  } & any) => (
+    <a href={href} data-testid={`link-${href}`} data-disabled={props.disabled} {...props}>
+      {children}
+    </a>
+  ),
+}));
 // Helper function to render with router context
 function renderWithRouter(component: React.ReactElement) {
   return render(<SidebarProvider>{component}</SidebarProvider>);

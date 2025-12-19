@@ -1,5 +1,9 @@
 import { render, screen } from "@testing-library/react";
+import { describe, expect, it } from "vitest";
+
+
 import { PreferencesForm } from "./preferences-form";
+
 describe("PreferencesForm", () => {
   it("renderiza campos principais", () => {
     render(<PreferencesForm />);
