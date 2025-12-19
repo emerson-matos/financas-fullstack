@@ -55,10 +55,6 @@ INSERT INTO auth.identities (
   now()
 );
 
--- ============================================================================
--- USER ACCOUNTS (10 accounts)
--- user_id now references auth.users(id) directly
--- ============================================================================
 INSERT INTO user_accounts (id, user_id, identification, kind, currency, created_at, updated_at) VALUES
   ('20000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000001', 'Nubank Conta', 'CHECKING', 'BRL', now() - interval '5 years', now()),
   ('20000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000001', 'Itaú Conta', 'CHECKING', 'BRL', now() - interval '5 years', now()),
@@ -70,6 +66,24 @@ INSERT INTO user_accounts (id, user_id, identification, kind, currency, created_
   ('20000000-0000-0000-0000-000000000008', '00000000-0000-0000-0000-000000000001', 'Itaú Crédito', 'CREDIT_CARD', 'BRL', now() - interval '4 years', now()),
   ('20000000-0000-0000-0000-000000000009', '00000000-0000-0000-0000-000000000001', 'Inter Conta', 'CHECKING', 'BRL', now() - interval '2 years', now()),
   ('20000000-0000-0000-0000-000000000010', '00000000-0000-0000-0000-000000000001', 'Wise USD', 'CHECKING', 'USD', now() - interval '1 year', now());
+
+-- ============================================================================
+-- ACTIVITY LOG (User Milestones)
+-- ============================================================================
+INSERT INTO activity_log (user_id, type, data, created_at) VALUES
+  ('00000000-0000-0000-0000-000000000001', 'WELCOME', '{"message": "Bem vindo ao Financas!"}'::JSONB, now() - interval '5 years');
+
+INSERT INTO activity_log (user_id, account_id, type, data, created_at) VALUES
+  ('00000000-0000-0000-0000-000000000001', '20000000-0000-0000-0000-000000000001', 'ACCOUNT_CREATED', '{"name": "Nubank Conta"}'::JSONB, now() - interval '5 years'),
+  ('00000000-0000-0000-0000-000000000001', '20000000-0000-0000-0000-000000000002', 'ACCOUNT_CREATED', '{"name": "Itaú Conta"}'::JSONB, now() - interval '5 years'),
+  ('00000000-0000-0000-0000-000000000001', '20000000-0000-0000-0000-000000000003', 'ACCOUNT_CREATED', '{"name": "Bradesco Conta"}'::JSONB, now() - interval '4 years'),
+  ('00000000-0000-0000-0000-000000000001', '20000000-0000-0000-0000-000000000004', 'ACCOUNT_CREATED', '{"name": "Poupança BB"}'::JSONB, now() - interval '5 years'),
+  ('00000000-0000-0000-0000-000000000001', '20000000-0000-0000-0000-000000000005', 'ACCOUNT_CREATED', '{"name": "Poupança Caixa"}'::JSONB, now() - interval '3 years'),
+  ('00000000-0000-0000-0000-000000000001', '20000000-0000-0000-0000-000000000006', 'ACCOUNT_CREATED', '{"name": "Carteira"}'::JSONB, now() - interval '5 years'),
+  ('00000000-0000-0000-0000-000000000001', '20000000-0000-0000-0000-000000000007', 'ACCOUNT_CREATED', '{"name": "Nubank Crédito"}'::JSONB, now() - interval '5 years'),
+  ('00000000-0000-0000-0000-000000000001', '20000000-0000-0000-0000-000000000008', 'ACCOUNT_CREATED', '{"name": "Itaú Crédito"}'::JSONB, now() - interval '4 years'),
+  ('00000000-0000-0000-0000-000000000001', '20000000-0000-0000-0000-000000000009', 'ACCOUNT_CREATED', '{"name": "Inter Conta"}'::JSONB, now() - interval '2 years'),
+  ('00000000-0000-0000-0000-000000000001', '20000000-0000-0000-0000-000000000010', 'ACCOUNT_CREATED', '{"name": "Wise USD"}'::JSONB, now() - interval '1 year');
 
 -- ============================================================================
 -- BUDGETS
@@ -106,8 +120,6 @@ INSERT INTO transactions (id, account_id, category_id, amount, currency, descrip
   ('40000000-0001-0000-0000-000000000004', '20000000-0000-0000-0000-000000000004', '00000000-0000-0000-0000-000000000000', 10000.00, 'BRL', 'Saldo inicial da conta', 'Saldo Inicial', 'CREDIT', '2020-01-01', '2020-01-01'::timestamptz, now()),
   ('40000000-0001-0000-0000-000000000005', '20000000-0000-0000-0000-000000000005', '00000000-0000-0000-0000-000000000000', 5000.00, 'BRL', 'Saldo inicial da conta', 'Saldo Inicial', 'CREDIT', '2022-01-01', '2022-01-01'::timestamptz, now()),
   ('40000000-0001-0000-0000-000000000006', '20000000-0000-0000-0000-000000000006', '00000000-0000-0000-0000-000000000000', 500.00, 'BRL', 'Saldo inicial da conta', 'Saldo Inicial', 'CREDIT', '2020-01-01', '2020-01-01'::timestamptz, now()),
-  ('40000000-0001-0000-0000-000000000007', '20000000-0000-0000-0000-000000000007', '00000000-0000-0000-0000-000000000000', 0.00, 'BRL', 'Saldo inicial da conta', 'Saldo Inicial', 'CREDIT', '2020-01-01', '2020-01-01'::timestamptz, now()),
-  ('40000000-0001-0000-0000-000000000008', '20000000-0000-0000-0000-000000000008', '00000000-0000-0000-0000-000000000000', 0.00, 'BRL', 'Saldo inicial da conta', 'Saldo Inicial', 'CREDIT', '2021-01-01', '2021-01-01'::timestamptz, now()),
   ('40000000-0001-0000-0000-000000000009', '20000000-0000-0000-0000-000000000009', '00000000-0000-0000-0000-000000000000', 1500.00, 'BRL', 'Saldo inicial da conta', 'Saldo Inicial', 'CREDIT', '2023-01-01', '2023-01-01'::timestamptz, now()),
   ('40000000-0001-0000-0000-000000000010', '20000000-0000-0000-0000-000000000010', '00000000-0000-0000-0000-000000000000', 2500.00, 'USD', 'Saldo inicial da conta', 'Saldo Inicial', 'CREDIT', '2024-01-01', '2024-01-01'::timestamptz, now());
 
