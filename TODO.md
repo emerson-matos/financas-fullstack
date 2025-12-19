@@ -128,3 +128,9 @@ This file tracks architectural decisions, outstanding features, and future enhan
 - [ ] UI is odd
 
 ## 15. user_accounts_with_balance=> @20241214000000_initial_schema.sql#L121-128 would be too bad to have expenses and incomes as well, and to have a whey to filter by month?
+
+## 16. duplicated transactions
+
+- [ ] how can we prevent those?
+- [ ] how can we prevent importing the same file using importar feature?
+- [ ] how can we prevent importing the same transactions from the same file?

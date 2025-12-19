@@ -183,7 +183,18 @@ export async function POST(request: NextRequest) {
       account_id: body.account?.id,
       category_id: body.category?.id || null,
       created_by: userId,
+      group_id: body.group_id || null,
     });
+
+    if (body.split_proposal && body.group_id) {
+      await create("split_proposals", {
+        transaction_id: transaction.id,
+        group_id: body.group_id,
+        split_rules: body.split_proposal.split_rules,
+        status: "pending",
+        created_by: userId,
+      });
+    }
 
     return createSuccessResponse(transaction, 201);
   } catch (error) {

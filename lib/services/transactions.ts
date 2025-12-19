@@ -59,6 +59,22 @@ export const transactionService = {
         data.kind === "TRANSFER" && data.destinationAccountId
           ? { id: data.destinationAccountId }
           : null,
+      group_id: data.groupId,
+      split_proposal:
+        data.groupId && data.splits?.length
+          ? {
+              group_id: data.groupId,
+              amount: data.amount,
+              status: "pending",
+              description: data.description,
+              split_rules: {
+                splits: data.splits.map((split) => ({
+                  user_id: split.userId,
+                  amount: split.amount,
+                })),
+              },
+            }
+          : null,
     };
 
     const response = await api.post<Transaction>(
@@ -85,6 +101,8 @@ export const transactionService = {
             id: data.categoryId,
           }
         : null,
+        : null,
+      group_id: data.groupId,
     };
 
     const response = await api.put<Transaction>(

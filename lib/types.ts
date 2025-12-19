@@ -253,7 +253,7 @@ export interface CreateTransactionRequest {
   destinationAccountId?: string;
   groupId?: string;
   splits?: Array<{
-    categoryId: string;
+    userId: string;
     amount: number;
     description?: string;
   }>;
@@ -271,7 +271,7 @@ export interface UpdateTransactionRequest {
   kind: "DEBIT" | "CREDIT" | "TRANSFER" | "UNKNOWN";
   groupId?: string;
   splits?: Array<{
-    categoryId: string;
+    userId: string;
     amount: number;
     description?: string;
   }>;

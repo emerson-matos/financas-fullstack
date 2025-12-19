@@ -10,6 +10,7 @@ export const defaultTransactionFormValues = {
   kind: "DEBIT" as "DEBIT" | "CREDIT" | "TRANSFER" | "UNKNOWN",
   currency: "BRL",
   destination_account_id: "",
+  groupId: "",
 };
 
 export const transactionFormSchema = z
@@ -31,6 +32,16 @@ export const transactionFormSchema = z
       .string()
       .min(1, { message: "Uma moeda precisa ser selecionada" }),
     destination_account_id: z.string().optional(),
+    groupId: z.string().optional(),
+    splits: z
+      .array(
+        z.object({
+          userId: z.string().min(1, "Membro é obrigatório"),
+          amount: z.number().positive("Valor deve ser maior que zero"),
+          description: z.string().optional(),
+        }),
+      )
+      .optional(),
   })
   .refine(
     (data) => {

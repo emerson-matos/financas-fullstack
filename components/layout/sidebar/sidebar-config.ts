@@ -7,6 +7,7 @@ import {
   Settings,
   ShieldQuestionIcon,
   UploadCloud,
+  UsersIcon,
 } from "lucide-react";
 
 import type { AppSidebarConfig } from "@/lib/types";
@@ -40,6 +41,13 @@ export const defaultSidebarConfig: AppSidebarConfig = {
           url: "/dashboard/transactions",
           icon: ArrowLeftRight,
           description: "Visualizar e gerenciar transações",
+        },
+        {
+          id: "recurring",
+          title: "Recorrências",
+          url: "/dashboard/recurring",
+          icon: RepeatIcon,
+          description: "Gerenciar transações recorrentes",
         },
         {
           id: "timeline",
@@ -82,6 +90,13 @@ export const defaultSidebarConfig: AppSidebarConfig = {
           url: "/dashboard/settings",
           icon: Settings,
           description: "Configurações da aplicação",
+        },
+        {
+          id: "groups",
+          title: "Grupos",
+          url: "/dashboard/groups",
+          icon: UsersIcon,
+          description: "Gerenciar grupos e membros",
         },
       ],
     },

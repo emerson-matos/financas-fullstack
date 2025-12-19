@@ -7,11 +7,13 @@ import {
   CalendarIcon,
   CreditCardIcon,
   HelpCircleIcon,
+  PlusIcon,
+  Trash2Icon,
   TrendingDownIcon,
   TrendingUpIcon,
 } from "lucide-react";
 import { useEffect, useTransition } from "react";
-import { Controller, useForm, useWatch } from "react-hook-form";
+import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 import type { z } from "zod";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -130,7 +132,13 @@ export function TransactionForm({
         transactionData?.account_id ||
         accountId ||
         "",
+      splits: transactionData?.splits || [],
     },
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "splits",
   });
 
   const selectedKind = useWatch({ control: form.control, name: "kind" });
@@ -172,6 +180,7 @@ export function TransactionForm({
           | "UNKNOWN",
         currency: transactionData.account?.currency || "BRL",
         destination_account_id: "",
+        splits: transactionData.splits || [],
       });
     } else if (accountId) {
       form.setValue("account_id", accountId);
@@ -192,6 +201,7 @@ export function TransactionForm({
       ...(values.kind === "TRANSFER" && values.destination_account_id
         ? { destinationAccountId: values.destination_account_id }
         : {}),
+      splits: values.splits,
     };
 
     startTransition(() => {
@@ -723,6 +733,123 @@ export function TransactionForm({
                   </Field>
                 )}
               />
+            )}
+
+            {/* Splits Section */}
+            {selectedKind !== "TRANSFER" && (
+              <div className="space-y-4 border-t pt-6 mt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-sm font-medium">Divisões (Splits)</h3>
+                    <p className="text-xs text-muted-foreground">
+                      Divida esta transação em múltiplas categorias
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      append({ categoryId: "", amount: 0, description: "" })
+                    }
+                  >
+                    <PlusIcon className="h-4 w-4 mr-2" />
+                    Adicionar Divisão
+                  </Button>
+                </div>
+
+                {fields.length > 0 && (
+                  <div className="space-y-4 bg-muted/30 p-4 rounded-lg border border-dashed text-foreground">
+                    {fields.map((field, index) => (
+                      <div
+                        key={field.id}
+                        className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end pb-4 border-b border-muted last:border-0 last:pb-0"
+                      >
+                        <div className="sm:col-span-4 text-foreground">
+                          <Controller
+                            control={form.control}
+                            name={`splits.${index}.categoryId`}
+                            render={({ field, fieldState }) => (
+                              <Field data-invalid={fieldState.invalid}>
+                                <FieldLabel className="text-xs">
+                                  Categoria
+                                </FieldLabel>
+                                <Select
+                                  onValueChange={field.onChange}
+                                  value={field.value}
+                                >
+                                  <SelectTrigger className="h-9">
+                                    <SelectValue placeholder="Categoria" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {categories?.map((cat) => (
+                                      <SelectItem key={cat.id} value={cat.id}>
+                                        {cat.name}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </Field>
+                            )}
+                          />
+                        </div>
+                        <div className="sm:col-span-3">
+                          <Controller
+                            control={form.control}
+                            name={`splits.${index}.amount`}
+                            render={({ field, fieldState }) => (
+                              <Field data-invalid={fieldState.invalid}>
+                                <FieldLabel className="text-xs">
+                                  Valor
+                                </FieldLabel>
+                                <Input
+                                  {...field}
+                                  type="number"
+                                  step="0.01"
+                                  className="h-9"
+                                  onChange={(e) =>
+                                    field.onChange(
+                                      Number.parseFloat(e.target.value) || 0,
+                                    )
+                                  }
+                                />
+                              </Field>
+                            )}
+                          />
+                        </div>
+                        <div className="sm:col-span-4 text-foreground">
+                          <Controller
+                            control={form.control}
+                            name={`splits.${index}.description`}
+                            render={({ field }) => (
+                              <Field>
+                                <FieldLabel className="text-xs">
+                                  Descrição (opcional)
+                                </FieldLabel>
+                                <Input
+                                  {...field}
+                                  className="h-9 text-foreground"
+                                />
+                              </Field>
+                            )}
+                          />
+                        </div>
+                        <div className="sm:col-span-1 flex justify-end">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-9 w-9 text-destructive"
+                            onClick={() => remove(index)}
+                          >
+                            <Trash2Icon className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             )}
 
             {/* Description */}
