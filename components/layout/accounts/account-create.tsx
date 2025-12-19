@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, PlusCircle, PlusIcon, Save } from "lucide-react";
 import * as React from "react";
 import { useEffect, useTransition } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import {
@@ -51,6 +51,10 @@ const formSchema = z.object({
     .max(50, "Identificação deve ter no máximo 50 caracteres"),
   currency: z.string().min(3).max(3),
   kind: z.string().optional(),
+  // Credit card specific fields
+  credit_limit: z.number().optional(),
+  bill_closing_day: z.number().min(1).max(31).optional(),
+  bill_due_day: z.number().min(1).max(31).optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -78,6 +82,9 @@ export function AccountForm({
       initial_amount: 0,
       currency: "BRL",
       kind: "",
+      credit_limit: 0,
+      bill_closing_day: 5,
+      bill_due_day: 15,
       ...defaultValues,
     },
   });
@@ -90,6 +97,9 @@ export function AccountForm({
         initial_amount: defaultValues.initial_amount || 0,
         currency: defaultValues.currency || "BRL",
         kind: defaultValues.kind || "",
+        credit_limit: defaultValues.credit_limit || 0,
+        bill_closing_day: defaultValues.bill_closing_day || 5,
+        bill_due_day: defaultValues.bill_due_day || 15,
       });
     }
   }, [defaultValues, form]);
@@ -102,6 +112,10 @@ export function AccountForm({
   };
 
   const isEditMode = mode === "edit";
+  const kind = useWatch({
+    control: form.control,
+    name: "kind",
+  });
 
   return (
     <form
@@ -222,6 +236,103 @@ export function AccountForm({
             )}
           />
         )}
+
+        {kind === "CREDIT_CARD" && (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <Controller
+              control={form.control}
+              name="credit_limit"
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="account-credit-limit">
+                    Limite de Crédito
+                  </FieldLabel>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    placeholder="0.00"
+                    id="account-credit-limit"
+                    value={field.value}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      const value =
+                        e.target.value === "" ? 0 : Number(e.target.value);
+                      field.onChange(value);
+                    }}
+                    onBlur={field.onBlur}
+                    name={field.name}
+                    ref={field.ref}
+                    aria-invalid={fieldState.invalid}
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+
+            <Controller
+              control={form.control}
+              name="bill_closing_day"
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="account-bill-closing-day">
+                    Fechamento (Dia)
+                  </FieldLabel>
+                  <Input
+                    type="number"
+                    min="1"
+                    max="31"
+                    id="account-bill-closing-day"
+                    value={field.value}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      const value =
+                        e.target.value === "" ? 1 : Number(e.target.value);
+                      field.onChange(value);
+                    }}
+                    onBlur={field.onBlur}
+                    name={field.name}
+                    ref={field.ref}
+                    aria-invalid={fieldState.invalid}
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+
+            <Controller
+              control={form.control}
+              name="bill_due_day"
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="account-bill-due-day">
+                    Vencimento (Dia)
+                  </FieldLabel>
+                  <Input
+                    type="number"
+                    min="1"
+                    max="31"
+                    id="account-bill-due-day"
+                    value={field.value}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      const value =
+                        e.target.value === "" ? 1 : Number(e.target.value);
+                      field.onChange(value);
+                    }}
+                    onBlur={field.onBlur}
+                    name={field.name}
+                    ref={field.ref}
+                    aria-invalid={fieldState.invalid}
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+          </div>
+        )}
       </FieldGroup>
 
       <div className="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2 space-y-2 space-y-reverse sm:space-y-0">
@@ -268,6 +379,9 @@ export function CreateAccount() {
           initial_amount: values.initial_amount,
           currency: values.currency,
           kind: values.kind,
+          credit_limit: values.credit_limit,
+          bill_closing_day: values.bill_closing_day,
+          bill_due_day: values.bill_due_day,
         };
         await createAccountMutation.mutateAsync(accountData);
         setIsOpen(false);

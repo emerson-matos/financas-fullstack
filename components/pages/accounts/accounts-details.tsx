@@ -81,6 +81,48 @@ export function AccountDetails({ id }: { id: string }) {
               Esta conta está desativada
             </div>
           )}
+          {account?.kind === "CREDIT_CARD" && (
+            <div className="mt-4 grid grid-cols-1 gap-2 border-t pt-4 sm:grid-cols-2">
+              <div className="space-y-1">
+                <div className="text-xs text-muted-foreground uppercase tracking-wider">
+                  Limite Total
+                </div>
+                <div className="font-medium">
+                  {new Intl.NumberFormat("pt-BR", {
+                    style: "currency",
+                    currency: currency,
+                  }).format(account.credit_limit || 0)}
+                </div>
+              </div>
+              <div className="space-y-1">
+                <div className="text-xs text-muted-foreground uppercase tracking-wider">
+                  Limite Disponível
+                </div>
+                <div className="font-medium text-emerald-600">
+                  {new Intl.NumberFormat("pt-BR", {
+                    style: "currency",
+                    currency: currency,
+                  }).format(
+                    (account.credit_limit || 0) + (account.current_amount || 0),
+                  )}
+                </div>
+              </div>
+              <div className="space-y-1">
+                <div className="text-xs text-muted-foreground uppercase tracking-wider">
+                  Fechamento da Fatura
+                </div>
+                <div className="font-medium">
+                  Dia {account.bill_closing_day}
+                </div>
+              </div>
+              <div className="space-y-1">
+                <div className="text-xs text-muted-foreground uppercase tracking-wider">
+                  Vencimento da Fatura
+                </div>
+                <div className="font-medium">Dia {account.bill_due_day}</div>
+              </div>
+            </div>
+          )}
           <div className="pt-4">
             <Button
               onClick={() =>

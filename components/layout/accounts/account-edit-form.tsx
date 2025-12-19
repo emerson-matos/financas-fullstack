@@ -23,6 +23,9 @@ export function AccountEditForm({ accountId }: AccountEditFormProps) {
     identification: string;
     currency: string;
     kind?: string;
+    credit_limit?: number;
+    bill_closing_day?: number;
+    bill_due_day?: number;
   }) => {
     startTransition(async () => {
       try {
@@ -88,6 +91,9 @@ export function AccountEditForm({ accountId }: AccountEditFormProps) {
             identification: account.identification || "",
             currency: account.currency || "BRL",
             kind: account.kind || "",
+            credit_limit: account.credit_limit || 0,
+            bill_closing_day: account.bill_closing_day || 5,
+            bill_due_day: account.bill_due_day || 15,
           }}
         />
       </CardContent>

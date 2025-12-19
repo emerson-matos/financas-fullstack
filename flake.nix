@@ -39,6 +39,7 @@
             bun
             yarn
             pnpm
+            gemini-cli
 
             # --- Supabase ---
             supabase-cli

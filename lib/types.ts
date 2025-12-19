@@ -71,6 +71,10 @@ export interface Account {
   deactivated_at: string | null;
   created_at: string;
   updated_at: string;
+  // Credit card fields
+  credit_limit?: number | null;
+  bill_closing_day?: number | null;
+  bill_due_day?: number | null;
 }
 
 export interface AccountCreateFormData {
@@ -78,6 +82,9 @@ export interface AccountCreateFormData {
   kind: string;
   currency: string;
   initial_amount: number;
+  credit_limit?: number;
+  bill_closing_day?: number;
+  bill_due_day?: number;
 }
 
 export interface Category {
