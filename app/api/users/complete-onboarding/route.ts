@@ -49,6 +49,14 @@ export async function PUT(request: NextRequest) {
 
     // 3. Create the first account if configured
     if (firstAccount) {
+      // 3.1 Insert Welcome event if not already present
+      await supabase.from("activity_log").insert({
+        user_id: userId,
+        type: "WELCOME",
+        data: { source: "onboarding" },
+        created_by: userId,
+      });
+
       // Check if an account with this name already exists for the user
       const { data: existingAccount } = await supabase
         .from("user_accounts")
@@ -57,24 +65,55 @@ export async function PUT(request: NextRequest) {
         .eq("identification", firstAccount.name)
         .single();
 
+      let accountId = existingAccount?.id;
+
       if (!existingAccount) {
-        const { error: createError } = await supabase
+        const { data: newAccount, error: createError } = await supabase
           .from("user_accounts")
           .insert({
             user_id: userId,
             identification: firstAccount.name,
             kind: firstAccount.kind,
-            currency: preferredCurrency || "BRL",
+            currency: firstAccount.currency || preferredCurrency || "BRL",
             created_by: userId,
-          });
+          })
+          .select("id")
+          .single();
 
         if (createError) {
           console.error("Error creating first account:", createError);
+        } else {
+          accountId = newAccount.id;
+          
+          // 3.2 Insert Account Created milestone
+          await supabase.from("activity_log").insert({
+            user_id: userId,
+            account_id: accountId,
+            type: "ACCOUNT_CREATED",
+            data: { name: firstAccount.name, kind: firstAccount.kind },
+            created_by: userId,
+          });
         }
       }
-      
-      // Note: We could also create an initial transaction here if initialAmount > 0
-      // For now, keeping it simple as per implementation plan
+
+      // 3.3 Create initial balance transaction only if amount > 0
+      if (accountId && firstAccount.initialAmount > 0) {
+        const { error: txError } = await supabase.from("transactions").insert({
+          account_id: accountId,
+          category_id: "00000000-0000-0000-0000-000000000000", // Inicial
+          amount: firstAccount.initialAmount,
+          currency: firstAccount.currency || preferredCurrency || "BRL",
+          description: "Saldo inicial da conta",
+          name: "Saldo Inicial",
+          kind: "CREDIT",
+          transacted_date: new Date().toISOString().split("T")[0],
+          created_by: userId,
+        });
+
+        if (txError) {
+          console.error("Error creating initial transaction:", txError);
+        }
+      }
     }
 
     // Return updated user info

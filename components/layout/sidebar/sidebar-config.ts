@@ -42,6 +42,13 @@ export const defaultSidebarConfig: AppSidebarConfig = {
           description: "Visualizar e gerenciar transações",
         },
         {
+          id: "timeline",
+          title: "Linha do Tempo",
+          url: "/dashboard/timeline",
+          icon: RepeatIcon,
+          description: "Histórico unificado de atividades",
+        },
+        {
           id: "budgets",
           title: "Orçamentos",
           url: "/dashboard/budgets",

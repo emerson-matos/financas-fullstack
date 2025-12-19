@@ -140,6 +140,27 @@ export interface Transaction {
   };
 }
 
+export interface TimelineEntry {
+  id: string;
+  user_id: string;
+  account_id: string | null;
+  entry_type: "ACTIVITY" | "TRANSACTION";
+  highlight_type: string;
+  data: Record<string, unknown>;
+  amount: number | null;
+  currency: string | null;
+  description: string | null;
+  event_time: string;
+}
+
+export interface TimelineFilter {
+  page?: number;
+  size?: number;
+  startDate?: Date;
+  endDate?: Date;
+  accountId?: string;
+}
+
 export interface TransactionFormData {
   description: string;
   amount: number;
