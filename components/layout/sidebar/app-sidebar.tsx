@@ -83,7 +83,7 @@ function SidebarHeaderComponent({
           <SidebarMenuButton size="lg" asChild>
             <Link href={homeUrl}>
               <div className="flex aspect-square items-center justify-center rounded-lg">
-                <TopHatLogo />
+                <TopHatLogo className="size-8" />
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">{brandName}</span>
