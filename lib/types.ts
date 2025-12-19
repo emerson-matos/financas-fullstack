@@ -145,6 +145,20 @@ export interface Transaction {
       identification: string;
     };
   };
+  group_id?: string;
+  splits?: Array<TransactionSplit>;
+}
+
+export interface TransactionSplit {
+  id: string;
+  transaction_id: string;
+  category_id: string;
+  amount: number;
+  description?: string;
+  category?: {
+    id: string;
+    name: string;
+  };
 }
 
 export interface TimelineEntry {
@@ -237,6 +251,12 @@ export interface CreateTransactionRequest {
   currency: string;
   kind: "DEBIT" | "CREDIT" | "TRANSFER" | "UNKNOWN";
   destinationAccountId?: string;
+  groupId?: string;
+  splits?: Array<{
+    categoryId: string;
+    amount: number;
+    description?: string;
+  }>;
 }
 
 export interface UpdateTransactionRequest {
@@ -249,6 +269,64 @@ export interface UpdateTransactionRequest {
   categoryId?: string;
   currency?: string;
   kind: "DEBIT" | "CREDIT" | "TRANSFER" | "UNKNOWN";
+  groupId?: string;
+  splits?: Array<{
+    categoryId: string;
+    amount: number;
+    description?: string;
+  }>;
+}
+
+export interface RecurringTemplate {
+  id: string;
+  user_id: string;
+  account_id: string;
+  category_id?: string;
+  amount: number;
+  currency: string;
+  name: string;
+  description?: string;
+  kind: "DEBIT" | "CREDIT" | "TRANSFER" | "UNKNOWN";
+  recurrence_rule: string;
+  last_generated_at?: string;
+  next_occurrence?: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  account?: {
+    id: string;
+    identification: string;
+  };
+  category?: {
+    id: string;
+    name: string;
+  };
+}
+
+export interface CreateRecurringTemplateRequest {
+  accountId: string;
+  categoryId?: string;
+  amount: number;
+  currency: string;
+  name: string;
+  description?: string;
+  kind: "DEBIT" | "CREDIT" | "TRANSFER" | "UNKNOWN";
+  recurrenceRule: string;
+  nextOccurrence: string;
+  isActive?: boolean;
+}
+
+export interface UpdateRecurringTemplateRequest {
+  accountId?: string;
+  categoryId?: string;
+  amount?: number;
+  currency?: string;
+  name?: string;
+  description?: string;
+  kind?: "DEBIT" | "CREDIT" | "TRANSFER" | "UNKNOWN";
+  recurrenceRule?: string;
+  nextOccurrence?: string;
+  isActive?: boolean;
 }
 
 export interface AppUserBackend {
@@ -497,3 +575,70 @@ export const notificationLabels = {
   budgetAlerts: "Alertas de limite de orçamento",
   transactionReminders: "Lembretes de transações",
 } as const;
+
+export interface Group {
+  id: string;
+  name: string;
+  description?: string;
+  created_at: string;
+  updated_at: string;
+  members?: Array<GroupMembership>;
+}
+
+export interface GroupMembership {
+  id: string;
+  group_id: string;
+  user_id: string;
+  user_role: "admin" | "member";
+  created_at: string;
+  user?: {
+    id: string;
+    email: string;
+    name: string;
+  };
+}
+
+export interface GroupInvite {
+  id: string;
+  group_id: string;
+  email: string;
+  role: "admin" | "member";
+  token: string;
+  expires_at: string;
+  status: "pending" | "accepted" | "declined" | "expired";
+  created_at: string;
+}
+
+export interface CreateGroupInviteRequest {
+  groupId: string;
+  email: string;
+  role: "admin" | "member";
+}
+
+export interface SplitProposal {
+  id: string;
+  transaction_id: string;
+  group_id: string;
+  split_rules?: Record<string, unknown>;
+  status: "pending" | "approved" | "rejected";
+  created_at: string;
+  updated_at: string;
+  created_by: string;
+  debts?: Array<MemberDebt>;
+}
+
+export interface MemberDebt {
+  id: string;
+  proposal_id: string;
+  user_id: string;
+  amount: number;
+  status: "unpaid" | "paid";
+  settled_at?: string;
+  created_at: string;
+  updated_at: string;
+  user?: {
+    id: string;
+    email: string;
+    name: string;
+  };
+}

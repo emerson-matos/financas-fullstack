@@ -105,6 +105,7 @@ export type Database = {
           id: string
           last_modified_by: string | null
           name: string
+          split_rules: Json | null
           updated_at: string | null
         }
         Insert: {
@@ -115,6 +116,7 @@ export type Database = {
           id?: string
           last_modified_by?: string | null
           name: string
+          split_rules?: Json | null
           updated_at?: string | null
         }
         Update: {
@@ -125,6 +127,7 @@ export type Database = {
           id?: string
           last_modified_by?: string | null
           name?: string
+          split_rules?: Json | null
           updated_at?: string | null
         }
         Relationships: []
@@ -252,6 +255,50 @@ export type Database = {
         }
         Relationships: []
       }
+      group_invites: {
+        Row: {
+          created_at: string | null
+          email: string
+          expires_at: string
+          group_id: string
+          id: string
+          role: string
+          status: string
+          token: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          expires_at: string
+          group_id: string
+          id?: string
+          role?: string
+          status?: string
+          token: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          expires_at?: string
+          group_id?: string
+          id?: string
+          role?: string
+          status?: string
+          token?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_invites_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "app_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       group_memberships: {
         Row: {
           created_at: string | null
@@ -296,6 +343,126 @@ export type Database = {
           },
         ]
       }
+      member_debts: {
+        Row: {
+          amount: number
+          created_at: string | null
+          id: string
+          proposal_id: string
+          settled_at: string | null
+          status: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          id?: string
+          proposal_id: string
+          settled_at?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          id?: string
+          proposal_id?: string
+          settled_at?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "member_debts_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "split_proposals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recurring_templates: {
+        Row: {
+          account_id: string
+          amount: number
+          category_id: string | null
+          created_at: string | null
+          created_by: string | null
+          currency: string
+          description: string | null
+          id: string
+          is_active: boolean | null
+          kind: string
+          last_modified_by: string | null
+          name: string
+          next_occurrence: string
+          recurrence_rule: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          account_id: string
+          amount?: number
+          category_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          currency?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          kind: string
+          last_modified_by?: string | null
+          name: string
+          next_occurrence: string
+          recurrence_rule: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          account_id?: string
+          amount?: number
+          category_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          currency?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          kind?: string
+          last_modified_by?: string | null
+          name?: string
+          next_occurrence?: string
+          recurrence_rule?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recurring_templates_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recurring_templates_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts_with_balance"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recurring_templates_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reports: {
         Row: {
           created_at: string | null
@@ -325,6 +492,54 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      split_proposals: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          group_id: string
+          id: string
+          split_rules: Json | null
+          status: string
+          transaction_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          group_id: string
+          id?: string
+          split_rules?: Json | null
+          status?: string
+          transaction_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          group_id?: string
+          id?: string
+          split_rules?: Json | null
+          status?: string
+          transaction_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "split_proposals_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "app_groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "split_proposals_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       transaction_categorization_jobs: {
         Row: {
@@ -414,6 +629,7 @@ export type Database = {
           currency: string | null
           deactivated_at: string | null
           description: string | null
+          group_id: string | null
           id: string
           kind: string | null
           label: string | null
@@ -433,6 +649,7 @@ export type Database = {
           currency?: string | null
           deactivated_at?: string | null
           description?: string | null
+          group_id?: string | null
           id?: string
           kind?: string | null
           label?: string | null
@@ -452,6 +669,7 @@ export type Database = {
           currency?: string | null
           deactivated_at?: string | null
           description?: string | null
+          group_id?: string | null
           id?: string
           kind?: string | null
           label?: string | null
@@ -482,6 +700,13 @@ export type Database = {
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "app_groups"
             referencedColumns: ["id"]
           },
           {

@@ -18,7 +18,7 @@ export function ReportsView() {
         value={activeTab}
       >
         <div className="w-full">
-          <TabsList className="md:w-auto">
+          <TabsList className="md:w-auto overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             <TabsTrigger
               className="whitespace-nowrap shrink-0"
               value="income-expense"

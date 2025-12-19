@@ -60,7 +60,14 @@ export function NetWorthReport() {
             <YAxis
               tickLine={false}
               axisLine={false}
-              tickFormatter={(value) => `$${value}`}
+              tickFormatter={(value) =>
+                new Intl.NumberFormat("pt-BR", {
+                  style: "currency",
+                  currency: "BRL",
+                  maximumFractionDigits: 0,
+                }).format(value)
+              }
+              width={80}
             />
             <ChartTooltip content={<ChartTooltipContent />} />
             <Area
@@ -74,12 +81,12 @@ export function NetWorthReport() {
               <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
                 <stop
                   offset="5%"
-                  stopColor="var(--chart-1)"
+                  stopColor="var(--color-value)"
                   stopOpacity={0.3}
                 />
                 <stop
                   offset="95%"
-                  stopColor="var(--chart-1)"
+                  stopColor="var(--color-value)"
                   stopOpacity={0.1}
                 />
               </linearGradient>

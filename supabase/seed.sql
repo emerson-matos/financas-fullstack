@@ -11,13 +11,16 @@
 -- ============================================================================
 
 -- Clean up existing seed data first (in case of re-run)
-DELETE FROM thc.transactions WHERE account_id IN (SELECT id FROM thc.user_accounts WHERE user_id = '00000000-0000-0000-0000-000000000001');
-DELETE FROM thc.budget_items WHERE budget_id IN (SELECT id FROM thc.budgets WHERE user_id = '00000000-0000-0000-0000-000000000001');
-DELETE FROM thc.budgets WHERE user_id = '00000000-0000-0000-0000-000000000001';
-DELETE FROM thc.user_accounts WHERE user_id = '00000000-0000-0000-0000-000000000001';
-DELETE FROM thc.categories WHERE user_id = '00000000-0000-0000-0000-000000000001';
-DELETE FROM auth.identities WHERE user_id = '00000000-0000-0000-0000-000000000001';
-DELETE FROM auth.users WHERE id = '00000000-0000-0000-0000-000000000001';
+DELETE FROM thc.transactions WHERE created_by IN ('00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000002');
+DELETE FROM thc.budget_items WHERE created_by IN ('00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000002');
+DELETE FROM thc.budgets WHERE user_id IN ('00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000002');
+DELETE FROM thc.recurring_templates WHERE user_id IN ('00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000002');
+DELETE FROM thc.group_memberships WHERE group_id IN ('10000000-0000-0000-0000-000000000001');
+DELETE FROM thc.app_groups WHERE id IN ('10000000-0000-0000-0000-000000000001');
+DELETE FROM thc.user_accounts WHERE user_id IN ('00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000002');
+DELETE FROM thc.categories WHERE user_id IN ('00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000002');
+DELETE FROM auth.identities WHERE user_id IN ('00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000002');
+DELETE FROM auth.users WHERE id IN ('00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000002');
 
 -- ============================================================================
 -- AUTH USER
@@ -55,6 +58,39 @@ INSERT INTO auth.identities (
   now()
 );
 
+-- Bob Mir
+INSERT INTO auth.users (
+  id, instance_id, email, encrypted_password, email_confirmed_at,
+  raw_app_meta_data, raw_user_meta_data, aud, role,
+  created_at, updated_at, confirmation_token, recovery_token, email_change_token_new, email_change
+) VALUES (
+  '00000000-0000-0000-0000-000000000002',
+  '00000000-0000-0000-0000-000000000000',
+  'bob@mir.com',
+  extensions.crypt('123456', extensions.gen_salt('bf')),
+  now() - interval '5 years',
+  '{"provider": "email", "providers": ["email"]}',
+  '{"name": "Bob Mir", "full_name": "Bob Mir", "onboarding_completed": true, "default_currency": "BRL"}',
+  'authenticated',
+  'authenticated',
+  now() - interval '5 years',
+  now(),
+  '', '', '', ''
+);
+
+INSERT INTO auth.identities (
+  id, user_id, identity_data, provider, provider_id, last_sign_in_at, created_at, updated_at
+) VALUES (
+  '00000000-0000-0000-0000-000000000002',
+  '00000000-0000-0000-0000-000000000002',
+  jsonb_build_object('sub', '00000000-0000-0000-0000-000000000002', 'email', 'bob@mir.com', 'email_verified', true),
+  'email',
+  '00000000-0000-0000-0000-000000000002',
+  now(),
+  now() - interval '5 years',
+  now()
+);
+
 INSERT INTO thc.user_accounts (id, user_id, identification, kind, currency, credit_limit, bill_closing_day, bill_due_day, created_at, updated_at, created_by) VALUES
   ('20000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000001', 'Nubank Conta', 'CHECKING', 'BRL', NULL, NULL, NULL, now() - interval '5 years', now(), '00000000-0000-0000-0000-000000000001'),
   ('20000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000001', 'Itaú Conta', 'CHECKING', 'BRL', NULL, NULL, NULL, now() - interval '5 years', now(), '00000000-0000-0000-0000-000000000001'),
@@ -65,7 +101,22 @@ INSERT INTO thc.user_accounts (id, user_id, identification, kind, currency, cred
   ('20000000-0000-0000-0000-000000000007', '00000000-0000-0000-0000-000000000001', 'Nubank Crédito', 'CREDIT_CARD', 'BRL', 10000.00, 5, 12, now() - interval '5 years', now(), '00000000-0000-0000-0000-000000000001'),
   ('20000000-0000-0000-0000-000000000008', '00000000-0000-0000-0000-000000000001', 'Itaú Crédito', 'CREDIT_CARD', 'BRL', 5000.00, 1, 10, now() - interval '4 years', now(), '00000000-0000-0000-0000-000000000001'),
   ('20000000-0000-0000-0000-000000000009', '00000000-0000-0000-0000-000000000001', 'Inter Conta', 'CHECKING', 'BRL', NULL, NULL, NULL, now() - interval '2 years', now(), '00000000-0000-0000-0000-000000000001'),
-  ('20000000-0000-0000-0000-000000000010', '00000000-0000-0000-0000-000000000001', 'Wise USD', 'CHECKING', 'USD', NULL, NULL, NULL, now() - interval '1 year', now(), '00000000-0000-0000-0000-000000000001');
+  ('20000000-0000-0000-0000-000000000010', '00000000-0000-0000-0000-000000000001', 'Wise USD', 'CHECKING', 'USD', NULL, NULL, NULL, now() - interval '1 year', now(), '00000000-0000-0000-0000-000000000001'),
+  -- FIXME: ademir is seeing this account, account aren't shareble, unless it is co-owned (conta conjunta)
+  ('20000000-0000-0000-0000-000000000011', '00000000-0000-0000-0000-000000000002', 'Santander Bob', 'CHECKING', 'BRL', NULL, NULL, NULL, now() - interval '1 year', now(), '00000000-0000-0000-0000-000000000002');
+
+-- ============================================================================
+-- GROUPS
+-- ============================================================================
+INSERT INTO thc.app_groups (id, name, created_by) VALUES
+  ('10000000-0000-0000-0000-000000000001', 'Top Hat Family', '00000000-0000-0000-0000-000000000001');
+
+INSERT INTO thc.group_memberships (group_id, user_id, user_role, created_by) VALUES
+  ('10000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000001', 'admin', '00000000-0000-0000-0000-000000000001'),
+  ('10000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000002', 'member', '00000000-0000-0000-0000-000000000001');
+
+-- Share some accounts
+UPDATE thc.user_accounts SET group_id = '10000000-0000-0000-0000-000000000001' WHERE id = '20000000-0000-0000-0000-000000000001';
 
 -- ============================================================================
 -- ACTIVITY LOG (User Milestones)
@@ -122,6 +173,25 @@ INSERT INTO thc.transactions (id, account_id, category_id, amount, currency, des
   ('40000000-0001-0000-0000-000000000006', '20000000-0000-0000-0000-000000000006', '00000000-0000-0000-0000-000000000000', 500.00, 'BRL', 'Saldo inicial da conta', 'Saldo Inicial', 'CREDIT', '2020-01-01 00:00:00+00', '2020-01-01'::timestamptz, now(), '00000000-0000-0000-0000-000000000001'),
   ('40000000-0001-0000-0000-000000000009', '20000000-0000-0000-0000-000000000009', '00000000-0000-0000-0000-000000000000', 1500.00, 'BRL', 'Saldo inicial da conta', 'Saldo Inicial', 'CREDIT', '2023-01-01 00:00:00+00', '2023-01-01'::timestamptz, now(), '00000000-0000-0000-0000-000000000001'),
   ('40000000-0001-0000-0000-000000000010', '20000000-0000-0000-0000-000000000010', '00000000-0000-0000-0000-000000000000', 2500.00, 'USD', 'Saldo inicial da conta', 'Saldo Inicial', 'CREDIT', '2024-01-01 00:00:00+00', '2024-01-01'::timestamptz, now(), '00000000-0000-0000-0000-000000000001');
+
+-- ============================================================================
+-- RECURRING TRANSACTION TEMPLATES
+-- ============================================================================
+INSERT INTO thc.recurring_templates (
+  id, user_id, account_id, category_id, amount, currency, name, description, kind, recurrence_rule, next_occurrence
+) VALUES (
+  '50000000-0000-0000-0000-000000000001',
+  '00000000-0000-0000-0000-000000000001',
+  '20000000-0000-0000-0000-000000000001',
+  'c0000000-0000-0000-0000-000000000001',
+  -150.00,
+  'BRL',
+  'Assinatura Mensal',
+  'Serviço de streaming',
+  'DEBIT',
+  'FREQ=MONTHLY;BYMONTHDAY=15',
+  '2025-01-15 09:00:00+00'
+);
 
 -- ============================================================================
 -- TRANSACTIONS 2020 (~52 transactions, ~1/week)

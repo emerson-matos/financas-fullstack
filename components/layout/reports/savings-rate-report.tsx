@@ -19,6 +19,13 @@ export function SavingsRateReport() {
       ?.filter((t) => t.amount < 0)
       .reduce((acc, t) => acc + t.amount, 0) || 0;
   const savingsRate = income > 0 ? ((income + expenses) / income) * 100 : 0;
+
+  const currency = transactions?.[0]?.account?.currency || "BRL";
+  const currencyFormatter = new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: currency,
+  });
+
   return (
     <div className="space-y-4 sm:space-y-6">
       <div>
@@ -38,7 +45,7 @@ export function SavingsRateReport() {
             Receita Total
           </span>
           <span className="text-sm sm:text-base font-semibold text-green-600">
-            ${income.toFixed(2)}
+            {currencyFormatter.format(income)}
           </span>
         </div>
         <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
@@ -46,13 +53,13 @@ export function SavingsRateReport() {
             Despesas Totais
           </span>
           <span className="text-sm sm:text-base font-semibold text-red-600">
-            ${Math.abs(expenses).toFixed(2)}
+            {currencyFormatter.format(Math.abs(expenses))}
           </span>
         </div>
         <div className="flex justify-between items-center p-3 bg-primary/10 rounded-lg border">
           <span className="text-xs sm:text-sm font-medium">Economia</span>
           <span className="text-sm sm:text-base font-bold text-primary">
-            ${(income + expenses).toFixed(2)}
+            {currencyFormatter.format(income + expenses)}
           </span>
         </div>
       </div>

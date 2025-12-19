@@ -46,12 +46,21 @@ export function CategoryBreakdownReport() {
   ];
   // Create chart config from category data
   const chartConfig = categoryData.reduce((acc, category, index) => {
-    acc[category.name] = {
+    const configKey = category.name.toLowerCase().replace(/\s+/g, "-");
+    acc[configKey] = {
       label: category.name,
       color: COLORS[index % COLORS.length],
     };
     return acc;
   }, {} as ChartConfig);
+
+  const updatedCategoryData = categoryData.map((c) => {
+    const configKey = c.name.toLowerCase().replace(/\s+/g, "-");
+    return {
+      ...c,
+      fill: `var(--color-${configKey})`,
+    };
+  });
   const isEmpty = !categoryData.length;
   return (
     <div className="grow w-full">
@@ -73,16 +82,15 @@ export function CategoryBreakdownReport() {
           <PieChart>
             <ChartTooltip content={<ChartTooltipContent />} />
             <Pie
-              data={categoryData}
+              data={updatedCategoryData}
               cx="50%"
               cy="50%"
               labelLine={false}
               outerRadius={80}
-              fill="var(--chart-1)"
               dataKey="value"
             >
-              {categoryData.map((category, index) => (
-                <Cell key={category.id} fill={COLORS[index % COLORS.length]} />
+              {updatedCategoryData.map((category) => (
+                <Cell key={category.id} fill={category.fill} />
               ))}
               <Label
                 content={({ viewBox }) => {

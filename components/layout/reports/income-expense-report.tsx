@@ -1,10 +1,12 @@
 import { LucideBarChart2, TrendingUp, TrendingDown } from "lucide-react";
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Legend } from "recharts";
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import {
   type ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
+  ChartLegend,
+  ChartLegendContent,
 } from "@/components/ui/chart";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTransactionsForChart } from "@/hooks/use-transactions";
@@ -116,18 +118,16 @@ export function IncomeExpenseReport() {
               width={80}
             />
             <ChartTooltip content={<ChartTooltipContent />} />
-            <Legend />
+            <ChartLegend content={<ChartLegendContent />} />
             <Bar
               dataKey="income"
               fill="var(--color-income)"
               radius={[4, 4, 0, 0]}
-              name="Receitas"
             />
             <Bar
               dataKey="expense"
               fill="var(--color-expense)"
               radius={[4, 4, 0, 0]}
-              name="Despesas"
             />
           </BarChart>
         </ChartContainer>
