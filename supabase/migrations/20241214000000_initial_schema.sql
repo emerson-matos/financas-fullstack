@@ -102,17 +102,18 @@ SELECT
 FROM activity_log
 UNION ALL
 SELECT 
-    id,
-    created_by as user_id,
-    account_id,
+    t.id,
+    ua.user_id,
+    t.account_id,
     'TRANSACTION' as entry_type,
-    kind as highlight_type,
-    jsonb_build_object('name', name, 'category_id', category_id) as data,
-    amount,
-    currency,
-    description,
-    COALESCE(transacted_date::TIMESTAMPTZ, created_at) as event_time
-FROM transactions;
+    t.kind as highlight_type,
+    jsonb_build_object('name', t.name, 'category_id', t.category_id) as data,
+    t.amount,
+    t.currency,
+    t.description,
+    COALESCE(t.transacted_date::TIMESTAMPTZ, t.created_at) as event_time
+FROM transactions t
+JOIN user_accounts ua ON t.account_id = ua.id;
 
 -- Budgets table
 CREATE TABLE IF NOT EXISTS budgets (
