@@ -14,6 +14,7 @@ import {
   Wallet,
   Clock,
   Loader2,
+  CreditCard,
 } from "lucide-react";
 import { format, isToday, isYesterday, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -22,6 +23,7 @@ import type { TimelineEntry } from "@/lib/types";
 import React, { useRef, useEffect, useState } from "react";
 
 export function Timeline() {
+  // TODO: Verify "Pagamento de Fatura" event in the timeline after creating a transfer to a credit card account.
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useTimeline({ size: 20 });
 
@@ -74,6 +76,8 @@ export function Timeline() {
         return <PartyPopper className="h-5 w-5 text-amber-500" />;
       case "ACCOUNT_CREATED":
         return <Wallet className="h-5 w-5 text-blue-500" />;
+      case "BILL_PAYMENT":
+        return <CreditCard className="h-5 w-5 text-purple-500" />;
       default:
         return <Clock className="h-5 w-5 text-muted-foreground" />;
     }
@@ -155,7 +159,9 @@ export function Timeline() {
                                       ? data.name || "Transação"
                                       : item.highlight_type === "WELCOME"
                                         ? "Sua Jornada Começa"
-                                        : `Novo Registro: ${data.name || "Conta"}`}
+                                        : item.highlight_type === "BILL_PAYMENT"
+                                          ? "Pagamento de Fatura"
+                                          : `Novo Registro: ${data.name || "Conta"}`}
                                   </p>
                                   {(() => {
                                     const getBadgeConfig = () => {
@@ -178,6 +184,12 @@ export function Timeline() {
                                             label: "Patrimônio",
                                             className:
                                               "bg-blue-500/10 text-blue-600 border-blue-500/20",
+                                          };
+                                        case "BILL_PAYMENT":
+                                          return {
+                                            label: "Pagamento",
+                                            className:
+                                              "bg-purple-500/10 text-purple-600 border-purple-500/20",
                                           };
                                         default:
                                           return {
