@@ -824,6 +824,7 @@ export type Database = {
           opts?: string | null;
           related_transaction_id?: string | null;
           transacted_date?: string | null;
+          transacted_time?: string | null;
           updated_at?: string | null;
         };
         Update: {
@@ -843,6 +844,7 @@ export type Database = {
           opts?: string | null;
           related_transaction_id?: string | null;
           transacted_date?: string | null;
+          transacted_time?: string | null;
           updated_at?: string | null;
         };
         Relationships: [
