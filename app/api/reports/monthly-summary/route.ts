@@ -58,6 +58,10 @@ export async function GET(request: NextRequest) {
       const date = new Date(tx.transacted_date);
       const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
 
+      if (tx.kind === "TRANSFER") {
+        continue;
+      }
+
       if (!monthlyData.has(monthKey)) {
         monthlyData.set(monthKey, {
           categories: new Map(),
