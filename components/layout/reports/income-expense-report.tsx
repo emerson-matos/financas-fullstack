@@ -13,18 +13,23 @@ import { Button } from "@/components/ui/button";
 const chartConfig = {
   income: {
     label: "Receitas",
-    color: "hsl(var(--chart-1))",
+    color: "var(--chart-1)",
     icon: TrendingUp,
   },
   expense: {
     label: "Despesas",
-    color: "hsl(var(--chart-2))",
+    color: "var(--chart-2)",
     icon: TrendingDown,
   },
 } satisfies ChartConfig;
 
 export function IncomeExpenseReport() {
-  const { data: transactions, isLoading, isError, refetch } = useTransactionsForChart();
+  const {
+    data: transactions,
+    isLoading,
+    isError,
+    refetch,
+  } = useTransactionsForChart();
 
   if (isLoading) {
     return <Skeleton className="h-[350px] w-full" />;
@@ -40,28 +45,34 @@ export function IncomeExpenseReport() {
   }
 
   const monthlyData =
-    transactions?.reduce((acc, transaction) => {
-      const month = new Date(transaction.transacted_at).toLocaleString("default", {
-        month: "short",
-      });
-      const monthData = acc.find((item) => item.name === month) || {
-        name: month,
-        income: 0,
-        expense: 0,
-      };
+    transactions?.reduce(
+      (acc, transaction) => {
+        const month = new Date(transaction.transacted_at).toLocaleString(
+          "default",
+          {
+            month: "short",
+          },
+        );
+        const monthData = acc.find((item) => item.name === month) || {
+          name: month,
+          income: 0,
+          expense: 0,
+        };
 
-      if (transaction.amount > 0) {
-        monthData.income += transaction.amount;
-      } else {
-        monthData.expense += Math.abs(transaction.amount);
-      }
+        if (transaction.amount > 0) {
+          monthData.income += transaction.amount;
+        } else {
+          monthData.expense += Math.abs(transaction.amount);
+        }
 
-      if (!acc.find((item) => item.name === month)) {
-        acc.push(monthData);
-      }
+        if (!acc.find((item) => item.name === month)) {
+          acc.push(monthData);
+        }
 
-      return acc;
-    }, [] as Array<{ name: string; income: number; expense: number }>) || [];
+        return acc;
+      },
+      [] as Array<{ name: string; income: number; expense: number }>,
+    ) || [];
 
   const isEmpty = !monthlyData.length;
 
@@ -85,19 +96,39 @@ export function IncomeExpenseReport() {
         </div>
       ) : (
         <ChartContainer config={chartConfig} className="h-[350px] w-full">
-          <BarChart data={monthlyData} margin={{ top: 20, right: 10, left: 10, bottom: 5 }}>
+          <BarChart
+            data={monthlyData}
+            margin={{ top: 20, right: 10, left: 10, bottom: 5 }}
+          >
             <CartesianGrid vertical={false} />
-            <XAxis dataKey="name" tickLine={false} axisLine={false} tickMargin={10} />
+            <XAxis
+              dataKey="name"
+              tickLine={false}
+              axisLine={false}
+              tickMargin={10}
+            />
             <YAxis
               tickLine={false}
               axisLine={false}
-              tickFormatter={(value) => currencyFormatter.format(value).replace(/\s/g, "")}
+              tickFormatter={(value) =>
+                currencyFormatter.format(value).replace(/\s/g, "")
+              }
               width={80}
             />
             <ChartTooltip content={<ChartTooltipContent />} />
             <Legend />
-            <Bar dataKey="income" fill={chartConfig.income.color} radius={[4, 4, 0, 0]} name="Receitas" />
-            <Bar dataKey="expense" fill={chartConfig.expense.color} radius={[4, 4, 0, 0]} name="Despesas" />
+            <Bar
+              dataKey="income"
+              fill="var(--color-income)"
+              radius={[4, 4, 0, 0]}
+              name="Receitas"
+            />
+            <Bar
+              dataKey="expense"
+              fill="var(--color-expense)"
+              radius={[4, 4, 0, 0]}
+              name="Despesas"
+            />
           </BarChart>
         </ChartContainer>
       )}

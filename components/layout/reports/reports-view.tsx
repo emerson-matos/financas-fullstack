@@ -17,8 +17,8 @@ export function ReportsView() {
         onValueChange={setActiveTab}
         value={activeTab}
       >
-        <div className="w-full overflow-x-auto -mx-4 px-4 md:mx-0">
-          <TabsList className="min-w-max md:w-auto">
+        <div className="w-full">
+          <TabsList className="md:w-auto">
             <TabsTrigger
               className="whitespace-nowrap shrink-0"
               value="income-expense"

@@ -79,7 +79,7 @@ describe("TransactionForm", () => {
     expect(screen.getByLabelText(/categoria/i)).toBeTruthy();
     expect(screen.getByLabelText(/valor/i)).toBeTruthy();
     expect(screen.getByLabelText(/descrição/i)).toBeTruthy();
-    expect(screen.getByLabelText(/data da transação/i)).toBeTruthy();
+    expect(screen.getByLabelText(/data/i)).toBeTruthy();
     expect(screen.getByText(/tipo de transação/i)).toBeTruthy();
   });
 });

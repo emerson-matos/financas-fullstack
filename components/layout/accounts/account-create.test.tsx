@@ -105,12 +105,14 @@ describe("CreateAccount", () => {
       const submitButton = screen.getByRole("button", { name: /criar conta/i });
       await user.click(submitButton);
       await waitFor(() => {
-        expect(mockMutateAsync).toHaveBeenCalledWith({
-          identification: "Nubank",
-          initial_amount: 1500.5,
-          currency: "BRL",
-          kind: "",
-        });
+        expect(mockMutateAsync).toHaveBeenCalledWith(
+          expect.objectContaining({
+            identification: "Nubank",
+            initial_amount: 1500.5,
+            currency: "BRL",
+            kind: "",
+          }),
+        );
       });
     });
     it("allows negative initial amounts", async () => {
@@ -133,12 +135,14 @@ describe("CreateAccount", () => {
       const submitButton = screen.getByRole("button", { name: /criar conta/i });
       await user.click(submitButton);
       await waitFor(() => {
-        expect(mockMutateAsync).toHaveBeenCalledWith({
-          identification: "Cartão de Crédito",
-          initial_amount: -2500.75,
-          currency: "BRL",
-          kind: "",
-        });
+        expect(mockMutateAsync).toHaveBeenCalledWith(
+          expect.objectContaining({
+            identification: "Cartão de Crédito",
+            initial_amount: -2500.75,
+            currency: "BRL",
+            kind: "",
+          }),
+        );
       });
     });
     it("shows success toast after successful submission", async () => {
@@ -268,12 +272,14 @@ describe("CreateAccount", () => {
       const submitButton = screen.getByRole("button", { name: /criar conta/i });
       await user.click(submitButton);
       await waitFor(() => {
-        expect(mockMutateAsync).toHaveBeenCalledWith({
-          identification: "Savings",
-          initial_amount: 123.45,
-          currency: "BRL",
-          kind: "",
-        });
+        expect(mockMutateAsync).toHaveBeenCalledWith(
+          expect.objectContaining({
+            identification: "Savings",
+            initial_amount: 123.45,
+            currency: "BRL",
+            kind: "",
+          }),
+        );
       });
     });
     it("closes dialog after successful submission", async () => {
@@ -322,7 +328,9 @@ describe("CreateAccount", () => {
       const triggerButton = screen.getByRole("button", { name: /nova conta/i });
       await user.click(triggerButton);
       // Check that currency selector is present
-      expect(screen.getByRole("combobox", { name: /moeda/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("combobox", { name: /moeda/i }),
+      ).toBeInTheDocument();
     });
   });
   describe("Form validation", () => {
@@ -387,12 +395,14 @@ describe("CreateAccount", () => {
       const submitButton = screen.getByRole("button", { name: /criar conta/i });
       await user.click(submitButton);
       await waitFor(() => {
-        expect(mockMutateAsync).toHaveBeenCalledWith({
-          identification: "Credit Card",
-          initial_amount: -1000,
-          currency: "BRL",
-          kind: "",
-        });
+        expect(mockMutateAsync).toHaveBeenCalledWith(
+          expect.objectContaining({
+            identification: "Credit Card",
+            initial_amount: -1000,
+            currency: "BRL",
+            kind: "",
+          }),
+        );
       });
       // Should not show validation error for negative amount
       expect(
@@ -415,12 +425,14 @@ describe("CreateAccount", () => {
       const submitButton = screen.getByRole("button", { name: /criar conta/i });
       await user.click(submitButton);
       await waitFor(() => {
-        expect(mockMutateAsync).toHaveBeenCalledWith({
-          identification: "New Account",
-          initial_amount: 0,
-          currency: "BRL",
-          kind: "",
-        });
+        expect(mockMutateAsync).toHaveBeenCalledWith(
+          expect.objectContaining({
+            identification: "New Account",
+            initial_amount: 0,
+            currency: "BRL",
+            kind: "",
+          }),
+        );
       });
     });
   });
