@@ -35,10 +35,12 @@ function SidebarMenuItemComponent({ item }: SidebarMenuItemComponentProps) {
         className={cn(item.isDisabled && "opacity-50 cursor-not-allowed")}
       >
         <Link href={item.url}>
-          <IconComponent className="h-4 w-4" />
-          <span>{item.title}</span>
+          <IconComponent className="h-4 w-4 shrink-0" />
+          <span className="truncate transition-[opacity,width,margin] duration-300 ease-in-out group-data-[collapsible=icon]:opacity-0 group-data-[collapsible=icon]:w-0 group-data-[collapsible=icon]:pointer-events-none">
+            {item.title}
+          </span>
           {item.badge && (
-            <span className="ml-auto text-xs bg-muted text-muted-foreground px-1.5 py-0.5 rounded-full">
+            <span className="ml-auto text-xs bg-muted text-muted-foreground px-1.5 py-0.5 rounded-full transition-opacity duration-300 ease-in-out group-data-[collapsible=icon]:opacity-0 group-data-[collapsible=icon]:pointer-events-none">
               {item.badge}
             </span>
           )}
@@ -83,7 +85,7 @@ function SidebarHeaderComponent({
               <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
                 <TopHatLogo className="size-6" />
               </div>
-              <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
+              <div className="grid flex-1 text-left text-sm leading-tight transition-[opacity,transform] duration-300 ease-in-out group-data-[collapsible=icon]:opacity-0 group-data-[collapsible=icon]:pointer-events-none group-data-[collapsible=icon]:w-0">
                 <span className="truncate font-semibold">{brandName}</span>
                 <span className="truncate text-xs text-muted-foreground">
                   {brandSubtitle}
