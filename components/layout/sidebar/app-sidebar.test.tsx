@@ -4,10 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import type { AppSidebarConfig } from "@/lib/types";
 import { AppSidebar } from "./app-sidebar";
-// Mock the UserNav component
-vi.mock("@/components/layout/header/user-nav", () => ({
-  UserNav: () => <div data-testid="user-nav">User Navigation</div>,
-}));
+
 // Mock the TopHatLogo component
 vi.mock("@/components/top-hat-logo", () => ({
   TopHatLogo: () => <div data-testid="top-hat-logo">TopHat Logo</div>,
@@ -22,7 +19,12 @@ vi.mock("next/link", () => ({
     href: string;
     children: React.ReactNode;
   } & any) => (
-    <a href={href} data-testid={`link-${href}`} data-disabled={props.disabled} {...props}>
+    <a
+      href={href}
+      data-testid={`link-${href}`}
+      data-disabled={props.disabled}
+      {...props}
+    >
       {children}
     </a>
   ),
@@ -43,8 +45,6 @@ describe("AppSidebar", () => {
       expect(screen.getByText("Company")).toBeInTheDocument();
       // Check logo
       expect(screen.getByTestId("top-hat-logo")).toBeInTheDocument();
-      // Check user navigation
-      expect(screen.getByTestId("user-nav")).toBeInTheDocument();
       // Check group label
       expect(screen.getByText("Páginas")).toBeInTheDocument();
     });
@@ -280,7 +280,6 @@ describe("AppSidebar", () => {
       renderWithRouter(<AppSidebar config={configWithEmptyGroups} />);
       // Should still render header and footer
       expect(screen.getByText("TopHat")).toBeInTheDocument();
-      expect(screen.getByTestId("user-nav")).toBeInTheDocument();
     });
     it("handles groups with empty items", () => {
       const configWithEmptyItems: Partial<AppSidebarConfig> = {

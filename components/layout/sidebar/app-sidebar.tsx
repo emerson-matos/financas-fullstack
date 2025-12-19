@@ -5,7 +5,6 @@ import { useMemo } from "react";
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -14,7 +13,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { UserNav } from "@/components/layout/header/user-nav";
 import type {
   AppSidebarProps,
   SidebarGroup as SidebarGroupType,
@@ -124,9 +122,6 @@ export function AppSidebar({
           <SidebarGroupComponent key={group.id} group={group} />
         ))}
       </SidebarContent>
-      <SidebarFooter>
-        <UserNav />
-      </SidebarFooter>
     </Sidebar>
   );
 }
