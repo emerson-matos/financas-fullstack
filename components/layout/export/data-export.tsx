@@ -70,7 +70,7 @@ export function DataExport() {
   async function onSubmit(values: FormValues) {
     setIsDownloading(true);
     try {
-      let url = `/export?type=${values.exportType}&format=${values.format}`;
+      let url = `/exports?type=${values.exportType}&format=${values.format}`;
       if (values.startDate) {
         url += `&startDate=${values.startDate.toISOString()}`;
       }

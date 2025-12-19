@@ -22,7 +22,7 @@ export class DownloadManager {
     const timeoutId = setTimeout(() => abortController?.abort(), timeout);
 
     try {
-      const response = await fetch(url, {
+      const response = await fetch(`/api/${url}`, {
         signal: abortController.signal,
       });
 
