@@ -1,18 +1,24 @@
-import { ThemeToggle } from "@/components/theme-toggle";
+import { UserNav } from "@/components/layout/header/user-nav";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { AppBreadcrumb } from "@/components/layout/breadcrumb/app-breadcrumb";
 
 export const Header = () => {
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 flex h-16 shrink-0 items-center justify-between gap-2 transition-[width,height] ease-linear">
-      <div className="flex items-center gap-2 px-4">
-        <SidebarTrigger />
-        <Separator orientation="vertical" className="mr-2 py-2 h-auto" />
+    <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-xl supports-backdrop-filter:bg-background/60 group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 flex h-16 shrink-0 items-center justify-between gap-2 px-6 transition-[width,height,background-color] duration-300 ease-in-out">
+      <div className="flex items-center gap-4">
+        <SidebarTrigger className="-ml-1 text-muted-foreground/60 transition-colors hover:text-foreground" />
+        <Separator
+          orientation="vertical"
+          className="h-auto w-[1px] bg-border/50"
+        />
         <AppBreadcrumb />
       </div>
-      <div className="flex items-center gap-2 px-4">
-        <ThemeToggle />
+      <div className="flex items-center gap-4">
+        <div className="flex items-center gap-1">
+          {/* Future slot for notifications or search */}
+        </div>
+        <UserNav />
       </div>
     </header>
   );
