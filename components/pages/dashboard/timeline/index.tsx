@@ -19,28 +19,39 @@ import { format, isToday, isYesterday, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import type { TimelineEntry } from "@/lib/types";
-import { useIntersection } from "react-use";
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 
 export function Timeline() {
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useTimeline({ size: 20 });
 
   const intersectionRef = useRef<HTMLDivElement>(null);
-  const intersection = useIntersection(
-    intersectionRef as React.RefObject<HTMLElement>,
-    {
-      root: null,
-      rootMargin: "50px",
-      threshold: 0,
-    },
-  );
+  const [isIntersecting, setIsIntersecting] = useState(false);
 
   useEffect(() => {
-    if (intersection?.isIntersecting && hasNextPage && !isFetchingNextPage) {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsIntersecting(entry.isIntersecting);
+      },
+      {
+        root: null,
+        rootMargin: "400px", // Load earlier for smoother experience
+        threshold: 0,
+      },
+    );
+
+    if (intersectionRef.current) {
+      observer.observe(intersectionRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (isIntersecting && hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
     }
-  }, [intersection, hasNextPage, isFetchingNextPage, fetchNextPage]);
+  }, [isIntersecting, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const formatCurrency = (amount: number, currency: string) => {
     return new Intl.NumberFormat("pt-BR", {
@@ -231,7 +242,10 @@ export function Timeline() {
             ))}
 
           {/* Trigger element for Infinite Scroll */}
-          <div ref={intersectionRef} className="flex justify-center py-8">
+          <div
+            ref={intersectionRef}
+            className="flex min-h-1 min-w-full justify-center py-10"
+          >
             {isFetchingNextPage ? (
               <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
             ) : hasNextPage ? (

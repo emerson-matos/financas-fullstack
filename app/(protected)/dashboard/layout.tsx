@@ -15,7 +15,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       <AppSidebar />
       <SidebarInset>
         <Header />
-        <div className="mx-4 flex-1 overflow-y-auto py-2">{children}</div>
+        <div className="mx-4 flex-1 py-2">{children}</div>
       </SidebarInset>
     </SidebarProvider>
   );
