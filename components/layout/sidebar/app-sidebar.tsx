@@ -82,12 +82,14 @@ function SidebarHeaderComponent({
         <SidebarMenuItem>
           <SidebarMenuButton size="lg" asChild>
             <Link href={homeUrl}>
-              <div className="flex aspect-square items-center justify-center rounded-lg">
-                <TopHatLogo className="size-8" />
+              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <TopHatLogo className="size-6" />
               </div>
-              <div className="grid flex-1 text-left text-sm leading-tight">
+              <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
                 <span className="truncate font-semibold">{brandName}</span>
-                <span className="truncate text-xs">{brandSubtitle}</span>
+                <span className="truncate text-xs text-muted-foreground">
+                  {brandSubtitle}
+                </span>
               </div>
             </Link>
           </SidebarMenuButton>
