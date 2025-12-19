@@ -20,7 +20,8 @@ interface OfxTransaction {
   name?: string;
   description: string;
   amount: number;
-  transactedDate: string;
+  transacted_date: string;
+  transacted_time?: string | null;
   categoryId?: string;
   currency?: string;
   kind: "DEBIT" | "CREDIT" | "TRANSFER" | "UNKNOWN";
@@ -130,6 +131,42 @@ function parseOfxDate(dateStr: string): string {
   return `${year}-${month}-${day}`;
 }
 
+function parseOfxTime(dateStr: string): string | null {
+  if (!dateStr || dateStr.length < 14) {
+    return null;
+  }
+
+  // Handle YYYYMMDDHHMMSS format or YYYYMMDDHHMMSS.XXX [+/-TZ]
+  // Extract HHMMSS
+  const hh = dateStr.substring(8, 10);
+  const mm = dateStr.substring(10, 12);
+  const ss = dateStr.substring(12, 14);
+
+  // Extract offset if present (e.g., [-3:BRT] or [-03:EST])
+  let offset = "-03"; // Default for Brazil
+  const timezoneMatch = dateStr.match(/\[([+-]?\d+):/);
+  if (timezoneMatch) {
+    const rawOffset = timezoneMatch[1];
+    // Pad to 2 digits if it's just a single digit (e.g., -3 -> -03)
+    if (rawOffset.startsWith("-") || rawOffset.startsWith("+")) {
+      const sign = rawOffset[0];
+      const digits = rawOffset.substring(1);
+      offset = `${sign}${digits.padStart(2, "0")}`;
+    } else {
+      offset = rawOffset.padStart(3, "+0").substring(0, 3);
+    }
+  } else {
+    // Check for suffix like 20231024103000[-03:BRT] or just 20231024103000-0300
+    const suffixMatch = dateStr.substring(14).match(/^([+-]\d+)/);
+    if (suffixMatch) {
+      const fullOffset = suffixMatch[0];
+      offset = fullOffset.substring(0, 3); // Take just the hour part for simpler TIMETZ storage
+    }
+  }
+
+  return `${hh}:${mm}:${ss}${offset}`;
+}
+
 function transformTransaction(
   t: OfxRawTransaction,
   accountId: string,
@@ -155,7 +192,8 @@ function transformTransaction(
     accountId,
     description: t.MEMO || "No description",
     amount: Math.abs(amount), // Store absolute value, kind determines direction
-    transactedDate: parseOfxDate(t.DTPOSTED),
+    transacted_date: parseOfxDate(t.DTPOSTED),
+    transacted_time: parseOfxTime(t.DTPOSTED),
     kind,
     currency,
     // Additional fields for reference

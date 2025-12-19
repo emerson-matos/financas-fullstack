@@ -163,6 +163,9 @@ export function TransactionForm({
         amount: Math.abs(transactionData.amount),
         description: transactionData.description || "",
         transacted_date: new Date(transactionData.transacted_date),
+        transacted_time: transactionData.transacted_time
+          ? transactionData.transacted_time.substring(0, 5)
+          : "",
         kind: transactionData.kind as
           | "DEBIT"
           | "CREDIT"
@@ -185,6 +188,9 @@ export function TransactionForm({
       amount: values.amount,
       description: values.description || "",
       transactedDate: values.transacted_date.toISOString().split("T")[0],
+      transactedTime: values.transacted_time
+        ? `${values.transacted_time}:00-03` // Default to Brazil offset
+        : undefined,
       currency: values.currency,
       kind: values.kind,
       ...(values.kind === "TRANSFER" && values.destination_account_id
@@ -303,7 +309,10 @@ export function TransactionForm({
               name="account_id"
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor={field.name} className="flex items-center gap-2">
+                  <FieldLabel
+                    htmlFor={field.name}
+                    className="flex items-center gap-2"
+                  >
                     Conta
                     <RequiredBadge />
                   </FieldLabel>
@@ -352,7 +361,10 @@ export function TransactionForm({
               name="kind"
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor={field.name} className="flex items-center gap-2">
+                  <FieldLabel
+                    htmlFor={field.name}
+                    className="flex items-center gap-2"
+                  >
                     Tipo de Transação
                     <RequiredBadge />
                   </FieldLabel>
@@ -414,7 +426,10 @@ export function TransactionForm({
                 name="destination_account_id"
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor={field.name} className="flex items-center gap-2">
+                    <FieldLabel
+                      htmlFor={field.name}
+                      className="flex items-center gap-2"
+                    >
                       Conta de Destino
                       <RequiredBadge />
                     </FieldLabel>
@@ -467,7 +482,10 @@ export function TransactionForm({
                   name="amount"
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor={field.name} className="flex items-center gap-2">
+                      <FieldLabel
+                        htmlFor={field.name}
+                        className="flex items-center gap-2"
+                      >
                         Valor
                         <RequiredBadge />
                       </FieldLabel>
@@ -503,7 +521,10 @@ export function TransactionForm({
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor={field.name}>Moeda</FieldLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
-                      <SelectTrigger id={field.name} aria-invalid={fieldState.invalid}>
+                      <SelectTrigger
+                        id={field.name}
+                        aria-invalid={fieldState.invalid}
+                      >
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -520,54 +541,79 @@ export function TransactionForm({
               />
             </div>
 
-            {/* Date */}
-            <Controller
-              control={form.control}
-              name="transacted_date"
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor={field.name} className="flex items-center gap-2">
-                    Data da Transação
-                    <RequiredBadge />
-                  </FieldLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        id={field.name}
-                        variant="outline"
-                        className={cn(
-                          "w-full pl-3 text-left font-normal transition-colors",
-                          !field.value && "text-muted-foreground",
-                          field.value && "border-primary/50",
-                        )}
-                        aria-invalid={fieldState.invalid}
-                        aria-label="Selecionar data da transação"
-                      >
-                        {field.value ? (
-                          new Intl.DateTimeFormat("pt-br").format(field.value)
-                        ) : (
-                          <span>Selecione uma data</span>
-                        )}
-                        <CalendarIcon
-                          className="ml-auto h-4 w-4 opacity-50"
-                          aria-hidden="true"
+            {/* Date and Time */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Controller
+                control={form.control}
+                name="transacted_date"
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel
+                      htmlFor={field.name}
+                      className="flex items-center gap-2"
+                    >
+                      Data
+                      <RequiredBadge />
+                    </FieldLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          id={field.name}
+                          variant="outline"
+                          className={cn(
+                            "w-full pl-3 text-left font-normal transition-colors",
+                            !field.value && "text-muted-foreground",
+                            field.value && "border-primary/50",
+                          )}
+                          aria-invalid={fieldState.invalid}
+                        >
+                          {field.value ? (
+                            new Intl.DateTimeFormat("pt-br").format(field.value)
+                          ) : (
+                            <span>Selecione uma data</span>
+                          )}
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
                         />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={field.onChange}
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
+                      </PopoverContent>
+                    </Popover>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+
+              <Controller
+                control={form.control}
+                name="transacted_time"
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor={field.name}>Hora</FieldLabel>
+                    <Input
+                      id={field.name}
+                      type="text"
+                      placeholder="HH:mm"
+                      {...field}
+                      className={cn(
+                        "transition-colors font-mono",
+                        field.value ? "border-primary/50" : "",
+                      )}
+                    />
+                    <FieldDescription>Formato: HH:mm (24h)</FieldDescription>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+            </div>
           </CardContent>
         </Card>
 
@@ -586,7 +632,9 @@ export function TransactionForm({
               name="name"
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor={field.name}>Nome da Transação</FieldLabel>
+                  <FieldLabel htmlFor={field.name}>
+                    Nome da Transação
+                  </FieldLabel>
                   <Input
                     id={field.name}
                     {...field}
@@ -623,7 +671,10 @@ export function TransactionForm({
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor={field.name}>Categoria</FieldLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
-                      <SelectTrigger id={field.name} aria-invalid={fieldState.invalid}>
+                      <SelectTrigger
+                        id={field.name}
+                        aria-invalid={fieldState.invalid}
+                      >
                         <SelectValue placeholder="Selecione uma categoria" />
                       </SelectTrigger>
                       <SelectContent>
@@ -651,7 +702,10 @@ export function TransactionForm({
               name="description"
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor={field.name} className="flex items-center gap-2">
+                  <FieldLabel
+                    htmlFor={field.name}
+                    className="flex items-center gap-2"
+                  >
                     Descrição
                     <RequiredBadge />
                   </FieldLabel>

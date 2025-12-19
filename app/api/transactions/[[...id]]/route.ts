@@ -134,6 +134,7 @@ export async function POST(request: NextRequest) {
         currency: body.currency || "BRL",
         kind: "TRANSFER",
         transacted_date: body.transacted_date,
+        transacted_time: body.transacted_time,
         amount: -amount, // Negative: money leaving source account
         account_id: sourceAccountId,
         category_id: null, // Transfers don't have a category
@@ -147,6 +148,7 @@ export async function POST(request: NextRequest) {
         currency: body.currency || "BRL",
         kind: "TRANSFER",
         transacted_date: body.transacted_date,
+        transacted_time: body.transacted_time,
         amount: amount, // Positive: money entering destination account
         account_id: destinationAccountId,
         category_id: null, // Transfers don't have a category
@@ -179,6 +181,7 @@ export async function POST(request: NextRequest) {
       currency: body.currency || "BRL",
       kind: body.kind,
       transacted_date: body.transacted_date,
+      transacted_time: body.transacted_time,
       amount,
       account_id: body.account?.id,
       category_id: body.category?.id || null,

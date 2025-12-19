@@ -8,15 +8,11 @@ export const Header = () => {
   return (
     <header className="group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 flex h-16 shrink-0 items-center justify-between gap-2 transition-[width,height] ease-linear">
       <div className="flex items-center gap-2 px-4">
-        <SidebarTrigger className="-ml-1" />
-        <Separator orientation="vertical" className="mr-2 h-4" />
+        <SidebarTrigger />
+        <Separator orientation="vertical" className="mr-2 py-2 h-auto" />
         <AppBreadcrumb />
       </div>
       <div className="flex items-center gap-2 px-4">
-        {/* <div className="hidden md:flex"> */}
-        {/* <Search /> */}
-        {/* <SearchInput /> */}
-        {/* </div> */}
         <ThemeToggle />
       </div>
     </header>

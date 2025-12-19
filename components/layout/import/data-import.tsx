@@ -29,7 +29,11 @@ import {
   useBulkCreateTransactions,
   useParseFileImport,
 } from "@/hooks/use-transactions";
-import type { CreateTransactionRequest, ImportResult, ParsedTransaction } from "@/lib/types";
+import type {
+  CreateTransactionRequest,
+  ImportResult,
+  ParsedTransaction,
+} from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { validateFile } from "@/lib/file-validation";
 
@@ -122,7 +126,14 @@ function ReviewTable({
   };
 
   const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString("pt-BR");
+    if (!date) return "Data Inválida";
+    // Check if it's YYYY-MM-DD
+    const match = date.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (match) {
+      return `${match[3]}/${match[2]}/${match[1]}`;
+    }
+    const d = new Date(date);
+    return isNaN(d.getTime()) ? "Data Inválida" : d.toLocaleDateString("pt-BR");
   };
 
   const getKindBadge = (kind: string) => {
@@ -143,6 +154,7 @@ function ReviewTable({
             <TableHead>Descrição</TableHead>
             <TableHead className="text-right">Valor</TableHead>
             <TableHead>Data</TableHead>
+            <TableHead>Hora</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -156,6 +168,9 @@ function ReviewTable({
                 {formatCurrency(transaction.amount)}
               </TableCell>
               <TableCell>{formatDate(transaction.transactedDate)}</TableCell>
+              <TableCell className="font-mono text-xs">
+                {transaction.transactedTime || "--:--:--"}
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
@@ -233,8 +248,10 @@ export function DataImport() {
               accountId: selectedAccountId,
               description: t.description,
               amount: t.amount,
-              transactedDate: t.transacted_date, // This is ParsedTransaction's property
+              transactedDate: t.transacted_date,
+              transactedTime: t.transacted_time,
               kind: t.kind,
+              currency: "BRL", // Default currency for imported transactions
             }));
 
           allTransactionsToCreate.push(...mappedTransactionsForCreation);

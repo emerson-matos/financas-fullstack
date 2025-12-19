@@ -24,11 +24,13 @@ export async function GET(request: NextRequest) {
       // RLS policy filters via account_id -> user_accounts -> user_id automatically.
       let query = supabase
         .from("transactions")
-        .select(`
+        .select(
+          `
           *,
           account:user_accounts(id, identification),
           category:categories(id, name)
-        `)
+        `,
+        )
         .is("deactivated_at", null)
         .order("transacted_date", { ascending: false });
 
@@ -51,6 +53,7 @@ export async function GET(request: NextRequest) {
         currency: t.currency,
         kind: t.kind,
         transacted_date: t.transacted_date,
+        transacted_time: t.transacted_time,
         account_name: t.account?.identification || "Unknown",
         category_name: t.category?.name || "Uncategorized",
       }));

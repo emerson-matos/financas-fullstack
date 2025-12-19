@@ -7,6 +7,16 @@ export const defaultTransactionFormValues = {
   amount: 0,
   description: "",
   transacted_date: new Date(),
+  transacted_time:
+    new Intl.DateTimeFormat("pt-BR", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+      timeZoneName: "shortOffset",
+    })
+      .format(new Date())
+      .split(" ")[0] + "-03", // Default to local offset -03 for Brazil if not specified
   kind: "DEBIT" as "DEBIT" | "CREDIT" | "TRANSFER" | "UNKNOWN",
   currency: "BRL",
   destination_account_id: "",
@@ -26,6 +36,12 @@ export const transactionFormSchema = z
     transacted_date: z.date({
       message: "Uma data precisa ser selecionada",
     }),
+    transacted_time: z
+      .string()
+      .regex(/^([01]\d|2[0-3]):?([0-5]\d)$/, {
+        message: "Formato de hora inválido (HH:mm)",
+      })
+      .optional(),
     kind: z.enum(["DEBIT", "CREDIT", "TRANSFER", "UNKNOWN"]),
     currency: z
       .string()
@@ -43,7 +59,7 @@ export const transactionFormSchema = z
     {
       message: "Você precisa selecionar a conta de destino para transferências",
       path: ["destination_account_id"],
-    }
+    },
   )
   .refine(
     (data) => {
@@ -56,7 +72,7 @@ export const transactionFormSchema = z
     {
       message: "A conta de destino deve ser diferente da conta de origem",
       path: ["destination_account_id"],
-    }
+    },
   );
 
 export type TransactionFormValues = z.infer<typeof transactionFormSchema>;

@@ -107,6 +107,7 @@ export interface Transaction {
   description: string;
   amount: number;
   transacted_date: string | Date;
+  transacted_time: string | null;
   account_id: string;
   kind: string;
   category_id: string;
@@ -222,14 +223,15 @@ export interface TransactionFilter {
 
 export interface CreateTransactionRequest {
   accountId: string;
-  destinationAccountId?: string; // Required for TRANSFER
-  name?: string;
-  description: string;
-  amount: number;
-  transactedDate: string; // yyyy-MM-dd
   categoryId?: string;
-  currency?: string;
+  name?: string;
+  amount: number;
+  description: string;
+  transactedDate: string;
+  transactedTime?: string | null;
+  currency: string;
   kind: "DEBIT" | "CREDIT" | "TRANSFER" | "UNKNOWN";
+  destinationAccountId?: string;
 }
 
 export interface UpdateTransactionRequest {
@@ -239,6 +241,7 @@ export interface UpdateTransactionRequest {
   description: string;
   amount: number;
   transactedDate: string; // yyyy-MM-dd
+  transactedTime?: string | null;
   categoryId?: string;
   currency?: string;
   kind: "DEBIT" | "CREDIT" | "TRANSFER" | "UNKNOWN";
@@ -397,6 +400,7 @@ export interface ParsedTransaction {
   description: string;
   amount: number;
   transacted_date: string;
+  transacted_time: string | null;
   kind: "DEBIT" | "CREDIT" | "TRANSFER" | "UNKNOWN";
   originalData: string;
 }
