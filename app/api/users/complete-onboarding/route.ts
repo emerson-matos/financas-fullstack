@@ -24,11 +24,13 @@ export async function PUT(request: NextRequest) {
     } = body;
 
     // 1. Update user metadata to mark onboarding as complete
-    const { data: authData, error: authError } = await supabase.auth.updateUser({
-      data: {
-        onboarding_completed: true,
+    const { data: authData, error: authError } = await supabase.auth.updateUser(
+      {
+        data: {
+          onboarding_completed: true,
+        },
       },
-    });
+    );
 
     if (authError) throw authError;
 
@@ -84,7 +86,7 @@ export async function PUT(request: NextRequest) {
           console.error("Error creating first account:", createError);
         } else {
           accountId = newAccount.id;
-          
+
           // 3.2 Insert Account Created milestone
           await supabase.from("activity_log").insert({
             user_id: userId,
@@ -106,7 +108,7 @@ export async function PUT(request: NextRequest) {
           description: "Saldo inicial da conta",
           name: "Saldo Inicial",
           kind: "CREDIT",
-          transacted_date: new Date().toISOString().split("T")[0],
+          transacted_at: new Date().toISOString(),
           created_by: userId,
         });
 
@@ -128,4 +130,3 @@ export async function PUT(request: NextRequest) {
     return createErrorResponse(error);
   }
 }
-

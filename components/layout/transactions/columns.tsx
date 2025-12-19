@@ -28,7 +28,7 @@ import type { Transaction } from "@/lib/types";
  */
 export const defaultTransactionColumns: Array<ColumnDef<Transaction>> = [
   {
-    accessorKey: "transacted_date",
+    accessorKey: "transacted_at",
     header: ({ column }) => (
       <Button
         variant="ghost"
@@ -45,7 +45,7 @@ export const defaultTransactionColumns: Array<ColumnDef<Transaction>> = [
       </Button>
     ),
     cell: ({ row }) => {
-      const date = new Date(row.original.transacted_date);
+      const date = new Date(row.original.transacted_at);
       return new Intl.DateTimeFormat("pt-BR").format(date);
     },
   },
@@ -126,7 +126,7 @@ export const defaultTransactionColumns: Array<ColumnDef<Transaction>> = [
  */
 export const compactTransactionColumns: Array<ColumnDef<Transaction>> = [
   {
-    accessorKey: "transacted_date",
+    accessorKey: "transacted_at",
     header: ({ column }) => (
       <Button
         variant="ghost"
@@ -143,7 +143,7 @@ export const compactTransactionColumns: Array<ColumnDef<Transaction>> = [
       </Button>
     ),
     cell: ({ row }) =>
-      format(new Date(row.original.transacted_date), "dd/MMM/yyyy"),
+      format(new Date(row.original.transacted_at), "dd/MMM/yyyy"),
   },
   {
     accessorKey: "description",

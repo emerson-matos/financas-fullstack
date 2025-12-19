@@ -22,10 +22,10 @@ export async function GET(request: NextRequest) {
         .eq("user_id", userId);
 
       if (startDate) {
-        query = query.gte("transacted_date", startDate);
+        query = query.gte("transacted_at", startDate);
       }
       if (endDate) {
-        query = query.lte("transacted_date", endDate);
+        query = query.lte("transacted_at", endDate);
       }
 
       const { data: transactions, error } = await query;

@@ -72,26 +72,12 @@ export function UserNav() {
             className="relative h-10 w-full justify-start gap-2 px-2 hover:bg-primary/5 transition-all duration-300 md:w-auto"
           >
             <ChevronsUpDown className="ml-auto hidden h-4 w-4 shrink-0 opacity-50 md:flex" />
-            <div className="hidden flex-1 text-left text-sm leading-tight md:grid">
-              <div className="flex items-center gap-2">
-                <span className="truncate font-semibold">{user.name}</span>
-                <span className="flex h-3.5 items-center rounded-sm bg-primary/10 px-1 text-[8px] font-bold tracking-wider text-primary uppercase ring-1 ring-primary/20">
-                  PRO
-                </span>
-              </div>
-              <span className="truncate text-[10px] text-muted-foreground/70">
-                {user.email}
-              </span>
-            </div>
-            <div className="relative">
-              <Avatar className="h-8 w-8 rounded-full border border-primary/10 transition-transform duration-300 group-hover:scale-105">
-                <AvatarImage src={user?.picture ?? ""} alt={user?.name ?? ""} />
-                <AvatarFallback className="rounded-full bg-linear-to-br from-primary/20 to-primary/5 text-primary text-[10px] font-bold">
-                  {initials}
-                </AvatarFallback>
-              </Avatar>
-              <div className="absolute -right-0.5 -bottom-0.5 h-3 w-3 rounded-full border-2 border-background bg-emerald-500" />
-            </div>
+            <Avatar className="h-8 w-8 rounded-full border border-primary/10 transition-transform duration-300 group-hover:scale-105">
+              <AvatarImage src={user?.picture ?? ""} alt={user?.name ?? ""} />
+              <AvatarFallback className="rounded-full bg-linear-to-br from-primary/20 to-primary/5 text-primary text-[10px] font-bold">
+                {initials}
+              </AvatarFallback>
+            </Avatar>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent

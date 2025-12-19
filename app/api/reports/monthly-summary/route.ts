@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
       .select(
         `
         amount,
-        transacted_date,
+        transacted_at,
         kind,
         category:categories!transactions_category_id_fkey(name)
         `,
@@ -34,10 +34,10 @@ export async function GET(request: NextRequest) {
       .is("deactivated_at", null);
 
     if (startDate) {
-      query = query.gte("transacted_date", startDate);
+      query = query.gte("transacted_at", startDate);
     }
     if (endDate) {
-      query = query.lte("transacted_date", endDate);
+      query = query.lte("transacted_at", endDate);
     }
 
     const { data: transactions, error } = await query;
@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
     >();
 
     for (const tx of transactions || []) {
-      const date = new Date(tx.transacted_date);
+      const date = new Date(tx.transacted_at);
       const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
 
       if (tx.kind === "TRANSFER") {

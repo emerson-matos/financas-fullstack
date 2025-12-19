@@ -162,10 +162,9 @@ export function TransactionForm({
         name: transactionData.name || transactionData.description || "",
         amount: Math.abs(transactionData.amount),
         description: transactionData.description || "",
-        transacted_date: new Date(transactionData.transacted_date),
-        transacted_time: transactionData.transacted_time
-          ? transactionData.transacted_time.substring(0, 5)
-          : "",
+        transacted_at: transactionData.transacted_at
+          ? new Date(transactionData.transacted_at)
+          : new Date(),
         kind: transactionData.kind as
           | "DEBIT"
           | "CREDIT"
@@ -187,10 +186,7 @@ export function TransactionForm({
       name: values.name,
       amount: values.amount,
       description: values.description || "",
-      transactedDate: values.transacted_date.toISOString().split("T")[0],
-      transactedTime: values.transacted_time
-        ? `${values.transacted_time}:00-03` // Default to Brazil offset
-        : undefined,
+      transactedAt: values.transacted_at.toISOString(),
       currency: values.currency,
       kind: values.kind,
       ...(values.kind === "TRANSFER" && values.destination_account_id
@@ -199,6 +195,7 @@ export function TransactionForm({
     };
 
     startTransition(() => {
+      // ... existing logic continues
       if (transactionId) {
         updateTransaction(
           { id: transactionId, data: requestData },
@@ -545,11 +542,11 @@ export function TransactionForm({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Controller
                 control={form.control}
-                name="transacted_date"
+                name="transacted_at"
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel
-                      htmlFor={field.name}
+                      htmlFor="transacted_at_date"
                       className="flex items-center gap-2"
                     >
                       Data
@@ -558,7 +555,7 @@ export function TransactionForm({
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button
-                          id={field.name}
+                          id="transacted_at_date"
                           variant="outline"
                           className={cn(
                             "w-full pl-3 text-left font-normal transition-colors",
@@ -567,7 +564,8 @@ export function TransactionForm({
                           )}
                           aria-invalid={fieldState.invalid}
                         >
-                          {field.value ? (
+                          {field.value instanceof Date &&
+                          !isNaN(field.value.getTime()) ? (
                             new Intl.DateTimeFormat("pt-br").format(field.value)
                           ) : (
                             <span>Selecione uma data</span>
@@ -579,7 +577,14 @@ export function TransactionForm({
                         <Calendar
                           mode="single"
                           selected={field.value}
-                          onSelect={field.onChange}
+                          onSelect={(date) => {
+                            if (!date) return;
+                            const newDate = new Date(field.value);
+                            newDate.setFullYear(date.getFullYear());
+                            newDate.setMonth(date.getMonth());
+                            newDate.setDate(date.getDate());
+                            field.onChange(newDate);
+                          }}
                         />
                       </PopoverContent>
                     </Popover>
@@ -592,15 +597,39 @@ export function TransactionForm({
 
               <Controller
                 control={form.control}
-                name="transacted_time"
+                name="transacted_at"
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor={field.name}>Hora</FieldLabel>
+                    <FieldLabel htmlFor="transacted_at_time">Hora</FieldLabel>
                     <Input
-                      id={field.name}
+                      id="transacted_at_time"
                       type="text"
                       placeholder="HH:mm"
-                      {...field}
+                      value={
+                        field.value instanceof Date &&
+                        !isNaN(field.value.getTime())
+                          ? `${String(field.value.getHours()).padStart(2, "0")}:${String(field.value.getMinutes()).padStart(2, "0")}`
+                          : ""
+                      }
+                      onChange={(e) => {
+                        const timeStr = e.target.value;
+                        const [hours, minutes] = timeStr.split(":").map(Number);
+                        if (
+                          !isNaN(hours) &&
+                          !isNaN(minutes) &&
+                          hours >= 0 &&
+                          hours < 24 &&
+                          minutes >= 0 &&
+                          minutes < 60
+                        ) {
+                          const newDate = new Date(field.value);
+                          newDate.setHours(hours);
+                          newDate.setMinutes(minutes);
+                          newDate.setSeconds(0);
+                          newDate.setMilliseconds(0);
+                          field.onChange(newDate);
+                        }
+                      }}
                       className={cn(
                         "transition-colors font-mono",
                         field.value ? "border-primary/50" : "",

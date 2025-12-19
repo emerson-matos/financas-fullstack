@@ -4,7 +4,10 @@ This file tracks architectural decisions, outstanding features, and future enhan
 
 ## 0. Immediate Priorities
 
-- [/] **Credit Card Support**: Plan and implement specialized logic for credit limits and billing cycles. See [Credit Card Planning](file:///home/emerson/.gemini/antigravity/brain/5bf21acd-affb-4d92-a462-ce0825831f31/credit_card_planning.md).
+- [/] **Credit Card Support**:
+  - [ ] Check "Pagamento de Fatura" event in the timeline after creating a transfer to a credit card account (Trigger fixed and UI support added).
+  - [x] Create specialized UI for credit card accounts (Forms + Details View)
+  - [ ] Implement specialized logic for credit limits and billing cycles. See [Credit Card Planning](file:///home/emerson/.gemini/antigravity/brain/5bf21acd-affb-4d92-a462-ce0825831f31/credit_card_planning.md).
 
 ## 1. Core Financial Features
 
@@ -123,3 +126,5 @@ This file tracks architectural decisions, outstanding features, and future enhan
 
 - [ ] Maybe we want a timeline here?
 - [ ] UI is odd
+
+## 15. user_accounts_with_balance=> @20241214000000_initial_schema.sql#L121-128 would be too bad to have expenses and incomes as well, and to have a whey to filter by month?

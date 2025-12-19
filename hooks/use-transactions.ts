@@ -10,7 +10,7 @@ import type {
 
 export const useTransactions = (params: TransactionFilter = {}) => {
   const queryParams = {
-    sort: params.sort || ["transacted_date,desc"],
+    sort: params.sort || ["transacted_at,desc"],
     ...params,
   };
   return useQuery({
@@ -92,7 +92,7 @@ export const useRecentTransactions = (limit = 10) => {
   return useTransactions({
     page: 0,
     size: limit,
-    sort: ["transacted_date,desc"],
+    sort: ["transacted_at,desc"],
   });
 };
 

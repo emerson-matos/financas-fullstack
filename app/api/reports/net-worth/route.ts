@@ -8,9 +8,9 @@ export async function GET(request: NextRequest) {
     const { userId } = await requireAuth();
     const supabase = await createClient();
 
-    // Fetch all user accounts
+    // Fetch all user accounts with their dynamic balances from the view
     const { data: accounts, error } = await supabase
-      .from("user_accounts")
+      .from("user_accounts_with_balance")
       .select("current_amount")
       .eq("user_id", userId)
       .is("deactivated_at", null);

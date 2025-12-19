@@ -16,8 +16,8 @@ interface BulkTransactionRequest {
   name?: string;
   description: string;
   amount: number;
-  transactedDate?: string;
-  transacted_date?: string;
+  transactedAt?: string;
+  transacted_at?: string;
   currency?: string;
   kind: "DEBIT" | "CREDIT" | "TRANSFER" | "UNKNOWN";
   opts?: string;
@@ -40,11 +40,11 @@ function transformTransaction(
   // Extract category_id if provided
   const categoryId = tx.categoryId || tx.category?.id || null;
 
-  // Extract transacted_date
-  const transactedDate = tx.transactedDate || tx.transacted_date;
-  if (!transactedDate) {
+  // Extract transacted_at
+  const transactedAt = tx.transactedAt || tx.transacted_at;
+  if (!transactedAt) {
     throw new BadRequestAlertException(
-      "Transaction must have transactedDate",
+      "Transaction must have transactedAt",
       "appTransaction",
       "missingdate",
     );
@@ -59,7 +59,7 @@ function transformTransaction(
     description: tx.description,
     name: tx.name || tx.description,
     kind: tx.kind,
-    transacted_date: transactedDate,
+    transacted_at: transactedAt,
     created_by: userId,
     last_modified_by: userId,
   };

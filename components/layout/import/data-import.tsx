@@ -127,13 +127,19 @@ function ReviewTable({
 
   const formatDate = (date: string) => {
     if (!date) return "Data Inválida";
-    // Check if it's YYYY-MM-DD
-    const match = date.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-    if (match) {
-      return `${match[3]}/${match[2]}/${match[1]}`;
+    const timePart = date.split("T")[0];
+    const d = new Date(timePart);
+    return d.toLocaleDateString("pt-BR");
+  };
+
+  const formatTime = (date: string) => {
+    if (!date) return "--:--";
+
+    if (date.includes("T")) {
+      const timePart = date.split("T")[1].substring(0, 5);
+      return timePart;
     }
-    const d = new Date(date);
-    return isNaN(d.getTime()) ? "Data Inválida" : d.toLocaleDateString("pt-BR");
+    return "--:--";
   };
 
   const getKindBadge = (kind: string) => {
@@ -167,9 +173,9 @@ function ReviewTable({
               <TableCell className="text-right font-mono">
                 {formatCurrency(transaction.amount)}
               </TableCell>
-              <TableCell>{formatDate(transaction.transactedDate)}</TableCell>
+              <TableCell>{formatDate(transaction.transactedAt)}</TableCell>
               <TableCell className="font-mono text-xs">
-                {transaction.transactedTime || "--:--:--"}
+                {formatTime(transaction.transactedAt)}
               </TableCell>
             </TableRow>
           ))}
@@ -242,14 +248,12 @@ export function DataImport() {
           // Collect all ParsedTransactions
           allParsedTransactions.push(...result.transactions);
 
-          // Map ParsedTransaction to CreateTransactionRequest
           const mappedTransactionsForCreation: CreateTransactionRequest[] =
             result.transactions.map((t) => ({
               accountId: selectedAccountId,
               description: t.description,
               amount: t.amount,
-              transactedDate: t.transacted_date,
-              transactedTime: t.transacted_time,
+              transactedAt: t.transacted_at,
               kind: t.kind,
               currency: "BRL", // Default currency for imported transactions
             }));

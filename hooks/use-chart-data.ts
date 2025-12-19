@@ -44,7 +44,7 @@ export const useChartData = () => {
           transaction: Transaction,
         ) => {
           const month = format(
-            new Date(transaction.transacted_date),
+            new Date(transaction.transacted_at),
             "yyyy-MM",
           );
           const amount = +transaction.amount;

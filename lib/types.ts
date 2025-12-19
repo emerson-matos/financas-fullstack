@@ -60,22 +60,22 @@ export interface BudgetDetails {
   categories: Array<BudgetCategory>;
 }
 
-export interface Account {
+export interface UserAccount {
   id: string;
-  identification: string;
-  kind: string;
-  currency: string;
-  initial_amount: number;
-  current_amount: number;
   user_id: string;
-  deactivated_at: string | null;
+  identification: string;
+  kind: "CHECKING" | "SAVINGS" | "INVESTMENT" | "CREDIT_CARD" | "CASH";
+  currency: "BRL" | "USD" | "EUR" | string;
+  current_amount: number;
+  credit_limit?: number;
+  bill_closing_day?: number;
+  bill_due_day?: number;
   created_at: string;
   updated_at: string;
-  // Credit card fields
-  credit_limit?: number | null;
-  bill_closing_day?: number | null;
-  bill_due_day?: number | null;
+  deactivated_at: string | null;
 }
+
+export type Account = UserAccount;
 
 export interface AccountCreateFormData {
   identification: string;
@@ -113,8 +113,7 @@ export interface Transaction {
   name: string;
   description: string;
   amount: number;
-  transacted_date: string | Date;
-  transacted_time: string | null;
+  transacted_at: string | Date;
   account_id: string;
   kind: string;
   category_id: string;
@@ -172,7 +171,7 @@ export interface TimelineFilter {
 export interface TransactionFormData {
   description: string;
   amount: number;
-  transacted_date: string;
+  transacted_at: string;
   account_id: string;
   category_id: string;
 }
@@ -234,8 +233,7 @@ export interface CreateTransactionRequest {
   name?: string;
   amount: number;
   description: string;
-  transactedDate: string;
-  transactedTime?: string | null;
+  transactedAt: string;
   currency: string;
   kind: "DEBIT" | "CREDIT" | "TRANSFER" | "UNKNOWN";
   destinationAccountId?: string;
@@ -247,8 +245,7 @@ export interface UpdateTransactionRequest {
   name?: string;
   description: string;
   amount: number;
-  transactedDate: string; // yyyy-MM-dd
-  transactedTime?: string | null;
+  transactedAt: string;
   categoryId?: string;
   currency?: string;
   kind: "DEBIT" | "CREDIT" | "TRANSFER" | "UNKNOWN";
@@ -375,7 +372,7 @@ export interface BreadcrumbItem {
 }
 
 export interface UseAccountsReturn {
-  accounts: Array<Account>;
+  accounts: Array<UserAccount>;
   loading: boolean;
   error: Error | null;
   refetch: () => void;
@@ -406,8 +403,7 @@ export interface ImportRequest {
 export interface ParsedTransaction {
   description: string;
   amount: number;
-  transacted_date: string;
-  transacted_time: string | null;
+  transacted_at: string;
   kind: "DEBIT" | "CREDIT" | "TRANSFER" | "UNKNOWN";
   originalData: string;
 }

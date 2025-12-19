@@ -20,7 +20,7 @@ interface OfxTransaction {
   name?: string;
   description: string;
   amount: number;
-  transacted_date: string;
+  transacted_at: string;
   transacted_time?: string | null;
   categoryId?: string;
   currency?: string;
@@ -188,12 +188,19 @@ function transformTransaction(
     kind = "TRANSFER";
   }
 
+  const date = parseOfxDate(t.DTPOSTED);
+  const time = parseOfxTime(t.DTPOSTED);
+
+  // Combine date and time into a single ISO string or similar
+  // parseOfxDate returns YYYY-MM-DD
+  // parseOfxTime returns HH:MM:SS-OO
+  const transacted_at = time ? `${date}T${time}` : `${date}T00:00:00-03`;
+
   return {
     accountId,
     description: t.MEMO || "No description",
     amount: Math.abs(amount), // Store absolute value, kind determines direction
-    transacted_date: parseOfxDate(t.DTPOSTED),
-    transacted_time: parseOfxTime(t.DTPOSTED),
+    transacted_at,
     kind,
     currency,
     // Additional fields for reference

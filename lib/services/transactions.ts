@@ -44,7 +44,7 @@ export const transactionService = {
       description: data.description,
       currency: data.currency || "BRL",
       kind: data.kind, // DEBIT, CREDIT, TRANSFER, or UNKNOWN
-      transacted_date: data.transactedDate, // Already formatted as LocalDate
+      transacted_at: data.transactedAt, // Already formatted as LocalDate
       amount: data.amount,
       account: {
         id: data.accountId,
@@ -75,7 +75,7 @@ export const transactionService = {
       description: data.description,
       currency: data.currency || "BRL",
       kind: data.kind, // DEBIT, CREDIT, TRANSFER, or UNKNOWN
-      transacted_date: data.transactedDate, // Already formatted as LocalDate
+      transacted_at: data.transactedAt, // Already formatted as LocalDate
       amount: data.amount,
       account: {
         id: data.accountId,
@@ -107,7 +107,7 @@ export const transactionService = {
       opts: `importado em ${new Date().toDateString()}`,
       description: transaction.description,
       amount: transaction.amount,
-      transacted_date: transaction.transactedDate,
+      transacted_at: transaction.transactedAt,
       category: { id: transaction.categoryId },
       currency: transaction.currency,
     }));

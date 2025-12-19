@@ -200,7 +200,7 @@ export function TransactionDetails({
               </span>
               <span className="font-medium">
                 {format(
-                  new Date(transaction.transacted_date),
+                  new Date(transaction.transacted_at),
                   "dd 'de' MMMM 'de' yyyy",
                   {
                     locale: ptBR,

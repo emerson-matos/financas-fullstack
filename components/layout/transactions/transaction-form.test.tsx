@@ -34,7 +34,7 @@ describe("TransactionForm", () => {
     category_id: "1",
     amount: 100,
     description: "Test Transaction",
-    transacted_date: new Date("2023-01-01"),
+    transacted_at: new Date("2023-01-01"),
     kind: "DEBIT" as const,
     user_id: "1",
     deactivated_at: null,

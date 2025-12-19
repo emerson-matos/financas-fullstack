@@ -32,13 +32,13 @@ export async function GET(request: NextRequest) {
         `,
         )
         .is("deactivated_at", null)
-        .order("transacted_date", { ascending: false });
+        .order("transacted_at", { ascending: false });
 
       if (startDate) {
-        query = query.gte("transacted_date", startDate);
+        query = query.gte("transacted_at", startDate);
       }
       if (endDate) {
-        query = query.lte("transacted_date", endDate);
+        query = query.lte("transacted_at", endDate);
       }
 
       const { data: transactions, error } = await query;
@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
         amount: t.amount,
         currency: t.currency,
         kind: t.kind,
-        transacted_date: t.transacted_date,
+        transacted_at: t.transacted_at,
         transacted_time: t.transacted_time,
         account_name: t.account?.identification || "Unknown",
         category_name: t.category?.name || "Uncategorized",

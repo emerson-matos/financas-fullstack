@@ -41,7 +41,7 @@ export function IncomeExpenseReport() {
 
   const monthlyData =
     transactions?.reduce((acc, transaction) => {
-      const month = new Date(transaction.transacted_date).toLocaleString("default", {
+      const month = new Date(transaction.transacted_at).toLocaleString("default", {
         month: "short",
       });
       const monthData = acc.find((item) => item.name === month) || {

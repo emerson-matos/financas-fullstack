@@ -108,12 +108,12 @@ Example: transactions route implementation:
 List endpoints support:
 - `page` (0-indexed)
 - `size` (items per page)
-- `sort` (e.g. `transacted_date,desc` or `name,asc`)
+- `sort` (e.g. `transacted_at,desc` or `name,asc`)
 - Resource-specific filters (e.g., `start_date`, `end_date`, `account_id` for transactions)
 
 Example request:
 ```migration-to-next/docs/API_GUIDE.md#L1-200
-GET /api/transactions?page=0&size=20&sort=transacted_date,desc&account_id=<uuid>
+GET /api/transactions?page=0&size=20&sort=transacted_at,desc&account_id=<uuid>
 ```
 
 Server returns paginated content using the page structure:

@@ -6,17 +6,7 @@ export const defaultTransactionFormValues = {
   name: "",
   amount: 0,
   description: "",
-  transacted_date: new Date(),
-  transacted_time:
-    new Intl.DateTimeFormat("pt-BR", {
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      hour12: false,
-      timeZoneName: "shortOffset",
-    })
-      .format(new Date())
-      .split(" ")[0] + "-03", // Default to local offset -03 for Brazil if not specified
+  transacted_at: new Date(),
   kind: "DEBIT" as "DEBIT" | "CREDIT" | "TRANSFER" | "UNKNOWN",
   currency: "BRL",
   destination_account_id: "",
@@ -33,15 +23,9 @@ export const transactionFormSchema = z
       .number()
       .positive({ message: "O valor precisa ser maior que zero" }),
     description: z.string().min(1, { message: "Descrição é necessária" }),
-    transacted_date: z.date({
-      message: "Uma data precisa ser selecionada",
+    transacted_at: z.date({
+      message: "Uma data e hora precisam ser selecionadas",
     }),
-    transacted_time: z
-      .string()
-      .regex(/^([01]\d|2[0-3]):?([0-5]\d)$/, {
-        message: "Formato de hora inválido (HH:mm)",
-      })
-      .optional(),
     kind: z.enum(["DEBIT", "CREDIT", "TRANSFER", "UNKNOWN"]),
     currency: z
       .string()

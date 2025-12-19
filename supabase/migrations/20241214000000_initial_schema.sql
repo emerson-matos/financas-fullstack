@@ -47,6 +47,9 @@ CREATE TABLE IF NOT EXISTS user_accounts (
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW(),
     deactivated_at TIMESTAMPTZ,
+    credit_limit NUMERIC(21, 2),
+    bill_closing_day INTEGER,
+    bill_due_day INTEGER,
     created_by UUID REFERENCES auth.users(id) ON DELETE SET NULL,
     last_modified_by UUID REFERENCES auth.users(id) ON DELETE SET NULL,
     CONSTRAINT uk_user_accounts_user_id_identification UNIQUE (user_id, identification)
@@ -65,7 +68,7 @@ CREATE TABLE IF NOT EXISTS transactions (
     label TEXT,
     kind TEXT,
     opts TEXT,
-    transacted_date DATE,
+    transacted_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW(),
     deactivated_at TIMESTAMPTZ,
@@ -111,9 +114,18 @@ SELECT
     t.amount,
     t.currency,
     t.description,
-    COALESCE(t.transacted_date::TIMESTAMPTZ, t.created_at) as event_time
+    t.transacted_at AS event_time
 FROM transactions t
 JOIN user_accounts ua ON t.account_id = ua.id;
+
+-- View to calculate current account balances dynamically
+CREATE OR REPLACE VIEW user_accounts_with_balance AS
+SELECT 
+    ua.*,
+    COALESCE(SUM(t.amount), 0) AS current_amount
+FROM user_accounts ua
+LEFT JOIN transactions t ON t.account_id = ua.id AND t.deactivated_at IS NULL
+GROUP BY ua.id;
 
 -- Budgets table
 CREATE TABLE IF NOT EXISTS budgets (
@@ -210,7 +222,7 @@ CREATE TABLE IF NOT EXISTS transaction_categorization_jobs (
 
 CREATE INDEX IF NOT EXISTS idx_transactions_account_id ON transactions(account_id);
 CREATE INDEX IF NOT EXISTS idx_transactions_category_id ON transactions(category_id);
-CREATE INDEX IF NOT EXISTS idx_transactions_transacted_date ON transactions(transacted_date);
+CREATE INDEX IF NOT EXISTS idx_transactions_transacted_at ON transactions(transacted_at);
 CREATE INDEX IF NOT EXISTS idx_transactions_kind ON transactions(kind);
 CREATE INDEX IF NOT EXISTS idx_transactions_soft_delete ON transactions(deactivated_at) WHERE (deactivated_at IS NULL);
 
@@ -375,6 +387,32 @@ CREATE TRIGGER update_reports_updated_at BEFORE UPDATE ON reports FOR EACH ROW E
 CREATE TRIGGER update_transaction_splits_updated_at BEFORE UPDATE ON transaction_splits FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_categorization_jobs_updated_at BEFORE UPDATE ON transaction_categorization_jobs FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+-- Credit Card Bill Payment Logging
+CREATE OR REPLACE FUNCTION log_bill_payment_activity()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_account_kind TEXT;
+    v_account_name TEXT;
+    v_user_id UUID;
+BEGIN
+    IF (NEW.kind = 'TRANSFER' AND NEW.amount > 0) THEN
+        SELECT kind, identification, user_id INTO v_account_kind, v_account_name, v_user_id
+        FROM user_accounts
+        WHERE id = NEW.account_id;
+
+        IF (v_account_kind = 'CREDIT_CARD') THEN
+            INSERT INTO activity_log (user_id, account_id, type, data, created_by)
+            VALUES (v_user_id, NEW.account_id, 'BILL_PAYMENT', jsonb_build_object('amount', NEW.amount, 'is_automated', false, 'transaction_id', NEW.id, 'account_name', v_account_name), NEW.created_by);
+        END IF;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE TRIGGER trg_log_bill_payment
+AFTER INSERT ON transactions
+FOR EACH ROW EXECUTE FUNCTION log_bill_payment_activity();
+
 -- ============================================================================
 -- HELPER FUNCTIONS
 -- ============================================================================
@@ -454,13 +492,13 @@ COMMENT ON FUNCTION update_budget_with_items IS 'Update a budget with its items 
 
 CREATE OR REPLACE VIEW budget_items_with_spent AS
 WITH tx_amounts AS (
-    SELECT t.category_id, t.amount, t.transacted_date FROM transactions t
+    SELECT t.category_id, t.amount, t.transacted_at FROM transactions t
     WHERE NOT EXISTS (SELECT 1 FROM transaction_splits ts WHERE ts.transaction_id = t.id)
     UNION ALL
-    SELECT ts.category_id, ts.amount, t.transacted_date FROM transaction_splits ts JOIN transactions t ON t.id = ts.transaction_id
+    SELECT ts.category_id, ts.amount, t.transacted_at FROM transaction_splits ts JOIN transactions t ON t.id = ts.transaction_id
 )
 SELECT bi.id, bi.budget_id, bi.category_id, bi.amount AS planned,
-    COALESCE(SUM(tx.amount) FILTER (WHERE tx.transacted_date BETWEEN b.start_date AND b.end_date), 0) AS spent
+    COALESCE(SUM(tx.amount) FILTER (WHERE tx.transacted_at BETWEEN b.start_date AND b.end_date), 0) AS spent
 FROM budget_items bi
 JOIN budgets b ON b.id = bi.budget_id
 LEFT JOIN tx_amounts tx ON tx.category_id = bi.category_id

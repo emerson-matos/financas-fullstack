@@ -42,7 +42,7 @@ export function TransactionList({
       queryKey={queryKey}
       columns={columns}
       page={page}
-      defaultSort={{ id: "transacted_date", desc: true }}
+      defaultSort={{ id: "transacted_at", desc: true }}
       accountId={accountId}
       onRowClick={handleRowClick}
     />

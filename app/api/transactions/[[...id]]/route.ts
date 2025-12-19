@@ -43,7 +43,7 @@ export async function GET(
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") || "0");
     const size = parseInt(searchParams.get("size") || "20");
-    const sort = searchParams.get("sort") || "transacted_date,desc";
+    const sort = searchParams.get("sort") || "transacted_at,desc";
     const [sortField, sortOrder] = sort.split(",");
 
     // Build query with joins
@@ -65,10 +65,10 @@ export async function GET(
     const accountId = searchParams.get("account_id");
 
     if (startDate) {
-      query = query.gte("transacted_date", startDate);
+      query = query.gte("transacted_at", startDate);
     }
     if (endDate) {
-      query = query.lte("transacted_date", endDate);
+      query = query.lte("transacted_at", endDate);
     }
     if (accountId) {
       query = query.eq("account_id", accountId);
@@ -76,7 +76,7 @@ export async function GET(
 
     // Apply sorting and pagination
     query = query
-      .order(sortField || "transacted_date", { ascending: sortOrder === "asc" })
+      .order(sortField || "transacted_at", { ascending: sortOrder === "asc" })
       .range(page * size, (page + 1) * size - 1);
 
     const { data: transactions, error, count } = await query;
@@ -133,8 +133,7 @@ export async function POST(request: NextRequest) {
         description: body.description || `Transfer to ${destinationAccountId}`,
         currency: body.currency || "BRL",
         kind: "TRANSFER",
-        transacted_date: body.transacted_date,
-        transacted_time: body.transacted_time,
+        transacted_at: body.transacted_at || new Date().toISOString(),
         amount: -amount, // Negative: money leaving source account
         account_id: sourceAccountId,
         category_id: null, // Transfers don't have a category
@@ -147,8 +146,7 @@ export async function POST(request: NextRequest) {
         description: body.description || `Transfer from ${sourceAccountId}`,
         currency: body.currency || "BRL",
         kind: "TRANSFER",
-        transacted_date: body.transacted_date,
-        transacted_time: body.transacted_time,
+        transacted_at: body.transacted_at || new Date().toISOString(),
         amount: amount, // Positive: money entering destination account
         account_id: destinationAccountId,
         category_id: null, // Transfers don't have a category
@@ -180,8 +178,7 @@ export async function POST(request: NextRequest) {
       description: body.description,
       currency: body.currency || "BRL",
       kind: body.kind,
-      transacted_date: body.transacted_date,
-      transacted_time: body.transacted_time,
+      transacted_at: body.transacted_at || new Date().toISOString(),
       amount,
       account_id: body.account?.id,
       category_id: body.category?.id || null,

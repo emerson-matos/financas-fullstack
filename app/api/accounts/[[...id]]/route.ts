@@ -21,9 +21,9 @@ export async function GET(
     const { searchParams } = new URL(request.url);
 
     if (id) {
-      // Get account with calculated balances
+      // Get account with calculated balances from view
       const { data: account, error } = await supabase
-        .from("user_accounts")
+        .from("user_accounts_with_balance")
         .select("*")
         .eq("id", id)
         .single();
@@ -36,26 +36,19 @@ export async function GET(
         );
       }
 
-      // Calculate balances from transactions
-      const balances = await calculateAccountBalances(supabase, [account.id]);
-
-      return createSuccessResponse({
-        ...account,
-        initial_amount: balances[account.id]?.initial_amount || 0,
-        current_amount: balances[account.id]?.current_amount || 0,
-      });
+      return createSuccessResponse(account);
     }
 
     const page = parseInt(searchParams.get("page") || "0");
     const size = parseInt(searchParams.get("size") || "20");
 
-    // Get accounts
+    // Get accounts from view
     const {
       data: accounts,
       error,
       count,
     } = await supabase
-      .from("user_accounts")
+      .from("user_accounts_with_balance")
       .select("*", { count: "exact" })
       .is("deactivated_at", null)
       .order("identification", { ascending: true })
@@ -63,22 +56,11 @@ export async function GET(
 
     if (error) throw error;
 
-    // Calculate balances for all accounts
-    const accountIds = (accounts || []).map((a) => a.id);
-    const balances = await calculateAccountBalances(supabase, accountIds);
-
-    // Merge balances into accounts
-    const accountsWithBalances = (accounts || []).map((account) => ({
-      ...account,
-      initial_amount: balances[account.id]?.initial_amount || 0,
-      current_amount: balances[account.id]?.current_amount || 0,
-    }));
-
     const totalElements = count || 0;
     const totalPages = Math.ceil(totalElements / size);
 
     return createSuccessResponse({
-      content: accountsWithBalances,
+      content: accounts || [],
       page: {
         size,
         total_elements: totalElements,
@@ -89,48 +71,6 @@ export async function GET(
   } catch (error) {
     return createErrorResponse(error);
   }
-}
-
-// Helper to calculate account balances from transactions
-async function calculateAccountBalances(
-  supabase: Awaited<ReturnType<typeof createClient>>,
-  accountIds: string[],
-): Promise<Record<string, { initial_amount: number; current_amount: number }>> {
-  if (accountIds.length === 0) return {};
-
-  // Get all transactions for these accounts
-  const { data: transactions, error } = await supabase
-    .from("transactions")
-    .select("account_id, amount, kind, category_id")
-    .in("account_id", accountIds)
-    .is("deactivated_at", null);
-
-  if (error) throw error;
-
-  const balances: Record<
-    string,
-    { initial_amount: number; current_amount: number }
-  > = {};
-
-  // Initialize all accounts with 0
-  for (const id of accountIds) {
-    balances[id] = { initial_amount: 0, current_amount: 0 };
-  }
-
-  // Calculate balances - amounts are already signed (CREDIT=positive, DEBIT=negative)
-  for (const tx of transactions || []) {
-    const amount = Number(tx.amount) || 0;
-
-    // If it's the initial transaction, set initial_amount (use absolute value for display)
-    if (tx.category_id === INITIAL_CATEGORY_ID) {
-      balances[tx.account_id].initial_amount = Math.abs(amount);
-    }
-
-    // Add to current balance (amount is already signed)
-    balances[tx.account_id].current_amount += amount;
-  }
-
-  return balances;
 }
 
 export async function POST(request: NextRequest) {
@@ -163,9 +103,8 @@ export async function POST(request: NextRequest) {
     if (accountError) throw accountError;
 
     // If initial_amount is provided and not zero, create initial transaction
-    // Amount should be signed: positive for CREDIT, negative for DEBIT
     if (initial_amount && initial_amount !== 0) {
-      const signedAmount = initial_amount; // Already signed: positive = credit, negative = debit
+      const signedAmount = initial_amount;
       const kind = initial_amount > 0 ? "CREDIT" : "DEBIT";
 
       const { error: txError } = await supabase.from("transactions").insert({
@@ -176,21 +115,21 @@ export async function POST(request: NextRequest) {
         name: "Saldo Inicial",
         description: "Saldo inicial da conta",
         kind,
-        transacted_date: new Date().toISOString().split("T")[0],
+        transacted_at: new Date().toISOString(),
         created_by: userId,
       });
 
       if (txError) throw txError;
     }
 
-    return createSuccessResponse(
-      {
-        ...account,
-        initial_amount: initial_amount || 0,
-        current_amount: initial_amount || 0,
-      },
-      201,
-    );
+    // Refresh account data from view to get calculated balance
+    const { data: refreshedAccount } = await supabase
+      .from("user_accounts_with_balance")
+      .select("*")
+      .eq("id", account.id)
+      .single();
+
+    return createSuccessResponse(refreshedAccount || account, 201);
   } catch (error) {
     return createErrorResponse(error);
   }
