@@ -101,7 +101,7 @@ export const transactionService = {
             id: data.categoryId,
           }
         : null,
-        : null,
+
       group_id: data.groupId,
     };
 
