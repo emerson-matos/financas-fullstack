@@ -192,7 +192,7 @@ How to add an API route (quick steps)
    - If needed, call `await requireAuth()` from `lib/api/auth.ts`.
    - Use Supabase client to perform queries.
    - Return formatted responses using `createSuccessResponse()` or `createErrorResponse()` from `lib/api/handlers.ts`.
-4. Optionally add service wrapper under `lib/services/<resource>.ts` and React Query hooks in `lib/query-hooks.ts`.
+4. Optionally add service wrapper under `lib/services/<resource>.ts` and React Query hooks in `hooks/use-<resource>.ts`.
 
 ---
 

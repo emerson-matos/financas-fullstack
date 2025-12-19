@@ -101,7 +101,7 @@ Tip: keep secrets out of VCS and set production env vars in Vercel's dashboard (
 This project exposes a TypeScript-first API surface. You have three recommended ways to interact with the backend:
 
 1. React Query hooks (recommended for UI code)
-   - Hooks live in `lib/query-hooks.ts` and follow resource patterns like `useTransactions`, `useCreateTransaction`.
+   - Hooks live in the `hooks/` directory and follow resource patterns like `useTransactions`, `useCreateTransaction`.
    - They provide caching, optimistic updates, and integration with forms.
 
 2. API utilities
@@ -166,7 +166,8 @@ Top-level overview (abridged):
   - `lib/api/` — API utilities and error/response handlers (`auth.ts`, `handlers.ts`, `errors.ts`)
   - `lib/api.ts` — simple fetch-based client used by services
   - `lib/services/` — higher-level service functions used by route handlers and UI
-  - `lib/query-client.ts` / `lib/query-hooks.ts` — React Query client/hooks
+  - `lib/query-client.ts` — React Query client
+  - `hooks/` — React Query hooks
 - `public/`, `components/`, `styles/` — UI assets and components
 - `README.md` — this file
 - `docs/` — detailed docs and migration notes (see below)

@@ -45,7 +45,7 @@ Create a `./.env.local` file by copying `./.env.local.example`. The following va
 ## Development Conventions
 
 - **API Usage:**
-  - **React Query hooks:** The recommended way to interact with the backend is through React Query hooks, which can be found in `lib/query-hooks.ts`.
+  - **React Query hooks:** The recommended way to interact with the backend is through React Query hooks, which can be found in the `hooks/` directory.
   - **API utilities:** Helper functions in `lib/api-utils.ts` provide a convenient way to interact with the API.
   - **Direct API client:** A simple `fetch`-based client is available in `lib/api.ts`.
 - **Authentication:**

@@ -134,10 +134,10 @@ Server returns paginated content using the page structure:
 Three main ways to interact with the API from frontend code:
 
 1. React Query hooks (recommended)
-   - Use prebuilt hooks (see `lib/query-client.ts` / `lib/query-hooks.ts`) for caching, mutations, and optimistic updates.
+   - Use prebuilt hooks (see `lib/query-client.ts` and the `hooks/` directory) for caching, mutations, and optimistic updates.
    - Example hook usage:
 ```migration-to-next/docs/API_GUIDE.md#L1-200
-import { useTransactions, useCreateTransaction } from '@/lib/query-hooks';
+import { useTransactions, useCreateTransaction } from '@/hooks/use-transactions';
 
 const { data } = useTransactions({ page: 0, size: 20 });
 await useCreateTransaction().mutateAsync({ amount: 100, accountId: '...' });
@@ -254,7 +254,7 @@ To add a new resource:
 1. Create a new folder under `app/api/<resource>/[[...id]]` and add `route.ts` implementing handlers (GET/POST/PUT/PATCH/DELETE).
 2. Use `lib/supabase/server.ts` to create a server client inside each handler.
 3. Add error handling via `lib/api/errors.ts` and `lib/api/handlers.ts` helpers.
-4. Add a service wrapper in `lib/services/<resource>.ts` and (optionally) React Query hooks in `lib/query-hooks.ts`.
+4. Add a service wrapper in `lib/services/<resource>.ts` and (optionally) React Query hooks in `hooks/use-<resource>.ts`.
 
 Skeleton example:
 // See app/api/transactions/[[...id]]/route.ts for a full implementation example.
