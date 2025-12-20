@@ -1,7 +1,8 @@
 import { Heading } from "@/components/heading";
 import { Separator } from "@/components/ui/separator";
 import { CreateAccount } from "@/components/layout/accounts/account-create";
-import { AccountList } from "@/components/layout/accounts/accounts-list";
+import { AccountsGrid } from "@/components/layout/accounts/accounts-grid";
+
 export function Accounts() {
   return (
     <div className="mx-auto space-y-6 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
@@ -10,7 +11,7 @@ export function Accounts() {
         <CreateAccount />
       </div>
       <Separator />
-      <AccountList />
+      <AccountsGrid />
     </div>
   );
 }
