@@ -93,6 +93,7 @@ This file tracks architectural decisions, outstanding features, and future enhan
 ## 7. Perf
 
 - [ ] Interaction to Next Paint: 464 ms (/dashboard/transactions/new)
+- [ ] Interaction to Next Paint: 952 ms (/dashboard/settings)
 
 ## 8. Import data page
 
