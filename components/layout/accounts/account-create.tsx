@@ -41,7 +41,12 @@ import {
 import { useCreateAccount } from "@/hooks/use-accounts";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/hooks/use-toast";
-import { accountKinds, currencies } from "@/lib/constants";
+import { accountKinds, currencies, type AccountKind } from "@/lib/constants";
+
+const accountKindValues = accountKinds.map((k) => k.value) as [
+  AccountKind,
+  ...AccountKind[],
+];
 
 const formSchema = z.object({
   initial_amount: z.number().optional(),
@@ -50,7 +55,7 @@ const formSchema = z.object({
     .min(2, "Identificação deve ter pelo menos 2 caracteres")
     .max(50, "Identificação deve ter no máximo 50 caracteres"),
   currency: z.string().min(3).max(3),
-  kind: z.string().optional(),
+  kind: z.enum(accountKindValues).optional(),
   // Credit card specific fields
   credit_limit: z.number().optional(),
   bill_closing_day: z.number().min(1).max(31).optional(),
@@ -81,7 +86,7 @@ export function AccountForm({
       identification: "",
       initial_amount: 0,
       currency: "BRL",
-      kind: "",
+      kind: undefined,
       credit_limit: 0,
       bill_closing_day: 5,
       bill_due_day: 15,
@@ -96,7 +101,7 @@ export function AccountForm({
         identification: defaultValues.identification || "",
         initial_amount: defaultValues.initial_amount || 0,
         currency: defaultValues.currency || "BRL",
-        kind: defaultValues.kind || "",
+        kind: defaultValues.kind || undefined,
         credit_limit: defaultValues.credit_limit || 0,
         bill_closing_day: defaultValues.bill_closing_day || 5,
         bill_due_day: defaultValues.bill_due_day || 15,

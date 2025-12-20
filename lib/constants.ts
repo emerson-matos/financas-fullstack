@@ -10,8 +10,6 @@ export const accountKinds = [
   { value: "CREDIT_CARD", label: "Cartão de Crédito" },
   { value: "INVESTMENT", label: "Investimento" },
   { value: "CASH", label: "Dinheiro" },
-  { value: "WALLET", label: "Carteira Digital" },
-  { value: "OTHER", label: "Outro" },
 ] as const;
 
 export type AccountKind = (typeof accountKinds)[number]["value"];

@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useAccount, useUpdateAccount } from "@/hooks/use-accounts";
 import { useToast } from "@/hooks/use-toast";
 import { AccountForm } from "@/components/layout/accounts/account-create";
+import type { AccountKind } from "@/lib/constants";
 
 interface AccountEditFormProps {
   accountId: string;
@@ -22,7 +23,7 @@ export function AccountEditForm({ accountId }: AccountEditFormProps) {
   const handleSubmit = (values: {
     identification: string;
     currency: string;
-    kind?: string;
+    kind?: AccountKind;
     credit_limit?: number;
     bill_closing_day?: number;
     bill_due_day?: number;
@@ -90,7 +91,7 @@ export function AccountEditForm({ accountId }: AccountEditFormProps) {
           defaultValues={{
             identification: account.identification || "",
             currency: account.currency || "BRL",
-            kind: account.kind || "",
+            kind: account.kind || undefined,
             credit_limit: account.credit_limit || 0,
             bill_closing_day: account.bill_closing_day || 5,
             bill_due_day: account.bill_due_day || 15,
