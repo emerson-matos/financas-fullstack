@@ -7,7 +7,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { compactTransactionColumns } from "@/components/layout/transactions/columns";
 import { TransactionList } from "@/components/layout/transactions/transaction-list";
 import { cn } from "@/lib/utils";
 export function RecentTransactions({ className }: { className?: string }) {
@@ -27,7 +26,7 @@ export function RecentTransactions({ className }: { className?: string }) {
         </div>
       </CardHeader>
       <CardContent>
-        <TransactionList limit={5} columns={compactTransactionColumns} />
+        <TransactionList limit={5} />
       </CardContent>
     </Card>
   );

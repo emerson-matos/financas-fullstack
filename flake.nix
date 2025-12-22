@@ -22,6 +22,7 @@
       let
         pkgs = import nixpkgs {
           inherit system;
+          config.allowUnfree = true;
           overlays = [
             nix-direnv.overlays.default
           ];
@@ -39,7 +40,8 @@
             bun
             yarn
             pnpm
-            gemini-cli
+            antigravity
+            chromium
 
             # --- Supabase ---
             supabase-cli

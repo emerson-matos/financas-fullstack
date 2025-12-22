@@ -8,7 +8,7 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Finanças Fullstack",
+    name: APP_NAME,
     short_name: "Finanças",
     description: APP_DESCRIPTION,
     start_url: PWA_START_URL,
@@ -17,20 +17,30 @@ export default function manifest(): MetadataRoute.Manifest {
     theme_color: BRAND_COLOR,
     icons: [
       {
-        src: "/assets/tophat.svg",
-        sizes: "any",
+        src: "/icon.svg",
+        sizes: "512x512",
         type: "image/svg+xml",
         purpose: "any",
       },
       {
-        src: "/assets/tophat.svg",
-        sizes: "192x192",
-        type: "image/svg+xml",
-      },
-      {
-        src: "/assets/tophat.svg",
+        src: "/icon.svg",
         sizes: "512x512",
         type: "image/svg+xml",
+        purpose: "maskable",
+      },
+    ],
+    screenshots: [
+      {
+        src: "/assets/Building blocks-amico.svg",
+        sizes: "1280x720",
+        type: "image/svg+xml",
+        form_factor: "wide",
+      },
+      {
+        src: "/assets/404 Error-rafiki.svg",
+        sizes: "720x1280",
+        type: "image/svg+xml",
+        form_factor: "narrow",
       },
     ],
   };

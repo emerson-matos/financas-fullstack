@@ -1,16 +1,14 @@
 /**
  * TransactionList component
  *
- * Renders a table of transactions using the provided columns and configuration.
+ * Renders a list of financial events using the Timeline feed UX.
  *
  * Props:
- * - columns: Column definitions for the table (default: compactTransactionColumns)
  * - limit: Number of rows to fetch/display
  * - accountId: Optional account filter
  *
  * Usage:
- * <TransactionList columns={defaultTransactionColumns} />
- * <TransactionList columns={compactTransactionColumns} limit={5} />
+ * <TransactionList limit={5} />
  */
 "use client";
 
