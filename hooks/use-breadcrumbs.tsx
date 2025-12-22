@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { useAccount } from "@/hooks/use-accounts";
+import { useTransaction } from "@/hooks/use-transactions";
 import { usePathname } from "next/navigation";
 type BreadcrumbItem = {
   title: string;
@@ -22,14 +23,26 @@ const routeMapping: Record<string, Array<BreadcrumbItem>> = {
   ],
 };
 // Move regex outside function to avoid performance issues
-const ACCOUNT_ID_REGEX = /\/dashboard\/accounts\/(?:details|edit)\/([^/]+)/;
+const ACCOUNT_ID_REGEX = /\/dashboard\/accounts\/([^/]+)/;
+const TRANSACTION_ID_REGEX = /\/dashboard\/transactions\/([^/]+)/;
 export function useBreadcrumbs() {
   const pathname = usePathname();
   // Fetch account data if we're on an account details page
   const accountIdMatch = pathname.match(ACCOUNT_ID_REGEX);
-  const accountId = accountIdMatch ? accountIdMatch[1] : null;
-  // Only call useAccount when we have a valid accountId
+  const accountId =
+    accountIdMatch && !["new"].includes(accountIdMatch[1])
+      ? accountIdMatch[1]
+      : null;
+  // Fetch transaction data if we're on a transaction page
+  const transactionIdMatch = pathname.match(TRANSACTION_ID_REGEX);
+  const transactionId =
+    transactionIdMatch && !["new"].includes(transactionIdMatch[1])
+      ? transactionIdMatch[1]
+      : null;
+
+  // hooks must be called unconditionally in the same order
   const { data: account } = useAccount(accountId || "");
+  const { data: transaction } = useTransaction(transactionId || "");
   const breadcrumbs = useMemo(() => {
     // Check if we have a custom mapping for this exact path
     if (routeMapping[pathname]) {
@@ -43,6 +56,13 @@ export function useBreadcrumbs() {
       if (account && accountId && segment === accountId) {
         return {
           title: account.identification,
+          link: path,
+        };
+      }
+      // Special handling for transaction pages
+      if (transaction && transactionId && segment === transactionId) {
+        return {
+          title: transaction.description || "Transação",
           link: path,
         };
       }
@@ -65,6 +85,6 @@ export function useBreadcrumbs() {
           };
       }
     });
-  }, [pathname, account, accountId]);
+  }, [pathname, account, accountId, transaction, transactionId]);
   return breadcrumbs;
 }

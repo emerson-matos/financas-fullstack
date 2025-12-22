@@ -1,33 +1,30 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { TransactionList } from "@/components/layout/transactions/transaction-list";
 import { cn } from "@/lib/utils";
+import { ArrowRightIcon, ForwardIcon } from "lucide-react";
 export function RecentTransactions({ className }: { className?: string }) {
   return (
-    <Card className={cn("mt-4", className)}>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle>Transações Recentes</CardTitle>
-            <CardDescription>
-              Sua atividade financeira mais recente
-            </CardDescription>
-          </div>
-          <Button variant="outline" asChild>
-            <Link href="/dashboard/transactions">Ver Todas</Link>
-          </Button>
+    <div className={cn("space-y-6 pt-8", className)}>
+      <div className="flex items-end justify-between border-b border-border/50 pb-4">
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight text-foreground">
+            Transações Recentes
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Acompanhe o fluxo das suas finanças em tempo real
+          </p>
         </div>
-      </CardHeader>
-      <CardContent>
-        <TransactionList limit={5} />
-      </CardContent>
-    </Card>
+        <Button>
+          <Link
+            href="/dashboard/transactions"
+            className="flex items-center gap-1"
+          >
+            Ver todas <ArrowRightIcon />
+          </Link>
+        </Button>
+      </div>
+      <TransactionList />
+    </div>
   );
 }

@@ -81,8 +81,8 @@ This file tracks architectural decisions, outstanding features, and future enhan
 
 ## 5. Mobile & Performance
 
-- [ ] **Mobile Polish**: Final pass on all complex tables and charts for mobile responsiveness.
-- [ ] **PWA Support**: Configure manifest and service workers for "Install as App" experience.
+- [x] **Mobile Polish**: Final pass on all complex tables and charts for mobile responsiveness.
+- [x] **PWA Support**: Configure manifest and service workers for "Install as App" experience.
 - [ ] **Query Optimization**: Perform load testing on `unified_timeline` view for large datasets.
 
 ## 6. Transactions form
@@ -104,21 +104,16 @@ This file tracks architectural decisions, outstanding features, and future enhan
 ## 9. Budget Default
 
 - [ ] We could improve onboarding so customer already have at least one budget available
-- [ ] Budget Form is using wrong date format, not using locale
+- [x] Budget Form is using wrong date format, not using locale
 
 ## 12. Transaction list
 
-- [ ] We shoul;d be able to deactivate the sorting, one click, sort, second click, sort again other direction, other click undo both sorting
+- [x] We shoul;d be able to deactivate the sorting, one click, sort, second click, sort again other direction, other click undo both sorting (Handled/N/A: Timeline uses fixed reverse-chronological order).
 
 ## 13. Datatable component
 
 - [ ] sorting icon for what?
 - [ ] search box trigger entire component rerender, not just the list
-
-## 14. Account details:
-
-- [ ] Maybe we want a timeline here?
-- [x] UI is odd
 
 ## 15. user_accounts_with_balance=> @20241214000000_initial_schema.sql#L121-128 would be too bad to have expenses and incomes as well, and to have a whey to filter by month?
 
@@ -130,8 +125,8 @@ This file tracks architectural decisions, outstanding features, and future enhan
 
 ## 17. Improve breadcumb
 
-- [] we shouldn't show internal IDs.
+- [x] we shouldn't show internal IDs.
 
 ## 18. Dashboard
 
-- [] Transações recentes section is not in line with the dashboard section, how can we improve?
+- [x] Transações recentes section is not in line with the dashboard section, how can we improve? maybe infinity scroll? remove the card and deal as a new section? (Implemented: Infinite scroll enabled with Timeline list).

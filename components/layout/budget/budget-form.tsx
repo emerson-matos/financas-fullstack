@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { CalendarIcon, Plus, Trash2 } from "lucide-react";
 import { useEffect, useTransition } from "react";
 import {
@@ -199,8 +200,8 @@ export function BudgetForm({
                 name="name"
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel>Budget name</FieldLabel>
-                    <Input {...field} placeholder="Monthly budget" />
+                    <FieldLabel>Nome do Orçamento</FieldLabel>
+                    <Input {...field} placeholder="Orçamento mensal" />
                     <FieldError errors={[fieldState.error]} />
                   </Field>
                 )}
@@ -226,8 +227,16 @@ export function BudgetForm({
               />
             </div>
 
-            <DateField control={control} name="start_date" label="Start date" />
-            <DateField control={control} name="end_date" label="End date" />
+            <DateField
+              control={control}
+              name="start_date"
+              label="Data de início"
+            />
+            <DateField
+              control={control}
+              name="end_date"
+              label="Data de término"
+            />
           </FieldGroup>
 
           <div>
@@ -312,8 +321,8 @@ function DateField({
                 )}
               >
                 {field.value
-                  ? format(field.value, "MM/dd/yyyy")
-                  : "Select date"}
+                  ? format(field.value, "PPP", { locale: ptBR })
+                  : "Selecione uma data"}
                 <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
               </Button>
             </PopoverTrigger>

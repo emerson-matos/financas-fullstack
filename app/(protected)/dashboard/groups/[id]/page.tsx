@@ -1,7 +1,6 @@
 "use client";
 
 import { use } from "react";
-import { useRouter } from "next/navigation";
 import { useGroup } from "@/hooks/use-groups";
 import { useAuth } from "@/hooks/use-auth";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -13,16 +12,16 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeftIcon, SettingsIcon } from "lucide-react";
+import { SettingsIcon } from "lucide-react";
 import { SplitProposalsList } from "@/components/layout/groups/split-proposals-list";
 import { GroupMembership } from "@/lib/types";
+import { BackButton } from "@/components/back-button";
 
 interface PageProps {
   params: Promise<{ id: string }>;
 }
 
 export default function GroupDetailsPage({ params }: PageProps) {
-  const router = useRouter();
   const { id } = use(params);
   // useGroup returns { data: Group | undefined, isLoading: boolean } from react-query
   // BUT the service logic might wrap it. Let's check api.ts again.
@@ -48,7 +47,7 @@ export default function GroupDetailsPage({ params }: PageProps) {
     return (
       <div className="p-8">
         <h2 className="text-xl font-semibold mb-4">Grupo não encontrado</h2>
-        <Button onClick={() => router.back()}>Voltar</Button>
+        <BackButton />
       </div>
     );
   }
@@ -56,9 +55,7 @@ export default function GroupDetailsPage({ params }: PageProps) {
   return (
     <div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => router.back()}>
-          <ArrowLeftIcon className="h-5 w-5" />
-        </Button>
+        <BackButton />
         <div className="flex-1">
           <h2 className="text-3xl font-bold tracking-tight">{group.name}</h2>
           {group.description && (
