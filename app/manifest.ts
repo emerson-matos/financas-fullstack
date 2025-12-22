@@ -8,7 +8,14 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    id: "/dashboard",
+    name: APP_NAME,
+    short_name: "Finanças",
+    description: APP_DESCRIPTION,
+    start_url: PWA_START_URL,
+    id: PWA_START_URL,
+    display: "standalone",
+    background_color: "#ffffff",
+    theme_color: BRAND_COLOR,
     icons: [
       {
         src: "/assets/tophat.svg",
@@ -23,6 +30,7 @@ export default function manifest(): MetadataRoute.Manifest {
         purpose: "maskable",
       },
     ],
+
     screenshots: [
       {
         src: "/assets/building-blocks-amico.svg",
