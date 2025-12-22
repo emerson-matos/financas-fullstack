@@ -19,8 +19,8 @@ const chartConfig = {
     color: "var(--chart-2)",
   },
 } satisfies ChartConfig;
-export function AppChart() {
-  const { data: transactions, isLoading, error } = useChartData();
+export function AppChart({ accountId }: { accountId?: string }) {
+  const { data: transactions, isLoading, error } = useChartData(accountId);
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[200px]">

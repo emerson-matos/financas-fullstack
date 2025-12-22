@@ -1,28 +1,13 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, PlusCircle, PlusIcon, Save } from "lucide-react";
+import { Loader2, Save } from "lucide-react";
 import * as React from "react";
-import { useEffect, useTransition } from "react";
+import { useEffect } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerDescription,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
+
 import {
   Field,
   FieldDescription,
@@ -38,9 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useCreateAccount } from "@/hooks/use-accounts";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { useToast } from "@/hooks/use-toast";
+
 import { accountKinds, currencies, type AccountKind } from "@/lib/constants";
 
 const accountKindValues = accountKinds.map((k) => k.value) as [
@@ -62,7 +45,7 @@ const formSchema = z.object({
   bill_due_day: z.number().min(1).max(31).optional(),
 });
 
-type FormValues = z.infer<typeof formSchema>;
+export type FormValues = z.infer<typeof formSchema>;
 
 interface AccountFormProps {
   onSubmit: (values: FormValues) => void;
@@ -113,6 +96,9 @@ export function AccountForm({
     onSubmit(values);
     if (mode === "create") {
       form.reset();
+      // Ensure default values are re-set if needed, or just standard reset
+      form.setValue("currency", "BRL");
+      form.setValue("initial_amount", 0);
     }
   };
 
@@ -340,122 +326,35 @@ export function AccountForm({
         )}
       </FieldGroup>
 
-      <div className="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2 space-y-2 space-y-reverse sm:space-y-0">
-        {onClose && (
-          <Button type="button" variant="outline" onClick={onClose}>
-            Cancelar
-          </Button>
-        )}
-        <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
-          {isLoading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              {isEditMode ? "Salvando..." : "Criando conta..."}
-            </>
-          ) : isEditMode ? (
-            <>
-              <Save className="mr-2 h-4 w-4" />
-              Salvar Alterações
-            </>
-          ) : (
-            <>
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Criar conta
-            </>
+      <div className="flex flex-col-reverse justify-end gap-4 sm:flex-row sm:items-center">
+        <div className="flex flex-col-reverse sm:flex-row sm:space-x-2 space-y-2 space-y-reverse sm:space-y-0">
+          {onClose && (
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancelar
+            </Button>
           )}
-        </Button>
+
+          <Button
+            type="submit"
+            disabled={isLoading}
+            className="w-full sm:w-auto"
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                {isEditMode ? "Salvando..." : "Criando conta..."}
+              </>
+            ) : isEditMode ? (
+              <>
+                <Save className="mr-2 h-4 w-4" />
+                Salvar Alterações
+              </>
+            ) : (
+              <>Criar conta</>
+            )}
+          </Button>
+        </div>
       </div>
     </form>
-  );
-}
-
-export function CreateAccount() {
-  const [isPending, startTransition] = useTransition();
-  const [isOpen, setIsOpen] = React.useState(false);
-  const { toast } = useToast();
-  const createAccountMutation = useCreateAccount();
-  const isMobile = useIsMobile();
-
-  function handleSubmit(values: FormValues) {
-    startTransition(async () => {
-      try {
-        const accountData = {
-          identification: values.identification,
-          initial_amount: values.initial_amount,
-          currency: values.currency,
-          kind: values.kind,
-          credit_limit: values.credit_limit,
-          bill_closing_day: values.bill_closing_day,
-          bill_due_day: values.bill_due_day,
-        };
-        await createAccountMutation.mutateAsync(accountData);
-        setIsOpen(false);
-        toast({
-          title: "Conta criada com sucesso!",
-          description: `A conta "${values.identification}" foi criada e já está disponível.`,
-        });
-      } catch (error) {
-        console.error("Failed to create account:", error);
-        toast({
-          title: "Erro ao criar conta",
-          description: "Não foi possível criar a conta. Tente novamente.",
-          variant: "destructive",
-        });
-      }
-    });
-  }
-
-  const isLoading = isPending || createAccountMutation.isPending;
-
-  if (isMobile) {
-    return (
-      <Drawer open={isOpen} onOpenChange={setIsOpen}>
-        <DrawerTrigger asChild>
-          <Button size="sm" className="h-9">
-            <PlusIcon className="h-4 w-4 mr-2" />
-            Nova Conta
-          </Button>
-        </DrawerTrigger>
-        <DrawerContent>
-          <DrawerHeader>
-            <DrawerTitle>Nova Conta</DrawerTitle>
-            <DrawerDescription>
-              Adicione uma nova conta financeira ao seu portfólio
-            </DrawerDescription>
-          </DrawerHeader>
-          <AccountForm
-            onSubmit={handleSubmit}
-            isLoading={isLoading}
-            onClose={() => setIsOpen(false)}
-            mode="create"
-          />
-        </DrawerContent>
-      </Drawer>
-    );
-  }
-
-  return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Nova Conta
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>Criar Nova Conta</DialogTitle>
-          <DialogDescription>
-            Adicione uma nova conta financeira ao seu portfólio
-          </DialogDescription>
-        </DialogHeader>
-        <AccountForm
-          onSubmit={handleSubmit}
-          isLoading={isLoading}
-          onClose={() => setIsOpen(false)}
-          mode="create"
-        />
-      </DialogContent>
-    </Dialog>
   );
 }

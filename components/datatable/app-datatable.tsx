@@ -118,7 +118,7 @@ export function DataTable<T extends { id: string }>({
           search: debouncedGlobalFilter || undefined,
           categoryId: categoryFilter || undefined,
           type: typeFilter || undefined,
-          "account_id.equals": accountId || undefined,
+          account_id: accountId || undefined,
         },
       });
 

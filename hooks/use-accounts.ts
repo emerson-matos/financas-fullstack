@@ -33,7 +33,8 @@ export const useCreateAccount = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: Partial<Account>) => accountService.createAccount(data),
+    mutationFn: (data: Partial<Account> & { initial_amount?: number }) =>
+      accountService.createAccount(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["accounts"] });
     },
