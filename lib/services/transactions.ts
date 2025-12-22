@@ -128,6 +128,7 @@ export const transactionService = {
       transacted_at: transaction.transactedAt,
       category: { id: transaction.categoryId },
       currency: transaction.currency,
+      fit_id: transaction.fitId,
     }));
 
     const response = await api.post("/transactions/bulk", {

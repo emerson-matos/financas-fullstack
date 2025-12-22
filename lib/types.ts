@@ -147,6 +147,7 @@ export interface Transaction {
   };
   group_id?: string;
   splits?: Array<TransactionSplit>;
+  fit_id?: string;
 }
 
 export interface TransactionSplit {
@@ -257,6 +258,7 @@ export interface CreateTransactionRequest {
     amount: number;
     description?: string;
   }>;
+  fitId?: string;
 }
 
 export interface UpdateTransactionRequest {
@@ -275,6 +277,7 @@ export interface UpdateTransactionRequest {
     amount: number;
     description?: string;
   }>;
+  fitId?: string;
 }
 
 export interface RecurringTemplate {
@@ -483,6 +486,7 @@ export interface ParsedTransaction {
   amount: number;
   transacted_at: string;
   kind: "DEBIT" | "CREDIT" | "TRANSFER" | "UNKNOWN";
+  fitId?: string;
   originalData: string;
 }
 

@@ -21,6 +21,7 @@ interface BulkTransactionRequest {
   currency?: string;
   kind: "DEBIT" | "CREDIT" | "TRANSFER" | "UNKNOWN";
   opts?: string;
+  fitId?: string;
 }
 
 function transformTransaction(
@@ -63,6 +64,11 @@ function transformTransaction(
     created_by: userId,
     last_modified_by: userId,
   };
+
+  // Add fit_id if provided
+  if (tx.fitId) {
+    insert.fit_id = tx.fitId;
+  }
 
   // Add opts if provided
   if (tx.opts) {
@@ -126,14 +132,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Use Supabase batch insert for better performance
+    // Use Supabase batch upsert to prevent duplicates while allowing the rest of the batch to proceed
+    // The uniqueness is defined on (account_id, fit_id) for imported transactions
     const { data: created, error } = await supabase
       .from("transactions")
-      .insert(transformedTransactions)
+      .upsert(transformedTransactions, {
+        onConflict: "account_id,fit_id",
+        ignoreDuplicates: true,
+      })
       .select();
 
     if (error) {
-      console.error("Supabase insert error:", error);
+      console.error("Supabase upsert error:", error);
       throw new BadRequestAlertException(
         `Failed to insert transactions: ${error.message}`,
         "appTransaction",

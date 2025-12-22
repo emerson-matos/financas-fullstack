@@ -94,6 +94,6 @@ CREATE TRIGGER update_split_proposals_updated_at BEFORE UPDATE ON split_proposal
 CREATE TRIGGER update_member_debts_updated_at BEFORE UPDATE ON member_debts FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- 5. Duplicate Prevention Constraint
-CREATE UNIQUE INDEX IF NOT EXISTS unique_transaction_import_idx 
+CREATE UNIQUE INDEX IF NOT EXISTS unique_transaction_import_idx
 ON transactions (account_id, transacted_at, amount, name)
 WHERE deactivated_at IS NULL;
