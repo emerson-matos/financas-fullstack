@@ -32,3 +32,8 @@ export const defaultFirstAccount = {
   currency: "BRL" as Currency,
   initialAmount: 0,
 };
+// Branding and PWA
+export const BRAND_COLOR = "#000000";
+export const APP_NAME = "Finanças App";
+export const APP_DESCRIPTION = "Aplicação de gestão de finanças pessoais";
+export const PWA_START_URL = "/dashboard";

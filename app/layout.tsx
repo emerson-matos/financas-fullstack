@@ -1,12 +1,26 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
-import "@/app/globals.css";
-import { Providers } from "@/components/providers";
+import { BRAND_COLOR, APP_NAME, APP_DESCRIPTION } from "@/lib/constants";
+
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
-export const metadata: Metadata = {
-  title: "Finanças App",
-  description: "Aplicação de gestão de finanças pessoais",
+
+export const viewport: Viewport = {
+  themeColor: BRAND_COLOR,
 };
+
+export const metadata: Metadata = {
+  title: APP_NAME,
+  description: APP_DESCRIPTION,
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: APP_NAME,
+  },
+  formatDetection: {
+    telephone: false,
+  },
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
