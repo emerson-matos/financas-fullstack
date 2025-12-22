@@ -41,7 +41,9 @@ export const useCreateTransaction = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["transactions"] });
-      queryClient.invalidateQueries({ queryKey: ["accounts"] }); // Update account balances
+      queryClient.invalidateQueries({ queryKey: ["accounts"] });
+      queryClient.invalidateQueries({ queryKey: ["chart-data"] });
+      queryClient.invalidateQueries({ queryKey: ["reports"] });
     },
     onError: (error) => {
       console.error("Failed to create transaction:", error);
@@ -69,7 +71,9 @@ export const useUpdateTransaction = () => {
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: ["transactions"] });
       queryClient.invalidateQueries({ queryKey: ["transactions", id] });
-      queryClient.invalidateQueries({ queryKey: ["accounts"] }); // Update account balances
+      queryClient.invalidateQueries({ queryKey: ["accounts"] });
+      queryClient.invalidateQueries({ queryKey: ["chart-data"] });
+      queryClient.invalidateQueries({ queryKey: ["reports"] });
     },
     onError: (error) => {
       console.error("Failed to update transaction:", error);
@@ -84,6 +88,9 @@ export const useDeleteTransaction = () => {
     mutationFn: (id: string) => transactionService.deleteTransaction(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["accounts"] });
+      queryClient.invalidateQueries({ queryKey: ["chart-data"] });
+      queryClient.invalidateQueries({ queryKey: ["reports"] });
     },
   });
 };
@@ -114,6 +121,9 @@ export const useBulkCreateTransactions = () => {
       transactionService.importTransactions(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["accounts"] });
+      queryClient.invalidateQueries({ queryKey: ["chart-data"] });
+      queryClient.invalidateQueries({ queryKey: ["reports"] });
     },
   });
 };
