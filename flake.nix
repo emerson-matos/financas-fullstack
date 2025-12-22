@@ -40,7 +40,7 @@
             bun
             yarn
             pnpm
-            antigravity
+            antigravity-fhs
             chromium
 
             # --- Supabase ---
