@@ -1,5 +1,12 @@
 "use client";
 
+import {
+  CardHeader,
+  CardFooter,
+  CardTitle,
+  Card,
+  CardContent,
+} from "@/components/ui/card";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import {
@@ -7,6 +14,7 @@ import {
   CalendarIcon,
   CreditCardIcon,
   HelpCircleIcon,
+  FileText,
   TrendingDownIcon,
   TrendingUpIcon,
   UsersIcon,
@@ -17,13 +25,6 @@ import type { z } from "zod";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import {
   Field,
   FieldDescription,
@@ -305,176 +306,54 @@ export function TransactionForm({
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header with context */}
-      <div className="space-y-2">
-        <div className="flex items-center gap-2">
-          <CreditCardIcon className="h-5 w-5 text-primary" />
-          <h2 className="text-xl font-semibold">
-            {transactionId ? "Editar Transação" : "Nova Transação"}
-          </h2>
-        </div>
-        {selectedAccount && (
-          <Badge variant="outline" className="text-xs">
-            Conta: {selectedAccount.identification}
-          </Badge>
-        )}
-      </div>
+    <div className="grid gap-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="size-5" />
+            Informações Gerais
+          </CardTitle>
+        </CardHeader>
 
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        {/* Essential Information */}
-        <Card>
-          <CardHeader className="pb-4">
-            <CardTitle className="text-lg">Informações Essenciais</CardTitle>
-            <CardDescription>
-              Dados obrigatórios para criar a transação
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {/* Account Selection */}
-            <Controller
-              control={form.control}
-              name="account_id"
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel
-                    htmlFor={field.name}
-                    className="flex items-center gap-2"
-                  >
-                    Conta
-                    <RequiredBadge />
-                  </FieldLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    value={field.value}
-                    disabled={
-                      !!accountId ||
-                      !!transactionData?.account_id ||
-                      !!transactionData?.account?.id
-                    }
-                  >
-                    <SelectTrigger
-                      id={field.name}
-                      className={cn(
-                        "transition-colors",
-                        field.value ? "border-primary/50" : "",
-                      )}
-                      aria-invalid={fieldState.invalid}
-                    >
-                      <SelectValue placeholder="Selecione uma conta" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {accounts?.map((account: Account) => (
-                        <SelectItem key={account.id} value={account.id}>
-                          <div className="flex items-center justify-between w-full">
-                            <span>{account.identification}</span>
-                            <Badge variant="outline" className="ml-2 text-xs">
-                              {account.currency}
-                            </Badge>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-
-            {/* Transaction Type */}
-            <Controller
-              control={form.control}
-              name="kind"
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel
-                    htmlFor={field.name}
-                    className="flex items-center gap-2"
-                  >
-                    Tipo de Transação
-                    <RequiredBadge />
-                  </FieldLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <SelectTrigger
-                      id={field.name}
-                      className={cn(
-                        "transition-colors",
-                        field.value ? "border-primary/50" : "",
-                      )}
-                      aria-invalid={fieldState.invalid}
-                    >
-                      <SelectValue placeholder="Selecione o tipo" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Object.entries(transactionKindConfig).map(
-                        ([value, config]) => {
-                          const Icon = config.icon;
-                          return (
-                            <SelectItem key={value} value={value}>
-                              <div className="flex items-center gap-2">
-                                <Icon className="h-4 w-4" />
-                                <div className="flex flex-col">
-                                  <span>{config.label}</span>
-                                  <span className="text-xs text-muted-foreground">
-                                    {config.description}
-                                  </span>
-                                </div>
-                              </div>
-                            </SelectItem>
-                          );
-                        },
-                      )}
-                    </SelectContent>
-                  </Select>
-                  {selectedKind && (
-                    <div className="flex items-center gap-2 mt-2">
-                      <Badge
-                        variant={transactionKindConfig[selectedKind].variant}
+        <CardContent className="space-y-6">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            {/* Essential Information */}
+            <div className="space-y-4">
+              <div className="grid gap-4 py-4">
+                {/* Account Selection */}
+                <Controller
+                  control={form.control}
+                  name="account_id"
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel
+                        htmlFor={field.name}
+                        className="flex items-center gap-2"
                       >
-                        {transactionKindConfig[selectedKind].label}
-                      </Badge>
-                      <span className="text-xs text-muted-foreground">
-                        {transactionKindConfig[selectedKind].description}
-                      </span>
-                    </div>
-                  )}
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-
-            {/* Destination Account - Only shown for TRANSFER */}
-            {selectedKind === "TRANSFER" && (
-              <Controller
-                control={form.control}
-                name="destination_account_id"
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel
-                      htmlFor={field.name}
-                      className="flex items-center gap-2"
-                    >
-                      Conta de Destino
-                      <RequiredBadge />
-                    </FieldLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <SelectTrigger
-                        id={field.name}
-                        className={cn(
-                          "transition-colors",
-                          field.value ? "border-primary/50" : "",
-                        )}
-                        aria-invalid={fieldState.invalid}
+                        Conta
+                        <RequiredBadge />
+                      </FieldLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                        disabled={
+                          !!accountId ||
+                          !!transactionData?.account_id ||
+                          !!transactionData?.account?.id
+                        }
                       >
-                        <SelectValue placeholder="Selecione a conta de destino" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {availableDestinationAccounts?.map(
-                          (account: Account) => (
+                        <SelectTrigger
+                          id={field.name}
+                          className={cn(
+                            "transition-colors",
+                            field.value ? "border-primary/50" : "",
+                          )}
+                          aria-invalid={fieldState.invalid}
+                        >
+                          <SelectValue placeholder="Selecione uma conta" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {accounts?.map((account: Account) => (
                             <SelectItem key={account.id} value={account.id}>
                               <div className="flex items-center justify-between w-full">
                                 <span>{account.identification}</span>
@@ -486,206 +365,332 @@ export function TransactionForm({
                                 </Badge>
                               </div>
                             </SelectItem>
-                          ),
-                        )}
-                      </SelectContent>
-                    </Select>
-                    <FieldDescription>
-                      O valor será transferido da conta de origem para esta
-                      conta
-                    </FieldDescription>
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
-                )}
-              />
-            )}
-
-            {/* Amount and Currency */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="sm:col-span-2">
-                <Controller
-                  control={form.control}
-                  name="amount"
-                  render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel
-                        htmlFor={field.name}
-                        className="flex items-center gap-2"
-                      >
-                        Valor
-                        <RequiredBadge />
-                      </FieldLabel>
-                      <Input
-                        id={field.name}
-                        type="number"
-                        step="0.01"
-                        placeholder="0,00"
-                        className={cn(
-                          "text-lg font-medium transition-colors",
-                          field.value > 0 ? "border-primary/50" : "",
-                        )}
-                        value={field.value}
-                        onChange={(e) =>
-                          field.onChange(Number.parseFloat(e.target.value) || 0)
-                        }
-                        onBlur={field.onBlur}
-                        name={field.name}
-                        ref={field.ref}
-                        aria-invalid={fieldState.invalid}
-                      />
+                          ))}
+                        </SelectContent>
+                      </Select>
                       {fieldState.invalid && (
                         <FieldError errors={[fieldState.error]} />
                       )}
                     </Field>
                   )}
                 />
-              </div>
-              <Controller
-                control={form.control}
-                name="currency"
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor={field.name}>Moeda</FieldLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <SelectTrigger
-                        id={field.name}
-                        aria-invalid={fieldState.invalid}
-                      >
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="BRL">BRL</SelectItem>
-                        <SelectItem value="USD">USD</SelectItem>
-                        <SelectItem value="EUR">EUR</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
-                )}
-              />
-            </div>
 
-            {/* Date and Time */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Controller
-                control={form.control}
-                name="transacted_at"
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel
-                      htmlFor="transacted_at_date"
-                      className="flex items-center gap-2"
-                    >
-                      Data
-                      <RequiredBadge />
-                    </FieldLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          id="transacted_at_date"
-                          variant="outline"
+                {/* Transaction Type */}
+                <Controller
+                  control={form.control}
+                  name="kind"
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel
+                        htmlFor={field.name}
+                        className="flex items-center gap-2"
+                      >
+                        Tipo de Transação
+                        <RequiredBadge />
+                      </FieldLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <SelectTrigger
+                          id={field.name}
                           className={cn(
-                            "w-full pl-3 text-left font-normal transition-colors",
-                            !field.value && "text-muted-foreground",
-                            field.value && "border-primary/50",
+                            "transition-colors",
+                            field.value ? "border-primary/50" : "",
                           )}
                           aria-invalid={fieldState.invalid}
                         >
-                          {field.value instanceof Date &&
-                          !isNaN(field.value.getTime()) ? (
-                            new Intl.DateTimeFormat("pt-br").format(field.value)
-                          ) : (
-                            <span>Selecione uma data</span>
+                          <SelectValue placeholder="Selecione o tipo" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Object.entries(transactionKindConfig).map(
+                            ([value, config]) => {
+                              const Icon = config.icon;
+                              return (
+                                <SelectItem key={value} value={value}>
+                                  <div className="flex items-center gap-2">
+                                    <Icon className="h-4 w-4" />
+                                    <div className="flex flex-col">
+                                      <span>{config.label}</span>
+                                      <span className="text-xs text-muted-foreground">
+                                        {config.description}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </SelectItem>
+                              );
+                            },
                           )}
-                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={(date) => {
-                            if (!date) return;
-                            const newDate = new Date(field.value);
-                            newDate.setFullYear(date.getFullYear());
-                            newDate.setMonth(date.getMonth());
-                            newDate.setDate(date.getDate());
-                            field.onChange(newDate);
-                          }}
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
-                )}
-              />
+                        </SelectContent>
+                      </Select>
+                      {selectedKind && (
+                        <div className="flex items-center gap-2 mt-2">
+                          <Badge
+                            variant={
+                              transactionKindConfig[selectedKind].variant
+                            }
+                          >
+                            {transactionKindConfig[selectedKind].label}
+                          </Badge>
+                          <span className="text-xs text-muted-foreground">
+                            {transactionKindConfig[selectedKind].description}
+                          </span>
+                        </div>
+                      )}
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
 
-              <Controller
-                control={form.control}
-                name="transacted_at"
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="transacted_at_time">Hora</FieldLabel>
-                    <Input
-                      id="transacted_at_time"
-                      type="text"
-                      placeholder="HH:mm"
-                      value={
-                        field.value instanceof Date &&
-                        !isNaN(field.value.getTime())
-                          ? `${String(field.value.getHours()).padStart(2, "0")}:${String(field.value.getMinutes()).padStart(2, "0")}`
-                          : ""
-                      }
-                      onChange={(e) => {
-                        const timeStr = e.target.value;
-                        const [hours, minutes] = timeStr.split(":").map(Number);
-                        if (
-                          !isNaN(hours) &&
-                          !isNaN(minutes) &&
-                          hours >= 0 &&
-                          hours < 24 &&
-                          minutes >= 0 &&
-                          minutes < 60
-                        ) {
-                          const newDate = new Date(field.value);
-                          newDate.setHours(hours);
-                          newDate.setMinutes(minutes);
-                          newDate.setSeconds(0);
-                          newDate.setMilliseconds(0);
-                          field.onChange(newDate);
-                        }
-                      }}
-                      className={cn(
-                        "transition-colors font-mono",
-                        field.value ? "border-primary/50" : "",
+                {/* Destination Account - Only shown for TRANSFER */}
+                {selectedKind === "TRANSFER" && (
+                  <Controller
+                    control={form.control}
+                    name="destination_account_id"
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel
+                          htmlFor={field.name}
+                          className="flex items-center gap-2"
+                        >
+                          Conta de Destino
+                          <RequiredBadge />
+                        </FieldLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
+                          <SelectTrigger
+                            id={field.name}
+                            className={cn(
+                              "transition-colors",
+                              field.value ? "border-primary/50" : "",
+                            )}
+                            aria-invalid={fieldState.invalid}
+                          >
+                            <SelectValue placeholder="Selecione a conta de destino" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {availableDestinationAccounts?.map(
+                              (account: Account) => (
+                                <SelectItem key={account.id} value={account.id}>
+                                  <div className="flex items-center justify-between w-full">
+                                    <span>{account.identification}</span>
+                                    <Badge
+                                      variant="outline"
+                                      className="ml-2 text-xs"
+                                    >
+                                      {account.currency}
+                                    </Badge>
+                                  </div>
+                                </SelectItem>
+                              ),
+                            )}
+                          </SelectContent>
+                        </Select>
+                        <FieldDescription>
+                          O valor será transferido da conta de origem para esta
+                          conta
+                        </FieldDescription>
+                        {fieldState.invalid && (
+                          <FieldError errors={[fieldState.error]} />
+                        )}
+                      </Field>
+                    )}
+                  />
+                )}
+
+                {/* Amount and Currency */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="sm:col-span-2">
+                    <Controller
+                      control={form.control}
+                      name="amount"
+                      render={({ field, fieldState }) => (
+                        <Field data-invalid={fieldState.invalid}>
+                          <FieldLabel
+                            htmlFor={field.name}
+                            className="flex items-center gap-2"
+                          >
+                            Valor
+                            <RequiredBadge />
+                          </FieldLabel>
+                          <Input
+                            id={field.name}
+                            type="number"
+                            step="0.01"
+                            placeholder="0,00"
+                            className={cn(
+                              "text-lg font-medium transition-colors",
+                              field.value > 0 ? "border-primary/50" : "",
+                            )}
+                            value={field.value}
+                            onChange={(e) =>
+                              field.onChange(
+                                Number.parseFloat(e.target.value) || 0,
+                              )
+                            }
+                            onBlur={field.onBlur}
+                            name={field.name}
+                            ref={field.ref}
+                            aria-invalid={fieldState.invalid}
+                          />
+                          {fieldState.invalid && (
+                            <FieldError errors={[fieldState.error]} />
+                          )}
+                        </Field>
                       )}
                     />
-                    <FieldDescription>Formato: HH:mm (24h)</FieldDescription>
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
+                  </div>
+                  <Controller
+                    control={form.control}
+                    name="currency"
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel htmlFor={field.name}>Moeda</FieldLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
+                          <SelectTrigger
+                            id={field.name}
+                            aria-invalid={fieldState.invalid}
+                          >
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="BRL">BRL</SelectItem>
+                            <SelectItem value="USD">USD</SelectItem>
+                            <SelectItem value="EUR">EUR</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        {fieldState.invalid && (
+                          <FieldError errors={[fieldState.error]} />
+                        )}
+                      </Field>
                     )}
-                  </Field>
-                )}
-              />
-            </div>
-          </CardContent>
-        </Card>
+                  />
+                </div>
 
-        {/* Details Section */}
-        <Card>
-          <CardHeader className="pb-4">
-            <CardTitle className="text-lg">Detalhes</CardTitle>
-            <CardDescription>
-              Informações adicionais para organizar melhor suas transações
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
+                {/* Date and Time */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <Controller
+                    control={form.control}
+                    name="transacted_at"
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel
+                          htmlFor="transacted_at_date"
+                          className="flex items-center gap-2"
+                        >
+                          Data
+                          <RequiredBadge />
+                        </FieldLabel>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              id="transacted_at_date"
+                              variant="outline"
+                              className={cn(
+                                "w-full pl-3 text-left font-normal transition-colors",
+                                !field.value && "text-muted-foreground",
+                                field.value && "border-primary/50",
+                              )}
+                              aria-invalid={fieldState.invalid}
+                            >
+                              {field.value instanceof Date &&
+                              !isNaN(field.value.getTime()) ? (
+                                new Intl.DateTimeFormat("pt-br").format(
+                                  field.value,
+                                )
+                              ) : (
+                                <span>Selecione uma data</span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={field.value}
+                              onSelect={(date) => {
+                                if (!date) return;
+                                const newDate = new Date(field.value);
+                                newDate.setFullYear(date.getFullYear());
+                                newDate.setMonth(date.getMonth());
+                                newDate.setDate(date.getDate());
+                                field.onChange(newDate);
+                              }}
+                            />
+                          </PopoverContent>
+                        </Popover>
+                        {fieldState.invalid && (
+                          <FieldError errors={[fieldState.error]} />
+                        )}
+                      </Field>
+                    )}
+                  />
+
+                  <Controller
+                    control={form.control}
+                    name="transacted_at"
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel htmlFor="transacted_at_time">
+                          Hora
+                        </FieldLabel>
+                        <Input
+                          id="transacted_at_time"
+                          type="text"
+                          placeholder="HH:mm"
+                          value={
+                            field.value instanceof Date &&
+                            !isNaN(field.value.getTime())
+                              ? `${String(field.value.getHours()).padStart(2, "0")}:${String(field.value.getMinutes()).padStart(2, "0")}`
+                              : ""
+                          }
+                          onChange={(e) => {
+                            const timeStr = e.target.value;
+                            const [hours, minutes] = timeStr
+                              .split(":")
+                              .map(Number);
+                            if (
+                              !isNaN(hours) &&
+                              !isNaN(minutes) &&
+                              hours >= 0 &&
+                              hours < 24 &&
+                              minutes >= 0 &&
+                              minutes < 60
+                            ) {
+                              const newDate = new Date(field.value);
+                              newDate.setHours(hours);
+                              newDate.setMinutes(minutes);
+                              newDate.setSeconds(0);
+                              newDate.setMilliseconds(0);
+                              field.onChange(newDate);
+                            }
+                          }}
+                          className={cn(
+                            "transition-colors font-mono",
+                            field.value ? "border-primary/50" : "",
+                          )}
+                        />
+                        <FieldDescription>
+                          Formato: HH:mm (24h)
+                        </FieldDescription>
+                        {fieldState.invalid && (
+                          <FieldError errors={[fieldState.error]} />
+                        )}
+                      </Field>
+                    )}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Details Section */}
             {/* Name */}
             <Controller
               control={form.control}
@@ -830,13 +835,24 @@ export function TransactionForm({
                 </Field>
               )}
             />
-          </CardContent>
-        </Card>
 
-        {/* Submit Actions */}
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex flex-col sm:flex-row gap-3">
+            {/* Submit Actions */}
+            <CardFooter className="pt-4 flex flex-col sm:flex-row gap-3">
+              {isSubmitting && (
+                <div
+                  className="mt-4 p-3 bg-muted rounded-md"
+                  role="status"
+                  aria-live="polite"
+                >
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <div
+                      className="animate-pulse h-2 w-2 bg-primary rounded-full"
+                      aria-hidden="true"
+                    />
+                    Processando sua transação...
+                  </div>
+                </div>
+              )}
               <Button
                 type="submit"
                 disabled={isSubmitting}
@@ -865,25 +881,10 @@ export function TransactionForm({
               >
                 Cancelar
               </Button>
-            </div>
-            {isSubmitting && (
-              <div
-                className="mt-4 p-3 bg-muted rounded-md"
-                role="status"
-                aria-live="polite"
-              >
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <div
-                    className="animate-pulse h-2 w-2 bg-primary rounded-full"
-                    aria-hidden="true"
-                  />
-                  Processando sua transação...
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </form>
+            </CardFooter>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }

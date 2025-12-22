@@ -112,7 +112,7 @@ This file tracks architectural decisions, outstanding features, and future enhan
 
 ## 11. Transaction edit
 
-- [ ] weird UI, completely off the way
+- [x] weird UI, completely off the way
 
 ## 12. Transaction list
 
@@ -136,6 +136,14 @@ This file tracks architectural decisions, outstanding features, and future enhan
 - [ ] how can we prevent importing the same file using importar feature?
 - [ ] how can we prevent importing the same transactions from the same file?
 
-17. Improve breadcumb
+## 17. Improve breadcumb
 
 - [] we shouldn't show internal IDs.
+
+## 18. Dashboard
+
+- [] Transações recentes section is not in line with the dashboard section, how can we improve?
+
+## 19. New account form
+
+- [ ] IT DOESN't WORK AT MOBILE!!!! WE NEED TO FIX THIS ASAP. THERE IS NO SCROLL. made we need to move away from a modal strategy
