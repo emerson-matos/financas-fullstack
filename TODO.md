@@ -97,9 +97,9 @@ This file tracks architectural decisions, outstanding features, and future enhan
 
 ## 8. Import data page
 
-- [ ] long scroll to find the buttons, poor UX
-- [ ] why don't we categorize stuff?
-- [ ] after importing we dont show default category "desconhecido" badge at transaction list
+- [x] long scroll to find the buttons, poor UX (Fixed with max-height on table)
+- [x] why don't we categorize stuff? (Added category selector)
+- [x] after importing we dont show default category "desconhecido" badge at transaction list (Now assigned default category)
 
 ## 9. Budget Default
 
@@ -119,9 +119,9 @@ This file tracks architectural decisions, outstanding features, and future enhan
 
 ## 16. duplicated transactions
 
-- [ ] how can we prevent those?
-- [ ] how can we prevent importing the same file using importar feature?
-- [ ] how can we prevent importing the same transactions from the same file?
+- [x] how can we prevent those? (Fixed using FITID)
+- [x] how can we prevent importing the same file using importar feature? (Skipped automatically)
+- [x] how can we prevent importing the same transactions from the same file? (Skipped automatically)
 
 ## 17. Improve breadcumb
 

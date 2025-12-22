@@ -24,6 +24,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useAccounts } from "@/hooks/use-accounts";
+import { useCategories } from "@/hooks/use-categories";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   useBulkCreateTransactions,
@@ -115,9 +116,16 @@ function FileList({ files }: { files: FileInfo[] }) {
 // Review Table Component
 function ReviewTable({
   transactions,
+  categories,
 }: {
   transactions: CreateTransactionRequest[];
+  categories?: Category[];
 }) {
+  const getCategoryName = (id?: string) => {
+    if (!id) return "Desconhecido";
+    const category = categories?.find((c) => c.id === id);
+    return category?.name || "Desconhecido";
+  };
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("pt-BR", {
       style: "currency",
@@ -152,12 +160,13 @@ function ReviewTable({
   };
 
   return (
-    <div className="overflow-auto rounded-md border">
+    <div className="overflow-auto rounded-md border max-h-[400px]">
       <Table>
         <TableHeader>
           <TableRow>
             <TableHead>Tipo</TableHead>
             <TableHead>Descrição</TableHead>
+            <TableHead>Categoria</TableHead>
             <TableHead className="text-right">Valor</TableHead>
             <TableHead>Data</TableHead>
             <TableHead>Hora</TableHead>
@@ -169,6 +178,11 @@ function ReviewTable({
               <TableCell>{getKindBadge(transaction.kind)}</TableCell>
               <TableCell className="max-w-md truncate">
                 {transaction.description}
+              </TableCell>
+              <TableCell>
+                <Badge variant="outline" className="font-normal">
+                  {getCategoryName(transaction.categoryId)}
+                </Badge>
               </TableCell>
               <TableCell className="text-right font-mono">
                 {formatCurrency(transaction.amount)}
@@ -190,6 +204,9 @@ export function DataImport() {
   const [currentStep, setCurrentStep] = useState<ImportStep>("upload");
   const [files, setFiles] = useState<FileInfo[]>([]);
   const [selectedAccountId, setSelectedAccountId] = useState<string>("");
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>(
+    "c0000000-0000-0000-0000-000000000002", // Default to "Desconhecido"
+  );
   const [transactions, setTransactions] = useState<CreateTransactionRequest[]>(
     [],
   );
@@ -197,6 +214,7 @@ export function DataImport() {
   const [isProcessing, setIsProcessing] = useState(false);
 
   const { data: accountsData } = useAccounts({ sort: ["identification,asc"] });
+  const { data: categoriesData } = useCategories();
   const parseFileMutation = useParseFileImport();
   const importMutation = useBulkCreateTransactions();
   const isMobile = useIsMobile();
@@ -255,6 +273,7 @@ export function DataImport() {
               amount: t.amount,
               transactedAt: t.transacted_at,
               kind: t.kind,
+              categoryId: selectedCategoryId,
               currency: "BRL", // Default currency for imported transactions
             }));
 
@@ -386,6 +405,27 @@ export function DataImport() {
           </Select>
         </div>
 
+        {/* Category Selection */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Categoria Padrão</label>
+          <Select
+            value={selectedCategoryId}
+            onValueChange={setSelectedCategoryId}
+            disabled={currentStep === "review"}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Selecione uma categoria" />
+            </SelectTrigger>
+            <SelectContent>
+              {categoriesData?.map((category) => (
+                <SelectItem key={category.id} value={category.id}>
+                  {category.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
         {/* Upload Step */}
         {currentStep === "upload" && (
           <>
@@ -488,7 +528,10 @@ export function DataImport() {
               <h3 className="text-lg font-semibold mb-4">
                 Transações a Importar ({transactions.length})
               </h3>
-              <ReviewTable transactions={transactions} />
+              <ReviewTable
+                transactions={transactions}
+                categories={categoriesData}
+              />
             </div>
 
             {/* Actions */}
