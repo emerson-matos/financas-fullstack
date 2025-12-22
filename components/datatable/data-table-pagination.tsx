@@ -24,7 +24,7 @@ export function DataTablePagination({
   return (
     <div className="flex items-center justify-between space-x-2 py-4">
       <div className="flex items-center space-x-2">
-        <p className="text-sm text-muted-foreground">
+        <p className="hidden text-sm text-muted-foreground sm:block">
           Mostrando {pageIndex * pageSize + 1} até{" "}
           {Math.min((pageIndex + 1) * pageSize, totalCount)} de {totalCount} no
           total

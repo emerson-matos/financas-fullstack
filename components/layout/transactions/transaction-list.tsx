@@ -15,36 +15,33 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import type { ColumnDef } from "@tanstack/react-table";
-import { DataTable } from "@/components/datatable/app-datatable";
-import type { Transaction } from "@/lib/types";
-import { compactTransactionColumns } from "@/components/layout/transactions/columns";
+import { TimelineList } from "@/components/layout/timeline/timeline-list";
+import type { TimelineEntry } from "@/lib/types";
+
 interface TransactionListProps {
-  columns?: Array<ColumnDef<Transaction>>;
-  limit?: number;
   accountId?: string;
+  limit?: number;
 }
+
 export function TransactionList({
-  columns = compactTransactionColumns,
   accountId,
   limit,
 }: TransactionListProps = {}) {
   const router = useRouter();
-  const queryKey = "transactions";
-  const page = limit ? { number: 0, size: limit } : undefined;
-  const handleRowClick = (transactionId: string) => {
-    router.push(
-      `/dashboard/${accountId ? `accounts/${accountId}/` : ""}transactions/${transactionId}`,
-    );
+
+  const handleItemClick = (id: string, entry: TimelineEntry) => {
+    if (entry.entry_type === "TRANSACTION") {
+      router.push(
+        `/dashboard/${accountId ? `accounts/${accountId}/` : ""}transactions/${id}`,
+      );
+    }
   };
+
   return (
-    <DataTable
-      queryKey={queryKey}
-      columns={columns}
-      page={page}
-      defaultSort={{ id: "transacted_at", desc: true }}
+    <TimelineList
       accountId={accountId}
-      onRowClick={handleRowClick}
+      limit={limit}
+      onItemClick={handleItemClick}
     />
   );
 }
