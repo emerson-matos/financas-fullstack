@@ -171,6 +171,18 @@ export function TransactionForm({
     }
   }, [selectedAccount, transactionId, form]);
 
+  // Auto-select account if only one exists and none is selected
+  useEffect(() => {
+    if (
+      accounts?.length === 1 &&
+      !watchedAccountId &&
+      !accountId &&
+      !transactionId
+    ) {
+      form.setValue("account_id", accounts[0].id);
+    }
+  }, [accounts, watchedAccountId, accountId, transactionId, form]);
+
   useEffect(() => {
     if (transactionData) {
       form.reset({

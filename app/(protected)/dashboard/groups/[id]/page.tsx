@@ -126,6 +126,7 @@ export default function GroupDetailsPage({ params }: PageProps) {
           <Card>
             <CardContent className="pt-6">
               <p className="text-muted-foreground text-center">
+                {/* TODO: Listagem de transações será implementada em breve. */}
                 Listagem de transações será implementada em breve.
               </p>
             </CardContent>

@@ -26,17 +26,18 @@ interface TransactionDetailsProps {
   transactionId: string;
   editUrl?: string;
 }
-const kindToBadge: Record<
+const accountKindToBadge: Record<
   string,
   {
     label: string;
     variant: "default" | "secondary" | "destructive" | "outline";
   }
 > = {
-  DEBIT: { label: "Débito", variant: "destructive" },
-  CREDIT: { label: "Crédito", variant: "default" },
-  TRANSFER: { label: "Transferência", variant: "secondary" },
-  UNKNOWN: { label: "Desconhecido", variant: "outline" },
+  CHECKING: { label: "Conta Corrente", variant: "default" },
+  SAVINGS: { label: "Poupança", variant: "secondary" },
+  INVESTMENT: { label: "Investimento", variant: "default" },
+  CREDIT_CARD: { label: "Cartão de Crédito", variant: "destructive" },
+  CASH: { label: "Dinheiro", variant: "outline" },
 };
 export function TransactionDetails({
   transactionId,
@@ -109,7 +110,8 @@ export function TransactionDetails({
     };
     return types[kind as keyof typeof types] || kind;
   };
-  const kind = transaction.account?.kind as keyof typeof kindToBadge;
+  const accountKind = transaction.account
+    ?.kind as keyof typeof accountKindToBadge;
   return (
     <div className="mx-auto space-y-6 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
       {/* Header with back button */}
@@ -226,8 +228,12 @@ export function TransactionDetails({
                 Tipo de Conta
               </span>
               <span className="font-medium capitalize">
-                <Badge variant={kindToBadge[kind]?.variant}>
-                  {kindToBadge[kind]?.label}
+                <Badge
+                  variant={
+                    accountKindToBadge[accountKind]?.variant || "outline"
+                  }
+                >
+                  {accountKindToBadge[accountKind]?.label || "Desconhecido"}
                 </Badge>
               </span>
             </div>

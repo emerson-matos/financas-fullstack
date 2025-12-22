@@ -110,7 +110,7 @@ describe("CreateAccount", () => {
             identification: "Nubank",
             initial_amount: 1500.5,
             currency: "BRL",
-            kind: "",
+            kind: undefined,
           }),
         );
       });
@@ -140,7 +140,7 @@ describe("CreateAccount", () => {
             identification: "Cartão de Crédito",
             initial_amount: -2500.75,
             currency: "BRL",
-            kind: "",
+            kind: undefined,
           }),
         );
       });
@@ -277,7 +277,7 @@ describe("CreateAccount", () => {
             identification: "Savings",
             initial_amount: 123.45,
             currency: "BRL",
-            kind: "",
+            kind: undefined,
           }),
         );
       });
@@ -400,7 +400,7 @@ describe("CreateAccount", () => {
             identification: "Credit Card",
             initial_amount: -1000,
             currency: "BRL",
-            kind: "",
+            kind: undefined,
           }),
         );
       });
@@ -430,7 +430,7 @@ describe("CreateAccount", () => {
             identification: "New Account",
             initial_amount: 0,
             currency: "BRL",
-            kind: "",
+            kind: undefined,
           }),
         );
       });

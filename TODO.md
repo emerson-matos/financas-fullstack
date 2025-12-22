@@ -85,10 +85,10 @@ This file tracks architectural decisions, outstanding features, and future enhan
 - [ ] **PWA Support**: Configure manifest and service workers for "Install as App" experience.
 - [ ] **Query Optimization**: Perform load testing on `unified_timeline` view for large datasets.
 
-## 6. Transactions form: time is not correct
+## 6. Transactions form
 
 - [ ] after inserting a new transaction we need to flush our query provider? info is not up to date after we create one.
-- [ ] account select the ONLY option if ONLY one is available.
+- [x] account select the ONLY option if ONLY one is available.
 
 ## 7. Perf
 
@@ -106,9 +106,9 @@ This file tracks architectural decisions, outstanding features, and future enhan
 - [ ] We could improve onboarding so customer already have at least one budget available
 - [ ] Budget Form is using wrong date format, not using locale
 
-## 10. Trasnaction details
+## 10. Transaction details
 
-- [ ] Tipo de Conta shows nothign, why? empty badge
+- [x] Tipo de Conta shows nothing, why? empty badge
 
 ## 11. Transaction edit
 
@@ -135,3 +135,7 @@ This file tracks architectural decisions, outstanding features, and future enhan
 - [ ] how can we prevent those?
 - [ ] how can we prevent importing the same file using importar feature?
 - [ ] how can we prevent importing the same transactions from the same file?
+
+17. Improve breadcumb
+
+- [] we shouldn't show internal IDs.
