@@ -438,6 +438,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     rawTransactions.forEach((rawTxn, index) => {
       try {
+        // Skip transactions with zero amount
+        const rawAmount = parseFloat(rawTxn.TRNAMT);
+        if (isNaN(rawAmount) || rawAmount === 0) {
+          return;
+        }
+
         const transaction = transformTransaction(
           rawTxn,
           body.account_id || "",
