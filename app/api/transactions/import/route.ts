@@ -196,10 +196,18 @@ function transformTransaction(
   // parseOfxTime returns HH:MM:SS-OO
   const transacted_at = time ? `${date}T${time}` : `${date}T00:00:00-03`;
 
+  // Ensure amount sign matches kind
+  let finalAmount = amount;
+  if (kind === "DEBIT" && finalAmount > 0) {
+    finalAmount = -finalAmount;
+  } else if (kind === "CREDIT" && finalAmount < 0) {
+    finalAmount = Math.abs(finalAmount);
+  }
+
   return {
     accountId,
     description: t.MEMO || "No description",
-    amount: Math.abs(amount), // Store absolute value, kind determines direction
+    amount: finalAmount,
     transacted_at,
     kind,
     currency,

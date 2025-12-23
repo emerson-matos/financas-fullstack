@@ -51,11 +51,24 @@ function transformTransaction(
     );
   }
 
+  // Ensure amount sign matches kind
+  let amount = tx.amount;
+  if (tx.kind === "DEBIT" && amount > 0) {
+    amount = -amount;
+  } else if (tx.kind === "CREDIT" && amount < 0) {
+    amount = Math.abs(amount);
+  } else if (tx.kind === "TRANSFER" && amount > 0) {
+    // For bulk transfers, we assume the caller might send positive amounts
+    // but the backend expects signs. However, bulk API usually receives
+    // pre-signed transactions for transfers (outgoing -ve, incoming +ve).
+    // We'll leave it as is unless it's explicitly absolute.
+  }
+
   // Build the insert object
   const insert: TransactionInsert = {
     account_id: accountId,
     category_id: categoryId,
-    amount: tx.amount,
+    amount: amount,
     currency: tx.currency || "BRL",
     description: tx.description,
     name: tx.name || tx.description,

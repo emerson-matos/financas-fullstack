@@ -117,6 +117,8 @@ This file tracks architectural decisions, outstanding features, and future enhan
 
 ## 15. user_accounts_with_balance=> @20241214000000_initial_schema.sql#L121-128 would be too bad to have expenses and incomes as well, and to have a whey to filter by month?
 
+- [ ] user_accounts_with_balance needs total_income and total_expense. Need account_monthly_balances view.
+
 ## 16. duplicated transactions
 
 - [x] how can we prevent those? (Fixed using FITID)
@@ -130,3 +132,7 @@ This file tracks architectural decisions, outstanding features, and future enhan
 ## 18. Dashboard
 
 - [x] Transações recentes section is not in line with the dashboard section, how can we improve? maybe infinity scroll? remove the card and deal as a new section? (Implemented: Infinite scroll enabled with Timeline list).
+
+## 19. Credit card Account
+
+- [x] after importing transactions the available limit is only growing. we need to check this (Fixed: standardized transaction signs and updated balance views)
