@@ -31,6 +31,7 @@ import {
   useParseFileImport,
 } from "@/hooks/use-transactions";
 import type {
+  Category,
   CreateTransactionRequest,
   ImportResult,
   ParsedTransaction,
