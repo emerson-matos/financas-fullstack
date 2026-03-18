@@ -3,7 +3,7 @@ import { GoogleAnalytics, GoogleTagManager } from "@next/third-parties/google";
 import { Inter } from "next/font/google";
 import "@/app/globals.css";
 import { Providers } from "@/components/providers";
-import { BRAND_COLOR, APP_NAME, APP_DESCRIPTION } from "@/lib/constants";
+import { BRAND_COLOR, APP_NAME, APP_DESCRIPTION, APP_URL } from "@/lib/constants";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -12,7 +12,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://financas.tophatcompany.com.br'),
+  metadataBase: new URL(APP_URL),
   title: {
     default: APP_NAME,
     template: `%s | ${APP_NAME}`,
@@ -29,13 +29,13 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'pt_BR',
-    url: 'https://financas.tophatcompany.com.br',
+    url: APP_URL,
     siteName: APP_NAME,
     title: APP_NAME,
     description: APP_DESCRIPTION,
     images: [
       {
-        url: 'https://financas.tophatcompany.com.br/api/og',
+        url: `${APP_URL}/api/og`,
         width: 1200,
         height: 630,
         alt: APP_NAME,
@@ -46,7 +46,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: APP_NAME,
     description: APP_DESCRIPTION,
-    images: ['https://financas.tophatcompany.com.br/api/og'],
+    images: [`${APP_URL}/api/og`],
   },
 };
 

@@ -36,4 +36,5 @@ export const defaultFirstAccount = {
 export const BRAND_COLOR = "#000000";
 export const APP_NAME = "Finanças App";
 export const APP_DESCRIPTION = "Aplicação de gestão de finanças pessoais";
+export const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://financas.tophatcompany.com.br";
 export const PWA_START_URL = "/dashboard";
