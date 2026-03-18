@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { GoogleAnalytics, GoogleTagManager } from "@next/third-parties/google";
 import { Inter } from "next/font/google";
 import "@/app/globals.css";
 import { Providers } from "@/components/providers";
@@ -30,6 +31,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR" suppressHydrationWarning>
+      {process.env.NEXT_PUBLIC_GTM_ID && (
+        <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GTM_ID} />
+      )}
+      {process.env.NEXT_PUBLIC_GA_ID && (
+        <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />
+      )}
       <body className={`${inter.variable} antialiased`}>
         <Providers>{children}</Providers>
       </body>
