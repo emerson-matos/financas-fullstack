@@ -112,12 +112,12 @@ This file tracks architectural decisions, outstanding features, and future enhan
 
 ## 13. Datatable component
 
-- [ ] sorting icon for what?
-- [ ] search box trigger entire component rerender, not just the list
+- [x] sorting icon for what?
+- [x] search box trigger entire component rerender, not just the list
 
 ## 15. user_accounts_with_balance=> @20241214000000_initial_schema.sql#L121-128 would be too bad to have expenses and incomes as well, and to have a whey to filter by month?
 
-- [ ] user_accounts_with_balance needs total_income and total_expense. Need account_monthly_balances view.
+- [x] user_accounts_with_balance needs total_income and total_expense. Need account_monthly_balances view.
 
 ## 16. duplicated transactions
 

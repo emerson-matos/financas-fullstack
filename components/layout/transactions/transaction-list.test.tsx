@@ -1,36 +1,23 @@
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import {
-  compactTransactionColumns,
-  defaultTransactionColumns,
-} from "@/components/layout/transactions/columns";
 import { TransactionList } from "@/components/layout/transactions/transaction-list";
-// Mock the DataTable component
-vi.mock("@/components/datatable/app-datatable", () => ({
-  DataTable: vi.fn((props) => {
-    // Store the props for testing
+import type { TimelineEntry } from "@/lib/types";
+
+// Mock the TimelineList component
+vi.mock("@/components/layout/timeline/timeline-list", () => ({
+  TimelineList: vi.fn((props) => {
     lastProps = props;
-    return (
-      <div data-testid="mock-data-table">
-        <div>Columns: {props.columns.length}</div>
-        <div>QueryKey: {props.queryKey}</div>
-        {props.limit && <div>Limit: {props.limit}</div>}
-        {props.accountId && <div>AccountId: {props.accountId}</div>}
-        <div>Props: {JSON.stringify(props)}</div>
-      </div>
-    );
+    return <div data-testid="mock-timeline-list" />;
   }),
 }));
-// Define the mock component with proper typing
-interface MockDataTableProps {
-  columns: typeof defaultTransactionColumns;
-  queryKey: string;
-  limit?: number;
+
+interface MockTimelineProps {
   accountId?: string;
-  defaultSort?: { id: string; desc: boolean };
+  limit?: number;
+  onItemClick?: (id: string, entry: TimelineEntry) => void;
 }
-// Create a mock component that stores its props for testing
-let lastProps: MockDataTableProps | undefined;
+
+let lastProps: MockTimelineProps | undefined;
 describe("TransactionList", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -38,24 +25,15 @@ describe("TransactionList", () => {
   });
   it("renders with default props", () => {
     render(<TransactionList />);
-    expect(screen.getByTestId("mock-data-table")).toBeTruthy();
+    expect(screen.getByTestId("mock-timeline-list")).toBeTruthy();
     expect(lastProps).toBeDefined();
-    expect(lastProps?.columns).toEqual(compactTransactionColumns);
-    expect(lastProps?.queryKey).toBe("transactions");
     expect(lastProps?.limit).toBeUndefined();
     expect(lastProps?.accountId).toBeUndefined();
   });
   it("renders with account filter", () => {
     render(<TransactionList accountId="123" />);
-    expect(screen.getByTestId("mock-data-table")).toBeTruthy();
+    expect(screen.getByTestId("mock-timeline-list")).toBeTruthy();
     expect(lastProps).toBeDefined();
-    expect(lastProps?.queryKey).toBe("transactions");
     expect(lastProps?.accountId).toBe("123");
-  });
-  it("renders with custom columns", () => {
-    render(<TransactionList columns={defaultTransactionColumns} />);
-    expect(screen.getByTestId("mock-data-table")).toBeTruthy();
-    expect(lastProps).toBeDefined();
-    expect(lastProps?.columns).toEqual(defaultTransactionColumns);
   });
 });
