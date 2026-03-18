@@ -27,7 +27,7 @@ const nextConfig: NextConfig = {
         },
         {
           key: "Content-Security-Policy",
-          value: "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.googletagmanager.com https://*.google-analytics.com; connect-src https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com;",
+          value: "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.googletagmanager.com https://*.google-analytics.com; connect-src https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://financas.tophatcompany.com.br;",
         },
       ],
     },
