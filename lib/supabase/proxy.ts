@@ -14,12 +14,21 @@ const PUBLIC_ROUTES = new Set([
   "/auth/oauth",
   "/privacy",
   "/terms",
+]);
+
+// Public API routes that don't need auth
+const PUBLIC_API_ROUTES = new Set([
   "/api/og",
 ]);
 
 // Check if the path is a public route
 function isPublicRoute(pathname: string): boolean {
   return PUBLIC_ROUTES.has(pathname);
+}
+
+// Check if it's a public API route
+function isPublicApiRoute(pathname: string): boolean {
+  return PUBLIC_API_ROUTES.has(pathname);
 }
 
 // Routes that require authentication
@@ -33,6 +42,11 @@ export async function updateSession(request: NextRequest) {
   });
 
   const { pathname } = request.nextUrl;
+
+  // Skip auth check for public API routes
+  if (isPublicApiRoute(pathname)) {
+    return supabaseResponse;
+  }
 
   // Skip auth check for public routes
   if (isPublicRoute(pathname) && !isProtectedRoute(pathname)) {
