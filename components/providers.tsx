@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "sonner";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/lib/query-client";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 export function Providers({
   children,
@@ -30,11 +31,13 @@ export function Providers({
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
       <QueryClientProvider client={queryClient}>
-        {children}
-        <Toaster />
+        <TooltipProvider>
+          {children}
+          <Toaster />
 
-        <SpeedInsights />
-        <ReactQueryDevtools initialIsOpen={false} />
+          <SpeedInsights />
+          <ReactQueryDevtools initialIsOpen={false} />
+        </TooltipProvider>
       </QueryClientProvider>
     </ThemeProvider>
   );

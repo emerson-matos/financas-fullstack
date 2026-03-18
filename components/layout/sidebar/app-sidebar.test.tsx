@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import type { AppSidebarConfig } from "@/lib/types";
 import { AppSidebar } from "./app-sidebar";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 // Mock the TopHatLogo component
 vi.mock("@/components/top-hat-logo", () => ({
@@ -31,7 +32,11 @@ vi.mock("next/link", () => ({
 }));
 // Helper function to render with router context
 function renderWithRouter(component: React.ReactElement) {
-  return render(<SidebarProvider>{component}</SidebarProvider>);
+  return render(
+    <TooltipProvider>
+      <SidebarProvider>{component}</SidebarProvider>
+    </TooltipProvider>,
+  );
 }
 describe("AppSidebar", () => {
   beforeEach(() => {

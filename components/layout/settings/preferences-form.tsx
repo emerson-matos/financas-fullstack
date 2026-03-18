@@ -24,7 +24,6 @@ import {
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
@@ -102,21 +101,19 @@ export function PreferencesForm() {
 
         <Field>
           <FieldLabel htmlFor={idiomaId}>Idioma</FieldLabel>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Input
-                  id={idiomaId}
-                  value="pt-BR"
-                  readOnly
-                  className="cursor-not-allowed bg-muted/50"
-                />
-              </TooltipTrigger>
-              <TooltipContent side="top">
-                No momento, apenas português é suportado.
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Input
+                id={idiomaId}
+                value="pt-BR"
+                readOnly
+                className="cursor-not-allowed bg-muted/50"
+              />
+            </TooltipTrigger>
+            <TooltipContent side="top">
+              No momento, apenas português é suportado.
+            </TooltipContent>
+          </Tooltip>
           <FieldDescription>
             Idioma do aplicativo (apenas português disponível).
           </FieldDescription>
