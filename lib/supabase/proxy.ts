@@ -14,6 +14,7 @@ const PUBLIC_ROUTES = new Set([
   "/auth/oauth",
   "/privacy",
   "/terms",
+  "/api/og",
 ]);
 
 // Check if the path is a public route
