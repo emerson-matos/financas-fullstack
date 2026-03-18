@@ -444,7 +444,7 @@ export interface AppSidebarConfig {
 export interface AppSidebarProps {
   config?: Partial<AppSidebarConfig>;
   className?: string;
-  collapsible?: "icon" | "offExamples" | "none";
+  collapsible?: "icon" | "offcanvas" | "none";
 }
 
 export interface BreadcrumbItem {
