@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { useAccount } from "@/hooks/use-accounts";
 import { useTransaction } from "@/hooks/use-transactions";
+import { useRecurringTemplate } from "@/hooks/use-recurring";
 import { usePathname } from "next/navigation";
 type BreadcrumbItem = {
   title: string;
@@ -21,10 +22,15 @@ const routeMapping: Record<string, Array<BreadcrumbItem>> = {
     { title: "Dashboard", link: "/dashboard/home" },
     { title: "Configurações", link: "/dashboard/settings" },
   ],
+  "/dashboard/recurring": [
+    { title: "Dashboard", link: "/dashboard/home" },
+    { title: "Recorrências", link: "/dashboard/recurring" },
+  ],
 };
 // Move regex outside function to avoid performance issues
 const ACCOUNT_ID_REGEX = /\/dashboard\/accounts\/([^/]+)/;
 const TRANSACTION_ID_REGEX = /\/dashboard\/transactions\/([^/]+)/;
+const RECURRING_ID_REGEX = /\/dashboard\/recurring\/([^/]+)/;
 export function useBreadcrumbs() {
   const pathname = usePathname();
   // Fetch account data if we're on an account details page
@@ -40,9 +46,17 @@ export function useBreadcrumbs() {
       ? transactionIdMatch[1]
       : null;
 
+  // Fetch recurring template data if we're on a recurring details/edit page
+  const recurringIdMatch = pathname.match(RECURRING_ID_REGEX);
+  const recurringId =
+    recurringIdMatch && !["new"].includes(recurringIdMatch[1])
+      ? recurringIdMatch[1]
+      : null;
+
   // hooks must be called unconditionally in the same order
   const { data: account } = useAccount(accountId || "");
   const { data: transaction } = useTransaction(transactionId || "");
+  const { data: recurringTemplate } = useRecurringTemplate(recurringId || "");
   const breadcrumbs = useMemo(() => {
     // Check if we have a custom mapping for this exact path
     if (routeMapping[pathname]) {
@@ -66,6 +80,13 @@ export function useBreadcrumbs() {
           link: path,
         };
       }
+      // Special handling for recurring template pages
+      if (recurringTemplate && recurringId && segment === recurringId) {
+        return {
+          title: recurringTemplate.name,
+          link: path,
+        };
+      }
       // Special handling for common segments
       switch (segment) {
         case "dashboard":
@@ -74,6 +95,8 @@ export function useBreadcrumbs() {
           return { title: "Contas", link: "/dashboard/accounts" };
         case "transactions":
           return { title: "Transações", link: "/dashboard/transactions" };
+        case "recurring":
+          return { title: "Recorrências", link: "/dashboard/recurring" };
         case "details":
           return { title: "Detalhes", link: path };
         case "edit":
@@ -85,6 +108,6 @@ export function useBreadcrumbs() {
           };
       }
     });
-  }, [pathname, account, accountId, transaction, transactionId]);
+  }, [pathname, account, accountId, transaction, transactionId, recurringTemplate, recurringId]);
   return breadcrumbs;
 }

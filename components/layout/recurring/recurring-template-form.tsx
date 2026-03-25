@@ -2,22 +2,22 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CalendarIcon, Loader2 } from "lucide-react";
-import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useEffect, useRef } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Field, FieldError, FieldLabel } from "@/components/ui/field";
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import {
   Popover,
@@ -31,16 +31,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
+
 import { useAccounts } from "@/hooks/use-accounts";
 import { useCategories } from "@/hooks/use-categories";
 import { useToast } from "@/hooks/use-toast";
 import {
   useCreateRecurringTemplate,
+  useDeleteRecurringTemplate,
   useRecurringTemplate,
   useUpdateRecurringTemplate,
-  useDeleteRecurringTemplate,
 } from "@/hooks/use-recurring";
 import {
   recurringTemplateFormSchema,
@@ -49,25 +50,23 @@ import {
 import { cn } from "@/lib/utils";
 
 interface RecurringTemplateFormProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
   templateId?: string;
   onSuccess?: () => void;
 }
 
 export function RecurringTemplateForm({
-  open,
-  onOpenChange,
   templateId,
   onSuccess,
 }: RecurringTemplateFormProps) {
+  const router = useRouter();
   const { toast } = useToast();
+
   const { data: accounts } = useAccounts();
   const { data: categories } = useCategories();
-
   const { data: template, isLoading: isTemplateLoading } = useRecurringTemplate(
-    templateId || "",
+    templateId ?? "",
   );
+
   const { mutate: createTemplate, isPending: isCreating } =
     useCreateRecurringTemplate();
   const { mutate: updateTemplate, isPending: isUpdating } =
@@ -91,39 +90,29 @@ export function RecurringTemplateForm({
     },
   });
 
+  const hasInitialized = useRef(false);
+
   useEffect(() => {
-    if (template) {
-      form.reset({
-        name: template.name,
-        description: template.description || "",
-        amount: Math.abs(template.amount),
-        currency: template.currency,
-        kind: template.kind,
-        account_id: template.account_id,
-        category_id: template.category_id || "",
-        recurrence_rule: template.recurrence_rule,
-        next_occurrence: template.next_occurrence
-          ? new Date(template.next_occurrence)
-          : new Date(),
-        is_active: template.is_active,
-      });
-    } else {
-      form.reset({
-        name: "",
-        description: "",
-        amount: 1,
-        currency: "BRL",
-        kind: "DEBIT",
-        account_id: "",
-        category_id: "",
-        recurrence_rule: "FREQ=MONTHLY;BYMONTHDAY=1",
-        next_occurrence: new Date(),
-        is_active: true,
-      });
-    }
+    if (!template || hasInitialized.current) return;
+    hasInitialized.current = true;
+
+    form.reset({
+      name: template.name,
+      description: template.description ?? "",
+      amount: Math.abs(template.amount),
+      currency: template.currency,
+      kind: template.kind,
+      account_id: template.account_id ?? "",
+      category_id: template.category_id ?? "",
+      recurrence_rule: template.recurrence_rule,
+      next_occurrence: template.next_occurrence
+        ? new Date(template.next_occurrence)
+        : new Date(),
+      is_active: template.is_active,
+    });
   }, [template, form]);
 
-  const onSubmit = async (values: RecurringTemplateFormValues) => {
+  function onSubmit(values: RecurringTemplateFormValues) {
     const payload = {
       ...values,
       accountId: values.account_id,
@@ -139,7 +128,6 @@ export function RecurringTemplateForm({
         {
           onSuccess: () => {
             toast({ title: "Template atualizado com sucesso!" });
-            onOpenChange(false);
             onSuccess?.();
           },
         },
@@ -148,73 +136,102 @@ export function RecurringTemplateForm({
       createTemplate(payload, {
         onSuccess: () => {
           toast({ title: "Template criado com sucesso!" });
-          onOpenChange(false);
           onSuccess?.();
         },
       });
     }
-  };
+  }
 
-  const handleDelete = () => {
+  function handleDelete() {
     if (!templateId) return;
-    if (confirm("Tem certeza que deseja excluir este template?")) {
-      deleteTemplate(templateId, {
-        onSuccess: () => {
-          toast({ title: "Template excluído com sucesso!" });
-          onOpenChange(false);
-          onSuccess?.();
-        },
-      });
-    }
-  };
+    if (!confirm("Tem certeza que deseja excluir este template?")) return;
+
+    deleteTemplate(templateId, {
+      onSuccess: () => {
+        toast({ title: "Template excluído com sucesso!" });
+        router.push("/dashboard/recurring");
+      },
+    });
+  }
 
   const isSubmitting = isCreating || isUpdating;
+  const isLoading = isTemplateLoading || !accounts || !categories;
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4 py-4">
+        <div className="grid grid-cols-2 gap-4">
+          {Array.from({ length: 2 }).map((_, i) => (
+            <div key={i} className="space-y-2">
+              <Skeleton className="h-4 w-16" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          ))}
+        </div>
+        <div className="grid grid-cols-3 gap-4">
+          <div className="col-span-2 space-y-2">
+            <Skeleton className="h-4 w-16" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-16" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          {Array.from({ length: 2 }).map((_, i) => (
+            <div key={i} className="space-y-2">
+              <Skeleton className="h-4 w-16" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          ))}
+        </div>
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-10 w-full" />
+      </div>
+    );
+  }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl overflow-y-auto max-h-[90vh]">
-        <DialogHeader>
-          <DialogTitle>
-            {templateId
-              ? "Editar Template Recorrente"
-              : "Novo Template Recorrente"}
-          </DialogTitle>
-          <DialogDescription>
-            Configure os detalhes da sua transação automática.
-          </DialogDescription>
-        </DialogHeader>
-
-        {isTemplateLoading ? (
-          <div className="flex h-32 items-center justify-center">
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-          </div>
-        ) : (
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-4 py-4"
-          >
-            <div className="grid grid-cols-2 gap-4">
-              <Field>
-                <FieldLabel>Nome</FieldLabel>
+    <form onSubmit={form.handleSubmit(onSubmit)} className="py-4" noValidate>
+      <FieldGroup>
+        {/* Row 1: Name + Kind */}
+        <div className="grid grid-cols-2 gap-4">
+          <Controller
+            name="name"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor={field.name}>Nome</FieldLabel>
                 <Input
-                  {...form.register("name")}
+                  {...field}
+                  id={field.name}
                   placeholder="Ex: Aluguel, Netflix..."
+                  aria-invalid={fieldState.invalid}
                 />
-                <FieldError errors={[form.formState.errors.name]} />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
               </Field>
+            )}
+          />
 
-              <Field>
-                <FieldLabel>Tipo</FieldLabel>
+          <Controller
+            name="kind"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor={field.name}>Tipo</FieldLabel>
                 <Select
-                  onValueChange={(v) =>
-                    form.setValue(
-                      "kind",
-                      v as RecurringTemplateFormValues["kind"],
-                    )
-                  }
-                  value={form.watch("kind")}
+                  key={field.value}
+                  name={field.name}
+                  value={field.value}
+                  onValueChange={field.onChange}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger
+                    id={field.name}
+                    aria-invalid={fieldState.invalid}
+                  >
                     <SelectValue placeholder="Selecione o tipo" />
                   </SelectTrigger>
                   <SelectContent>
@@ -222,28 +239,53 @@ export function RecurringTemplateForm({
                     <SelectItem value="CREDIT">Crédito</SelectItem>
                   </SelectContent>
                 </Select>
-                <FieldError errors={[form.formState.errors.kind]} />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
               </Field>
-            </div>
+            )}
+          />
+        </div>
 
-            <div className="grid grid-cols-3 gap-4">
-              <Field className="col-span-2">
-                <FieldLabel>Valor</FieldLabel>
+        {/* Row 2: Amount + Currency */}
+        <div className="grid grid-cols-3 gap-4">
+          <Controller
+            name="amount"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field className="col-span-2" data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor={field.name}>Valor</FieldLabel>
                 <Input
+                  {...field}
+                  id={field.name}
                   type="number"
                   step="0.01"
-                  {...form.register("amount", { valueAsNumber: true })}
+                  aria-invalid={fieldState.invalid}
+                  onChange={(e) => field.onChange(e.target.valueAsNumber)}
                 />
-                <FieldError errors={[form.formState.errors.amount]} />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
               </Field>
+            )}
+          />
 
-              <Field>
-                <FieldLabel>Moeda</FieldLabel>
+          <Controller
+            name="currency"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor={field.name}>Moeda</FieldLabel>
                 <Select
-                  onValueChange={(v) => form.setValue("currency", v)}
-                  value={form.watch("currency")}
+                  key={field.value}
+                  name={field.name}
+                  value={field.value}
+                  onValueChange={field.onChange}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger
+                    id={field.name}
+                    aria-invalid={fieldState.invalid}
+                  >
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -251,17 +293,32 @@ export function RecurringTemplateForm({
                     <SelectItem value="USD">USD</SelectItem>
                   </SelectContent>
                 </Select>
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
               </Field>
-            </div>
+            )}
+          />
+        </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <Field>
-                <FieldLabel>Conta</FieldLabel>
+        {/* Row 3: Account + Category */}
+        <div className="grid grid-cols-2 gap-4">
+          <Controller
+            name="account_id"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor={field.name}>Conta</FieldLabel>
                 <Select
-                  onValueChange={(v) => form.setValue("account_id", v)}
-                  value={form.watch("account_id")}
+                  key={field.value}
+                  name={field.name}
+                  value={field.value}
+                  onValueChange={field.onChange}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger
+                    id={field.name}
+                    aria-invalid={fieldState.invalid}
+                  >
                     <SelectValue placeholder="Selecione a conta" />
                   </SelectTrigger>
                   <SelectContent>
@@ -274,16 +331,29 @@ export function RecurringTemplateForm({
                     )}
                   </SelectContent>
                 </Select>
-                <FieldError errors={[form.formState.errors.account_id]} />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
               </Field>
+            )}
+          />
 
-              <Field>
-                <FieldLabel>Categoria</FieldLabel>
+          <Controller
+            name="category_id"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor={field.name}>Categoria</FieldLabel>
                 <Select
-                  onValueChange={(v) => form.setValue("category_id", v)}
-                  value={form.watch("category_id")}
+                  key={field.value}
+                  name={field.name}
+                  value={field.value}
+                  onValueChange={field.onChange}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger
+                    id={field.name}
+                    aria-invalid={fieldState.invalid}
+                  >
                     <SelectValue placeholder="Selecione a categoria" />
                   </SelectTrigger>
                   <SelectContent>
@@ -294,38 +364,59 @@ export function RecurringTemplateForm({
                     ))}
                   </SelectContent>
                 </Select>
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
               </Field>
-            </div>
+            )}
+          />
+        </div>
 
-            <Field>
-              <FieldLabel>Regra de Recorrência (RRULE)</FieldLabel>
+        {/* Recurrence Rule */}
+        <Controller
+          name="recurrence_rule"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor={field.name}>
+                Regra de Recorrência (RRULE)
+              </FieldLabel>
               <Input
-                {...form.register("recurrence_rule")}
+                {...field}
+                id={field.name}
                 placeholder="FREQ=MONTHLY;BYMONTHDAY=1"
+                aria-invalid={fieldState.invalid}
               />
-              <p className="text-[0.7rem] text-muted-foreground">
+              <FieldDescription>
                 Use o formato iCal RRULE. Ex: FREQ=MONTHLY;BYMONTHDAY=15 (Todo
                 dia 15 do mês)
-              </p>
-              <FieldError errors={[form.formState.errors.recurrence_rule]} />
+              </FieldDescription>
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
+          )}
+        />
 
-            <Field>
+        {/* Next Occurrence */}
+        <Controller
+          name="next_occurrence"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
               <FieldLabel>Próxima Ocorrência</FieldLabel>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
+                    type="button"
                     variant="outline"
+                    aria-invalid={fieldState.invalid}
                     className={cn(
                       "w-full justify-start text-left font-normal",
-                      !form.watch("next_occurrence") && "text-muted-foreground",
+                      !field.value && "text-muted-foreground",
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {form.watch("next_occurrence") ? (
-                      format(form.watch("next_occurrence"), "PPP", {
-                        locale: ptBR,
-                      })
+                    {field.value ? (
+                      format(field.value, "PPP", { locale: ptBR })
                     ) : (
                       <span>Selecione uma data</span>
                     )}
@@ -334,68 +425,83 @@ export function RecurringTemplateForm({
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
                     mode="single"
-                    selected={form.watch("next_occurrence")}
-                    onSelect={(date) =>
-                      date && form.setValue("next_occurrence", date)
-                    }
+                    selected={field.value}
+                    onSelect={(date) => date && field.onChange(date)}
                     initialFocus
                   />
                 </PopoverContent>
               </Popover>
-              <FieldError errors={[form.formState.errors.next_occurrence]} />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
+          )}
+        />
 
-            <Field>
-              <FieldLabel>Descrição</FieldLabel>
-              <Textarea {...form.register("description")} />
-            </Field>
-
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="is_active"
-                checked={form.watch("is_active")}
-                onCheckedChange={(checked) =>
-                  form.setValue("is_active", !!checked)
-                }
+        {/* Description */}
+        <Controller
+          name="description"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor={field.name}>Descrição</FieldLabel>
+              <Textarea
+                {...field}
+                id={field.name}
+                aria-invalid={fieldState.invalid}
               />
-              <label
-                htmlFor="is_active"
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
+
+        {/* Is Active */}
+        <Controller
+          name="is_active"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field orientation="horizontal" data-invalid={fieldState.invalid}>
+              <Checkbox
+                id={field.name}
+                name={field.name}
+                checked={field.value}
+                onCheckedChange={field.onChange}
+                aria-invalid={fieldState.invalid}
+              />
+              <FieldLabel
+                htmlFor={field.name}
+                className="font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
               >
                 Template Ativo
-              </label>
-            </div>
+              </FieldLabel>
+            </Field>
+          )}
+        />
+      </FieldGroup>
 
-            <DialogFooter className="gap-2 sm:gap-0">
-              {templateId && (
-                <Button
-                  type="button"
-                  variant="destructive"
-                  onClick={handleDelete}
-                  disabled={isDeleting}
-                >
-                  Excluir
-                </Button>
-              )}
-              <div className="flex gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => onOpenChange(false)}
-                >
-                  Cancelar
-                </Button>
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting && (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  )}
-                  {templateId ? "Salvar" : "Criar"}
-                </Button>
-              </div>
-            </DialogFooter>
-          </form>
+      {/* Actions */}
+      <div className="mt-4 flex items-center gap-2">
+        {templateId && (
+          <Button
+            type="button"
+            variant="destructive"
+            onClick={handleDelete}
+            disabled={isDeleting}
+          >
+            {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Excluir
+          </Button>
         )}
-      </DialogContent>
-    </Dialog>
+
+        <div className="ml-auto flex gap-2">
+          <Button type="button" variant="outline" onClick={() => router.back()}>
+            Cancelar
+          </Button>
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {templateId ? "Salvar" : "Criar"}
+          </Button>
+        </div>
+      </div>
+    </form>
   );
 }
+

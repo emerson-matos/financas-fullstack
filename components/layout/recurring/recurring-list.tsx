@@ -1,24 +1,25 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
+import Link from "next/link";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarClock, Plus, Repeat, ToggleLeft, ToggleRight } from "lucide-react";
+import {
+  CalendarClock,
+  Pencil,
+  Repeat,
+  ToggleLeft,
+  ToggleRight,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { RecurringTemplateForm } from "@/components/layout/recurring/recurring-template-form";
 import { useRecurringTemplates } from "@/hooks/use-recurring";
 import { formatCurrency } from "@/lib/utils";
 import type { RecurringTemplate } from "@/lib/types";
 
 export function RecurringList() {
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [selectedTemplateId, setSelectedTemplateId] = useState<
-    string | undefined
-  >();
-
   const { data: templates, isLoading, error } = useRecurringTemplates();
 
   const sortedTemplates = useMemo(() => {
@@ -27,16 +28,6 @@ export function RecurringList() {
       (b.next_occurrence || "").localeCompare(a.next_occurrence || ""),
     );
   }, [templates]);
-
-  const handleRowClick = (id: string) => {
-    setSelectedTemplateId(id);
-    setIsFormOpen(true);
-  };
-
-  const handleCreateNew = () => {
-    setSelectedTemplateId(undefined);
-    setIsFormOpen(true);
-  };
 
   const renderTemplateCard = (template: RecurringTemplate) => {
     const amountLabel = formatCurrency(
@@ -54,10 +45,12 @@ export function RecurringList() {
       <Card
         key={template.id}
         className="p-4 transition hover:-translate-y-0.5 hover:shadow-sm"
-        onClick={() => handleRowClick(template.id)}
       >
         <div className="flex items-start justify-between gap-3">
-          <div className="space-y-1">
+          <Link
+            href={`/dashboard/recurring/${template.id}`}
+            className="flex-1 space-y-1"
+          >
             <div className="flex items-center gap-2">
               <Repeat className="h-4 w-4 text-muted-foreground" />
               <h3 className="text-base font-semibold leading-tight">
@@ -83,19 +76,26 @@ export function RecurringList() {
                 Conta: {template.account.identification}
               </p>
             )}
-          </div>
+          </Link>
 
-          <Badge variant={template.is_active ? "default" : "outline"}>
-            {template.is_active ? (
-              <span className="inline-flex items-center gap-1">
-                <ToggleRight className="h-3.5 w-3.5" /> Ativo
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1">
-                <ToggleLeft className="h-3.5 w-3.5" /> Pausado
-              </span>
-            )}
-          </Badge>
+          <div className="flex flex-col items-end gap-2">
+            <Badge variant={template.is_active ? "default" : "outline"}>
+              {template.is_active ? (
+                <span className="inline-flex items-center gap-1">
+                  <ToggleRight className="h-3.5 w-3.5" /> Ativo
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1">
+                  <ToggleLeft className="h-3.5 w-3.5" /> Pausado
+                </span>
+              )}
+            </Badge>
+            <Button variant="ghost" size="sm" asChild>
+              <Link href={`/dashboard/recurring/${template.id}/edit`}>
+                <Pencil className="h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
         </div>
       </Card>
     );
@@ -103,13 +103,6 @@ export function RecurringList() {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
-        <Button onClick={handleCreateNew}>
-          <Plus className="mr-2 h-4 w-4" />
-          Novo Template
-        </Button>
-      </div>
-
       {isLoading ? (
         <div className="space-y-3">
           {[1, 2, 3].map((item) => (
@@ -139,14 +132,6 @@ export function RecurringList() {
         <div className="space-y-3">
           {sortedTemplates.map(renderTemplateCard)}
         </div>
-      )}
-
-      {isFormOpen && (
-        <RecurringTemplateForm
-          open={isFormOpen}
-          onOpenChange={setIsFormOpen}
-          templateId={selectedTemplateId}
-        />
       )}
     </div>
   );
