@@ -14,5 +14,11 @@ export default defineConfig({
       ".direnv/**",
       "**/.{idea,git,cache,output,temp}/**",
     ],
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "json", "html"],
+      include: ["lib/services/**/*.ts", "hooks/**/*.ts"],
+      exclude: ["**/*.test.ts", "**/*.test.tsx"],
+    },
   },
 });
