@@ -837,7 +837,7 @@ export function TransactionForm({
             />
 
             {/* Submit Actions */}
-            <CardFooter className="pt-4 flex flex-col sm:flex-row gap-3">
+            <CardFooter className="pt-4 flex flex-col sm:flex-row gap-3 w-full">
               {isSubmitting && (
                 <div
                   className="mt-4 p-3 bg-muted rounded-md"
@@ -853,34 +853,36 @@ export function TransactionForm({
                   </div>
                 </div>
               )}
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-                className="flex-1 h-12"
-                size="lg"
-              >
-                {isSubmitting ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                    {transactionId ? "Salvando..." : "Criando..."}
-                  </>
-                ) : (
-                  <>
-                    <CreditCardIcon className="h-4 w-4 mr-2" />
-                    {transactionId ? "Salvar Alterações" : "Criar Transação"}
-                  </>
-                )}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => router.back()}
-                disabled={isSubmitting}
-                className="h-12"
-                size="lg"
-              >
-                Cancelar
-              </Button>
+              <div className="flex gap-3 flex-1 w-full">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => router.back()}
+                  disabled={isSubmitting}
+                  className="flex-1"
+                  size="lg"
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="flex-2"
+                  size="lg"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                      {transactionId ? "Salvando..." : "Criando..."}
+                    </>
+                  ) : (
+                    <>
+                      <CreditCardIcon className="h-4 w-4 mr-2" />
+                      {transactionId ? "Salvar Alterações" : "Criar Transação"}
+                    </>
+                  )}
+                </Button>
+              </div>
             </CardFooter>
           </form>
         </CardContent>
