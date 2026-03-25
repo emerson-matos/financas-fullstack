@@ -47,37 +47,46 @@ describe("AppSidebar", () => {
       renderWithRouter(<AppSidebar />);
       // Check brand name and subtitle
       expect(screen.getByText("TopHat")).toBeInTheDocument();
-      expect(screen.getByText("Company")).toBeInTheDocument();
+      expect(screen.getByText("Finanças")).toBeInTheDocument();
       // Check logo
       expect(screen.getByTestId("top-hat-logo")).toBeInTheDocument();
       // Check group label
-      expect(screen.getByText("Páginas")).toBeInTheDocument();
+      expect(screen.getByText("Início")).toBeInTheDocument();
     });
     it("renders all default menu items", () => {
       renderWithRouter(<AppSidebar />);
       const expectedItems = [
-        "Dashboard",
-        "Contas",
+        "Resumo",
         "Transações",
-        "Orçamentos",
+        "Contas",
+        "Gastos Fixos",
+        "Metas",
+        "Histórico",
+        "Importar",
         "Exportar",
-        "Relatórios",
         "Configurações",
+        "Contas Compartilhadas",
+        "Grupos",
       ];
       expectedItems.forEach((item) => {
-        expect(screen.getByText(item)).toBeInTheDocument();
+        expect(screen.getAllByText(item).length).toBeGreaterThan(0);
       });
+      expect(screen.getAllByText("Análises").length).toBeGreaterThanOrEqual(2);
     });
     it("renders correct navigation links", () => {
       renderWithRouter(<AppSidebar />);
       const expectedLinks = [
-        { text: "Dashboard", href: "/dashboard/home" },
-        { text: "Contas", href: "/dashboard/accounts" },
+        { text: "Resumo", href: "/dashboard/home" },
         { text: "Transações", href: "/dashboard/transactions" },
-        { text: "Orçamentos", href: "/dashboard/budgets" },
+        { text: "Contas", href: "/dashboard/accounts" },
+        { text: "Gastos Fixos", href: "/dashboard/recurring" },
+        { text: "Metas", href: "/dashboard/budgets" },
+        { text: "Histórico", href: "/dashboard/timeline" },
+        { text: "Análises", href: "/dashboard/reports" },
+        { text: "Importar", href: "/dashboard/import" },
         { text: "Exportar", href: "/dashboard/export" },
-        { text: "Relatórios", href: "/dashboard/reports" },
         { text: "Configurações", href: "/dashboard/settings" },
+        { text: "Grupos", href: "/dashboard/groups" },
       ];
       expectedLinks.forEach(({ text, href }) => {
         // Get all links with this href and find the one containing the expected text
@@ -189,10 +198,10 @@ describe("AppSidebar", () => {
       // Check that sidebar menu items render with expected content
       const dashboardLinks = screen.getAllByTestId("link-/dashboard/home");
       const menuLink = dashboardLinks.find((link) =>
-        link.textContent?.includes("Dashboard"),
+        link.textContent?.includes("Resumo"),
       );
       expect(menuLink).toBeInTheDocument();
-      expect(menuLink).toHaveTextContent("Dashboard");
+      expect(menuLink).toHaveTextContent("Resumo");
       // Verify the link structure includes an icon (SVG element)
       const iconElement = menuLink?.querySelector("svg");
       expect(iconElement).toBeInTheDocument();
@@ -202,7 +211,7 @@ describe("AppSidebar", () => {
     it("has proper heading structure", () => {
       renderWithRouter(<AppSidebar />);
       // Check that group labels are properly rendered
-      expect(screen.getByText("Páginas")).toBeInTheDocument();
+      expect(screen.getByText("Início")).toBeInTheDocument();
     });
     it("has proper link accessibility", () => {
       renderWithRouter(<AppSidebar />);
@@ -216,7 +225,7 @@ describe("AppSidebar", () => {
       renderWithRouter(<AppSidebar />);
       const homeLinks = screen.getAllByTestId("link-/dashboard/home");
       const menuLink = homeLinks.find((link) =>
-        link.textContent?.includes("Dashboard"),
+        link.textContent?.includes("Resumo"),
       );
       menuLink?.focus();
       expect(document.activeElement).toBe(menuLink);
