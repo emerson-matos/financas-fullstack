@@ -5,23 +5,32 @@ This document guides coding agents in maintaining consistency, quality, and secu
 ## 1. Core Commands
 
 ```
-# Start dev server (https://localhost:3000)
-pnpm dev
+# Development
+pnpm dev                           # Start dev server (https://localhost:3000 with HTTPS)
+pnpm build                         # Build for production
+pnpm start                         # Open existing production server
 
-# Build for production
-pnpm build
+# Linting & Formatting
+pnpm lint                          # Run ESLint on entire codebase
 
-# Open existing server
-pnpm start
+# Testing (Vitest + React Testing Library)
+pnpm test                          # Run all tests once
+pnpm test:watch                    # Run tests in watch mode
+pnpm test filename.test.ts         # Run single test file
+vitest run filename.test.ts        # Alternative: run single test file
 
-# Lint & format
-pnpm lint
+# Database (Supabase local)
+pnpm db:migrate                    # Push migrations to local DB
+pnpm db:migrate:prod               # Push migrations to production DB
+pnpm db:reset                      # Reset local database
+pnpm db:seed                       # Reset and seed local database
+pnpm db:diff                       # Show diff between schema and migrations
+pnpm db:status                     # List migration status
 
-# Run tests
-pnpm test          # All tests
-pnpm test:watch    # Watch mode
-pnpm test filename.test.ts          # Single test file
-vitest run filename.test.ts         # Alternative single file
+# Supabase CLI
+pnpm supabase:start                # Start local Supabase services
+pnpm supabase:stop                 # Stop local Supabase services
+pnpm supabase:types                # Generate TypeScript types from DB schema
 ```
 
 ## 2. Code Style & Conventions
@@ -77,6 +86,13 @@ components/
 hooks/                   # React‑Query hooks
 ```
 
+### State Management
+- **React Query** for server state (data fetching, caching, mutations)
+- Use `@tanstack/react-query` for all async data operations
+- Create custom hooks in `hooks/` folder wrapping React Query
+- Example: `useTransactions`, `useCreateTransaction`
+- Invalidate queries after mutations to refetch data
+
 ## 3. Error Handling
 - Central error definitions: `lib/error-handler.ts`.
 - Use enum `ErrorType` and `ErrorSeverity`.
@@ -122,6 +138,37 @@ const mutation = useMutation({
 - Lazy‑load routes and heavy UI modules.
 - Keep React‑Query cache keys unique per query.
 - Monitor bundle size via `pnpm build`.
+
+## 9. Development Notes
+- Dev server runs on **HTTPS** (`https://localhost:3000`) with self-signed certificates
+- Next.js 16 uses React 19 with async APIs for `params`, `searchParams`, `cookies`, `headers`
+- Use `cache` function for data caching in server components
+- Prefer Server Actions for form submissions where applicable
+
+## 10. Running Tests
+- Tests use **Vitest** with React Testing Library
+- Test files: `*.test.ts` or `*.test.tsx` in same folder as source
+- Import via `@testing-library/react` for component tests
+- Import via `@testing-library/jest-dom` for DOM assertions
+- Use `vitest` config for setup files and mocks
+
+### Example Test Pattern
+```ts
+import { render, screen } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { MyComponent } from "./my-component";
+
+const queryClient = new QueryClient();
+
+test("renders correctly", () => {
+  render(
+    <QueryClientProvider client={queryClient}>
+      <MyComponent />
+    </QueryClientProvider>
+  );
+  expect(screen.getByText("Hello")).toBeInTheDocument();
+});
+```
 
 ---
 
