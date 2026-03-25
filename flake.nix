@@ -12,10 +12,10 @@
 
   outputs =
     {
-      self,
       nixpkgs,
       flake-utils,
       nix-direnv,
+      ...
     }:
     flake-utils.lib.eachDefaultSystem (
       system:
@@ -27,8 +27,6 @@
             nix-direnv.overlays.default
           ];
         };
-
-        node = pkgs.nodejs_22;
       in
       {
         devShells.default = pkgs.mkShell {
@@ -36,11 +34,10 @@
 
           packages = with pkgs; [
             # --- Core ---
-            node
+            nodejs
             bun
             yarn
             pnpm
-            antigravity-fhs
             chromium
 
             # --- Supabase ---
@@ -56,6 +53,11 @@
             eslint
             biome
             prettier
+
+            ## IA
+            claude-code
+            opencode
+            antigravity-fhs
 
             # --- Utilities ---
             jq
