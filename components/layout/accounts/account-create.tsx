@@ -326,10 +326,10 @@ export function AccountForm({
         )}
       </FieldGroup>
 
-      <div className="flex flex-col-reverse justify-end gap-4 sm:flex-row sm:items-center">
-        <div className="flex flex-col-reverse sm:flex-row sm:space-x-2 space-y-2 space-y-reverse sm:space-y-0">
+      <div className="flex flex-col sm:flex-row gap-3 w-full">
+        <div className="flex gap-3 flex-1 w-full">
           {onClose && (
-            <Button type="button" variant="outline" onClick={onClose}>
+            <Button type="button" variant="outline" onClick={onClose} className="flex-1">
               Cancelar
             </Button>
           )}
@@ -337,7 +337,7 @@ export function AccountForm({
           <Button
             type="submit"
             disabled={isLoading}
-            className="w-full sm:w-auto"
+            className="flex-2"
           >
             {isLoading ? (
               <>
