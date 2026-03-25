@@ -478,7 +478,7 @@ export function RecurringTemplateForm({
       </FieldGroup>
 
       {/* Actions */}
-      <div className="mt-4 flex items-center gap-2">
+      <div className="mt-4 flex flex-col sm:flex-row gap-3 w-full">
         {templateId && (
           <Button
             type="button"
@@ -491,11 +491,11 @@ export function RecurringTemplateForm({
           </Button>
         )}
 
-        <div className="ml-auto flex gap-2">
-          <Button type="button" variant="outline" onClick={() => router.back()}>
+        <div className="flex gap-3 flex-1">
+          <Button type="button" variant="outline" onClick={() => router.back()} className="flex-1">
             Cancelar
           </Button>
-          <Button type="submit" disabled={isSubmitting}>
+          <Button type="submit" disabled={isSubmitting} className="flex-2">
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {templateId ? "Salvar" : "Criar"}
           </Button>

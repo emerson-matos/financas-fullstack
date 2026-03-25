@@ -3,7 +3,7 @@
 import { use } from "react";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { ArrowLeft, CalendarClock, Pencil, Repeat, ToggleLeft, ToggleRight } from "lucide-react";
+import { ArrowLeft, CalendarClock, Pencil, ToggleLeft, ToggleRight } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -76,14 +76,10 @@ export function RecurringDetail({ params }: RecurringDetailProps) {
   return (
     <div className="mx-auto space-y-6 px-4 py-6 sm:px-6 lg:px-8 lg:py-8 max-w-4xl">
       <div className="flex items-center justify-between">
-        <div className="space-y-1">
-          <Heading
-            title={template.name}
-            description="Detalhes do template recorrente"
-          >
-            <Repeat className="h-8 w-8 text-primary" />
-          </Heading>
-        </div>
+        <Heading
+          title={template.name}
+          description="Detalhes do template recorrente"
+        />
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => router.back()}>
             <ArrowLeft className="h-4 w-4 mr-2" />
