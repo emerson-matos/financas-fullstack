@@ -1,5 +1,5 @@
 -- Seed file for local development
--- Creates a test user: ade@mir.com with password: 123456
+-- Creates a test user: ade@mir.com with password: 123123
 -- All mocked data starts from 5 years ago
 -- Transactions grow over time: ~1/week in 2020, increasing to ~5/week in 2025
 
@@ -35,7 +35,7 @@ INSERT INTO auth.users (
   '00000000-0000-0000-0000-000000000001',
   '00000000-0000-0000-0000-000000000000',
   'ade@mir.com',
-  extensions.crypt('123456', extensions.gen_salt('bf')),
+  extensions.crypt('123123', extensions.gen_salt('bf')),
   now() - interval '5 years',
   '{"provider": "email", "providers": ["email"]}',
   '{"name": "Ade Mir", "full_name": "Ade Mir", "onboarding_completed": true, "default_currency": "BRL"}',
@@ -68,7 +68,7 @@ INSERT INTO auth.users (
   '00000000-0000-0000-0000-000000000002',
   '00000000-0000-0000-0000-000000000000',
   'bob@mir.com',
-  extensions.crypt('123456', extensions.gen_salt('bf')),
+  extensions.crypt('123123', extensions.gen_salt('bf')),
   now() - interval '5 years',
   '{"provider": "email", "providers": ["email"]}',
   '{"name": "Bob Mir", "full_name": "Bob Mir", "onboarding_completed": true, "default_currency": "BRL"}',
