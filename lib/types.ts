@@ -644,4 +644,19 @@ export interface MemberDebt {
     email: string;
     name: string;
   };
+  proposal?: {
+    id?: string;
+    status?: "pending" | "approved" | "rejected";
+    transaction?: { name: string; amount: number; currency: string };
+  };
+  debtor?: { name: string | null; email: string | null };
+}
+
+export interface GroupTransaction {
+  id: string;
+  name: string;
+  amount: number;
+  currency: string;
+  transacted_at: string;
+  proposal?: { id: string; status: "pending" | "approved" | "rejected" } | null;
 }

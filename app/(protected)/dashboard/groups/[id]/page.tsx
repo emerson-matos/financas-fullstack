@@ -15,6 +15,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { SettingsIcon, UserPlus, Trash2, Copy } from "lucide-react";
 import { SplitProposalsList } from "@/components/layout/groups/split-proposals-list";
+import { GroupTransactionsList } from "@/components/layout/groups/group-transactions-list";
+import { GroupDebtsList } from "@/components/layout/groups/group-debts-list";
 import { GroupInviteDialog } from "@/components/layout/groups/group-invite-dialog";
 import { GroupMembership, GroupInvite } from "@/lib/types";
 import { BackButton } from "@/components/back-button";
@@ -46,9 +48,13 @@ export default function GroupDetailsPage({ params }: PageProps) {
   const { mutate: deleteInvite } = useDeleteGroupInvite(id);
 
   const copyInviteLink = (token: string) => {
-    const link = `${APP_URL}/invite/${token}`;
-    navigator.clipboard.writeText(link);
-    toast({ title: "Link copiado!" });
+    const baseUrl =
+      typeof window !== "undefined"
+        ? window.location.origin
+        : APP_URL;
+    const message = `Você foi convidado para o grupo *${group?.name}*! Acesse o link para entrar: ${baseUrl}/invite/${token}`;
+    navigator.clipboard.writeText(message);
+    toast({ title: "Mensagem copiada!" });
   };
 
   if (isLoading) {
@@ -93,6 +99,7 @@ export default function GroupDetailsPage({ params }: PageProps) {
             )}
           </TabsTrigger>
           <TabsTrigger value="transactions">Transações</TabsTrigger>
+          <TabsTrigger value="debts">Dívidas</TabsTrigger>
         </TabsList>
 
         <TabsContent value="proposals" className="space-y-4">
@@ -178,7 +185,7 @@ export default function GroupDetailsPage({ params }: PageProps) {
                             size="icon"
                             variant="ghost"
                             onClick={() => copyInviteLink(invite.token)}
-                            title="Copiar link de convite"
+                            title="Copiar mensagem"
                           >
                             <Copy className="h-4 w-4" />
                           </Button>
@@ -201,14 +208,24 @@ export default function GroupDetailsPage({ params }: PageProps) {
           </div>
         </TabsContent>
 
-        <TabsContent value="transactions">
-          <Card>
-            <CardContent className="pt-6">
-              <p className="text-muted-foreground text-center">
-                Listagem de transações será implementada em breve.
-              </p>
-            </CardContent>
-          </Card>
+        <TabsContent value="transactions" className="space-y-4">
+          <div>
+            <h3 className="text-lg font-medium">Transações do Grupo</h3>
+            <p className="text-sm text-muted-foreground">
+              Transações associadas a este grupo e suas propostas de divisão.
+            </p>
+          </div>
+          <GroupTransactionsList groupId={id} />
+        </TabsContent>
+
+        <TabsContent value="debts" className="space-y-4">
+          <div>
+            <h3 className="text-lg font-medium">Dívidas entre Membros</h3>
+            <p className="text-sm text-muted-foreground">
+              Controle de débitos gerados pelas divisões aprovadas.
+            </p>
+          </div>
+          <GroupDebtsList groupId={id} isAdmin={isAdmin} />
         </TabsContent>
       </Tabs>
 

@@ -1,8 +1,10 @@
 import { api } from "@/lib/api";
-import {
+import type {
   Group,
   GroupInvite,
   CreateGroupInviteRequest,
+  GroupTransaction,
+  MemberDebt,
   PageResponse,
 } from "@/lib/types";
 
@@ -48,5 +50,30 @@ export const groupsService = {
 
   deleteGroupInvite: async (id: string) => {
     await api.delete(`/invites/${id}`);
+  },
+
+  getGroupTransactions: async (groupId: string, page = 0, size = 20) => {
+    const response = await api.get<{
+      content: GroupTransaction[];
+      totalElements: number;
+      totalPages: number;
+      currentPage: number;
+      pageSize: number;
+    }>(`/groups/${groupId}/transactions?page=${page}&size=${size}`);
+    return response.data;
+  },
+
+  getGroupDebts: async (groupId: string) => {
+    const response = await api.get<{ content: MemberDebt[] }>(
+      `/groups/${groupId}/debts`,
+    );
+    return response.data;
+  },
+
+  settleDebt: async (debtId: string) => {
+    const response = await api.patch(`/member-debts/${debtId}`, {
+      status: "paid",
+    });
+    return response;
   },
 };

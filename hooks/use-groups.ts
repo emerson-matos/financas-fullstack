@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { groupsService } from "@/lib/services/groups";
-import { CreateGroupInviteRequest, Group } from "@/lib/types";
+import type { CreateGroupInviteRequest, Group } from "@/lib/types";
 import { api } from "@/lib/api";
 
 export function useGroups() {
@@ -78,6 +78,34 @@ export function useDeleteGroupInvite(groupId: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["groups", groupId, "invites"],
+      });
+    },
+  });
+}
+
+export function useGroupTransactions(groupId: string) {
+  return useQuery({
+    queryKey: ["groups", groupId, "transactions"],
+    queryFn: () => groupsService.getGroupTransactions(groupId),
+    enabled: !!groupId,
+  });
+}
+
+export function useGroupDebts(groupId: string) {
+  return useQuery({
+    queryKey: ["groups", groupId, "debts"],
+    queryFn: () => groupsService.getGroupDebts(groupId),
+    enabled: !!groupId,
+  });
+}
+
+export function useSettleDebt(groupId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (debtId: string) => groupsService.settleDebt(debtId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["groups", groupId, "debts"],
       });
     },
   });
