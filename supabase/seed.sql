@@ -103,7 +103,6 @@ INSERT INTO thc.user_accounts (id, user_id, identification, kind, currency, cred
   ('20000000-0000-0000-0000-000000000008', '00000000-0000-0000-0000-000000000001', 'Itaú Crédito', 'CREDIT_CARD', 'BRL', 5000.00, 1, 10, now() - interval '4 years', now(), '00000000-0000-0000-0000-000000000001'),
   ('20000000-0000-0000-0000-000000000009', '00000000-0000-0000-0000-000000000001', 'Inter Conta', 'CHECKING', 'BRL', NULL, NULL, NULL, now() - interval '2 years', now(), '00000000-0000-0000-0000-000000000001'),
   ('20000000-0000-0000-0000-000000000010', '00000000-0000-0000-0000-000000000001', 'Wise USD', 'CHECKING', 'USD', NULL, NULL, NULL, now() - interval '1 year', now(), '00000000-0000-0000-0000-000000000001'),
-  -- FIXME: ademir is seeing this account, account aren't shareble, unless it is co-owned (conta conjunta)
   ('20000000-0000-0000-0000-000000000011', '00000000-0000-0000-0000-000000000002', 'Santander Bob', 'CHECKING', 'BRL', NULL, NULL, NULL, now() - interval '1 year', now(), '00000000-0000-0000-0000-000000000002');
 
 -- ============================================================================
