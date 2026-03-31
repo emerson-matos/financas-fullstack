@@ -30,13 +30,13 @@ export async function POST(
 
     // 2. Authorization: Check if user is ADMIN of the group
     const { data: membership, error: membershipError } = await supabase
-      .from("group_members")
-      .select("role")
+      .from("group_memberships")
+      .select("user_role")
       .eq("group_id", proposal.group_id)
       .eq("user_id", userId)
       .single();
 
-    if (membershipError || !membership || membership.role !== "admin") {
+    if (membershipError || !membership || membership.user_role !== "admin") {
       return createErrorResponse(
         new Error("Only admins can reject split proposals"),
         403,

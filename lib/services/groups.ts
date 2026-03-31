@@ -32,7 +32,7 @@ export const groupsService = {
   },
 
   getGroupInvites: async (groupId: string) => {
-    const response = await api.get<{ data: GroupInvite[] }>(
+    const response = await api.get<PageResponse<GroupInvite>>(
       `/groups/${groupId}/invites`,
     );
     return response.data;

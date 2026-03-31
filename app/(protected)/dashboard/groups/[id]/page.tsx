@@ -1,7 +1,7 @@
 "use client";
 
-import { use } from "react";
-import { useGroup } from "@/hooks/use-groups";
+import { use, useState } from "react";
+import { useGroup, useGroupInvites, useDeleteGroupInvite } from "@/hooks/use-groups";
 import { useAuth } from "@/hooks/use-auth";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -12,10 +12,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { SettingsIcon } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { SettingsIcon, UserPlus, Trash2, Copy } from "lucide-react";
 import { SplitProposalsList } from "@/components/layout/groups/split-proposals-list";
-import { GroupMembership } from "@/lib/types";
+import { GroupInviteDialog } from "@/components/layout/groups/group-invite-dialog";
+import { GroupMembership, GroupInvite } from "@/lib/types";
 import { BackButton } from "@/components/back-button";
+import { useToast } from "@/hooks/use-toast";
+import { APP_URL } from "@/lib/constants";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -23,21 +27,29 @@ interface PageProps {
 
 export default function GroupDetailsPage({ params }: PageProps) {
   const { id } = use(params);
-  // useGroup returns { data: Group | undefined, isLoading: boolean } from react-query
-  // BUT the service logic might wrap it. Let's check api.ts again.
-  // api.get returns ApiResponse<T> where T has data property?
-  // groupsService.getGroup returns response (which is ApiResponse<Group>).
-  // So data in useQuery is ApiResponse<Group>.
-  // So we access data.data.
   const { data: groupResponse, isLoading } = useGroup(id);
   const group = groupResponse?.data;
 
   const { user } = useAuth();
+  const { toast } = useToast();
+  const [isInviteOpen, setIsInviteOpen] = useState(false);
 
   const membership = group?.members?.find(
     (m: GroupMembership) => m.user_id === user?.id,
   );
   const isAdmin = membership?.user_role === "admin";
+
+  const { data: invitesResponse } = useGroupInvites(id);
+  const invites = (invitesResponse?.content ?? []) as GroupInvite[];
+  const pendingInvites = invites.filter((inv) => inv.status === "pending");
+
+  const { mutate: deleteInvite } = useDeleteGroupInvite(id);
+
+  const copyInviteLink = (token: string) => {
+    const link = `${APP_URL}/invite/${token}`;
+    navigator.clipboard.writeText(link);
+    toast({ title: "Link copiado!" });
+  };
 
   if (isLoading) {
     return <div className="p-8">Carregando grupo...</div>;
@@ -72,7 +84,14 @@ export default function GroupDetailsPage({ params }: PageProps) {
       <Tabs defaultValue="proposals" className="space-y-4">
         <TabsList>
           <TabsTrigger value="proposals">Propostas de Divisão</TabsTrigger>
-          <TabsTrigger value="members">Membros</TabsTrigger>
+          <TabsTrigger value="members">
+            Membros
+            {pendingInvites.length > 0 && (
+              <Badge variant="secondary" className="ml-2">
+                {pendingInvites.length} pendente{pendingInvites.length > 1 ? "s" : ""}
+              </Badge>
+            )}
+          </TabsTrigger>
           <TabsTrigger value="transactions">Transações</TabsTrigger>
         </TabsList>
 
@@ -90,46 +109,114 @@ export default function GroupDetailsPage({ params }: PageProps) {
         </TabsContent>
 
         <TabsContent value="members">
-          <Card>
-            <CardHeader>
-              <CardTitle>Membros</CardTitle>
-              <CardDescription>
-                Pessoas participantes deste grupo ({group.members?.length || 0})
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {group.members?.map((member: GroupMembership) => (
-                  <div
-                    key={member.id}
-                    className="flex items-center justify-between border-b pb-2 last:border-0 last:pb-0"
-                  >
-                    <div>
-                      <p className="font-medium">
-                        {member.user?.name || member.user?.email}
-                      </p>
-                      <p className="text-xs text-muted-foreground capitalize">
-                        {member.user_role}
-                      </p>
-                    </div>
+          <div className="space-y-4">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Membros</CardTitle>
+                    <CardDescription>
+                      Pessoas participantes deste grupo ({group.members?.length || 0})
+                    </CardDescription>
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                  {isAdmin && (
+                    <Button size="sm" onClick={() => setIsInviteOpen(true)}>
+                      <UserPlus className="mr-2 h-4 w-4" />
+                      Convidar
+                    </Button>
+                  )}
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {group.members?.map((member: GroupMembership) => (
+                    <div
+                      key={member.id}
+                      className="flex items-center justify-between border-b pb-2 last:border-0 last:pb-0"
+                    >
+                      <div>
+                        <p className="font-medium">
+                          {member.user?.name || member.user?.email || member.user_id}
+                        </p>
+                        <p className="text-xs text-muted-foreground capitalize">
+                          {member.user_role === "admin" ? "Administrador" : "Membro"}
+                        </p>
+                      </div>
+                      <Badge variant={member.user_role === "admin" ? "default" : "secondary"}>
+                        {member.user_role === "admin" ? "Admin" : "Membro"}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {isAdmin && pendingInvites.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Convites Pendentes</CardTitle>
+                  <CardDescription>
+                    Convites enviados aguardando aceitação
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {pendingInvites.map((invite: GroupInvite) => (
+                      <div
+                        key={invite.id}
+                        className="flex items-center justify-between border-b pb-2 last:border-0 last:pb-0"
+                      >
+                        <div>
+                          <p className="text-sm font-medium">{invite.email}</p>
+                          <p className="text-xs text-muted-foreground capitalize">
+                            {invite.role === "admin" ? "Administrador" : "Membro"} •{" "}
+                            Expira em {new Date(invite.expires_at).toLocaleDateString("pt-BR")}
+                          </p>
+                        </div>
+                        <div className="flex gap-1">
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            onClick={() => copyInviteLink(invite.token)}
+                            title="Copiar link de convite"
+                          >
+                            <Copy className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="text-destructive hover:bg-destructive/10"
+                            onClick={() => deleteInvite(invite.id)}
+                            title="Cancelar convite"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
         </TabsContent>
 
         <TabsContent value="transactions">
           <Card>
             <CardContent className="pt-6">
               <p className="text-muted-foreground text-center">
-                {/* TODO: Listagem de transações será implementada em breve. */}
                 Listagem de transações será implementada em breve.
               </p>
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
+
+      <GroupInviteDialog
+        open={isInviteOpen}
+        onOpenChange={setIsInviteOpen}
+        groupId={id}
+      />
     </div>
   );
 }

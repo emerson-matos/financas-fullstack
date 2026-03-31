@@ -3,6 +3,7 @@ import { createErrorResponse, createSuccessResponse } from "@/lib/api/handlers";
 import { requireAuth } from "@/lib/api/auth";
 import { BadRequestAlertException } from "@/lib/api/errors";
 import { paginate, create } from "@/lib/supabase/queries";
+import { createClient } from "@/lib/supabase/server";
 
 export async function GET(request: NextRequest) {
   try {
@@ -39,8 +40,17 @@ export async function POST(request: NextRequest) {
     }
 
     const group = await create("app_groups", {
-      ...body,
+      name: body.name,
+      description: body.description,
       created_by: userId,
+    });
+
+    // Add creator as admin member
+    const supabase = await createClient();
+    await supabase.from("group_memberships").insert({
+      group_id: (group as { id: string }).id,
+      user_id: userId,
+      user_role: "admin",
     });
 
     return createSuccessResponse(group, 201);

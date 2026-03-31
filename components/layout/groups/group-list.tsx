@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { GroupInviteDialog } from "@/components/layout/groups/group-invite-dialog";
+import { GroupCreateDialog } from "@/components/layout/groups/group-create-dialog";
 import { useGroups } from "@/hooks/use-groups";
 import type { Group } from "@/lib/types";
 
@@ -105,13 +105,7 @@ export function GroupList() {
         </div>
       )}
 
-      {isInviteOpen && (
-        <GroupInviteDialog
-          open={isInviteOpen}
-          onOpenChange={setIsInviteOpen}
-          groupId={undefined} // New group
-        />
-      )}
+      <GroupCreateDialog open={isInviteOpen} onOpenChange={setIsInviteOpen} />
     </div>
   );
 }

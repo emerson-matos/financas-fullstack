@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { groupsService } from "@/lib/services/groups";
 import { CreateGroupInviteRequest, Group } from "@/lib/types";
+import { api } from "@/lib/api";
 
 export function useGroups() {
   return useQuery({
@@ -65,6 +66,18 @@ export function useCreateGroupInvite() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
         queryKey: ["groups", variables.groupId, "invites"],
+      });
+    },
+  });
+}
+
+export function useDeleteGroupInvite(groupId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (inviteId: string) => api.delete(`/invites/${inviteId}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["groups", groupId, "invites"],
       });
     },
   });
