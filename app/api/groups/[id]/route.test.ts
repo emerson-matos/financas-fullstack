@@ -53,7 +53,7 @@ describe("PUT /api/groups/[id]", () => {
     mockRequireAuth.mockResolvedValue({ userId: "user-1" });
     membershipRow = null; // not a member
 
-    const { PUT } = await import("../route");
+    const { PUT } = await import("./route");
     const res = await PUT(makeRequest({ name: "New name" }), PARAMS);
     expect(res.status).toBe(403);
 
@@ -65,7 +65,7 @@ describe("PUT /api/groups/[id]", () => {
     mockRequireAuth.mockResolvedValue({ userId: "user-1" });
     membershipRow = { user_role: "member" };
 
-    const { PUT } = await import("../route");
+    const { PUT } = await import("./route");
     const res = await PUT(makeRequest({ name: "New name" }), PARAMS);
     expect(res.status).toBe(403);
   });
@@ -75,7 +75,7 @@ describe("PUT /api/groups/[id]", () => {
     membershipRow = { user_role: "admin" };
     mockUpdate.mockResolvedValue({ id: "group-1", name: "New name" });
 
-    const { PUT } = await import("../route");
+    const { PUT } = await import("./route");
     const res = await PUT(makeRequest({ name: "New name" }), PARAMS);
     expect(res.status).toBe(200);
     expect(mockUpdate).toHaveBeenCalledWith(
@@ -90,7 +90,7 @@ describe("PUT /api/groups/[id]", () => {
     membershipRow = { user_role: "admin" };
     mockUpdate.mockResolvedValue({ id: "group-1" });
 
-    const { PUT } = await import("../route");
+    const { PUT } = await import("./route");
     await PUT(
       makeRequest({ name: "ok", description: "ok", created_by: "injected", deactivated_at: "evil" }),
       PARAMS,
@@ -117,7 +117,7 @@ describe("DELETE /api/groups/[id]", () => {
     mockRequireAuth.mockResolvedValue({ userId: "user-1" });
     membershipRow = null;
 
-    const { DELETE } = await import("../route");
+    const { DELETE } = await import("./route");
     const req = new NextRequest("http://localhost/api/groups/group-1", { method: "DELETE" });
     const res = await DELETE(req, PARAMS);
     expect(res.status).toBe(403);
@@ -129,7 +129,7 @@ describe("DELETE /api/groups/[id]", () => {
     membershipRow = { user_role: "admin" };
     mockDeleteById.mockResolvedValue(undefined);
 
-    const { DELETE } = await import("../route");
+    const { DELETE } = await import("./route");
     const req = new NextRequest("http://localhost/api/groups/group-1", { method: "DELETE" });
     const res = await DELETE(req, PARAMS);
     expect(res.status).toBe(204);

@@ -126,6 +126,8 @@ const mutation = useMutation({
 - Store secrets in `.env` or GitHub secrets.
 - Validate all inputs with Zod.
 - Sanitize any user‑generated content before rendering.
+- **User ownership in mutations**: When creating records that belong to a user, always include `user_id: userId` explicitly in the payload — never depend solely on `created_by` for data isolation. RLS policies filter by `user_id`, not `created_by`. A missing `user_id` (NULL) can make a record visible to all authenticated users.
+- **RLS SELECT policies**: Every table with per-user data must restrict SELECT to `user_id = auth.uid()` (or members of shared groups). Never use `USING (TRUE)` on tables with personal data.
 
 ## 7. Common Gotchas
 1. **Relative imports in non‑tests** – always use `@/`.

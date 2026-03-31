@@ -37,7 +37,7 @@ describe("GET /api/groups — pagination param validation", () => {
   });
 
   it("uses default page=0 and size=20 when params absent", async () => {
-    const { GET } = await import("../route");
+    const { GET } = await import("./route");
     await GET(getRequest());
 
     const opts = mockPaginate.mock.calls[0][1];
@@ -46,7 +46,7 @@ describe("GET /api/groups — pagination param validation", () => {
   });
 
   it("clamps NaN page to 0", async () => {
-    const { GET } = await import("../route");
+    const { GET } = await import("./route");
     await GET(getRequest("?page=abc&size=xyz"));
 
     const opts = mockPaginate.mock.calls[0][1];
@@ -55,7 +55,7 @@ describe("GET /api/groups — pagination param validation", () => {
   });
 
   it("clamps negative page to 0", async () => {
-    const { GET } = await import("../route");
+    const { GET } = await import("./route");
     await GET(getRequest("?page=-5"));
 
     const opts = mockPaginate.mock.calls[0][1];
@@ -63,7 +63,7 @@ describe("GET /api/groups — pagination param validation", () => {
   });
 
   it("passes valid page and size through", async () => {
-    const { GET } = await import("../route");
+    const { GET } = await import("./route");
     await GET(getRequest("?page=2&size=10"));
 
     const opts = mockPaginate.mock.calls[0][1];
@@ -79,7 +79,7 @@ describe("POST /api/groups — field whitelist", () => {
   });
 
   it("only passes name, description and created_by to create", async () => {
-    const { POST } = await import("../route");
+    const { POST } = await import("./route");
     const req = new NextRequest("http://localhost/api/groups", {
       method: "POST",
       body: JSON.stringify({

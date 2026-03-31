@@ -88,6 +88,7 @@ export async function POST(request: NextRequest) {
 
     const category = await create("categories", {
       ...body,
+      user_id: userId,
       created_by: userId,
     });
 

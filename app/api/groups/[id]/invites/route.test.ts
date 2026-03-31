@@ -52,7 +52,7 @@ describe("POST /api/groups/[id]/invites", () => {
     mockRequireAuth.mockResolvedValue({ userId: "user-1" });
     membershipRow = null;
 
-    const { POST } = await import("../route");
+    const { POST } = await import("./route");
     const res = await POST(postRequest({ email: "a@b.com" }), PARAMS);
     expect(res.status).toBe(403);
     expect(mockCreate).not.toHaveBeenCalled();
@@ -62,7 +62,7 @@ describe("POST /api/groups/[id]/invites", () => {
     mockRequireAuth.mockResolvedValue({ userId: "user-1" });
     membershipRow = { user_role: "member" };
 
-    const { POST } = await import("../route");
+    const { POST } = await import("./route");
     const res = await POST(postRequest({ email: "a@b.com" }), PARAMS);
     expect(res.status).toBe(403);
   });
@@ -71,7 +71,7 @@ describe("POST /api/groups/[id]/invites", () => {
     mockRequireAuth.mockResolvedValue({ userId: "admin-1" });
     membershipRow = { user_role: "admin" };
 
-    const { POST } = await import("../route");
+    const { POST } = await import("./route");
     const res = await POST(postRequest({}), PARAMS);
     expect(res.status).toBe(400);
     expect(mockCreate).not.toHaveBeenCalled();
@@ -82,7 +82,7 @@ describe("POST /api/groups/[id]/invites", () => {
     membershipRow = { user_role: "admin" };
     mockCreate.mockResolvedValue({ id: "invite-1", email: "a@b.com", status: "pending" });
 
-    const { POST } = await import("../route");
+    const { POST } = await import("./route");
     const res = await POST(postRequest({ email: "a@b.com", role: "member" }), PARAMS);
     expect(res.status).toBe(201);
 
@@ -99,7 +99,7 @@ describe("POST /api/groups/[id]/invites", () => {
     membershipRow = { user_role: "admin" };
     mockCreate.mockResolvedValue({ id: "invite-1" });
 
-    const { POST } = await import("../route");
+    const { POST } = await import("./route");
     await POST(postRequest({ email: "a@b.com" }), PARAMS);
 
     expect(mockCreate.mock.calls[0][1].role).toBe("member");
