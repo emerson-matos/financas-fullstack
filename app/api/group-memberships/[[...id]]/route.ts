@@ -33,8 +33,8 @@ export async function GET(
       return createSuccessResponse(data);
     }
 
-    const page = parseInt(searchParams.get("page") || "0");
-    const size = parseInt(searchParams.get("size") || "20");
+    const page = Math.max(0, parseInt(searchParams.get("page") || "0") || 0);
+    const size = Math.max(1, parseInt(searchParams.get("size") || "20") || 20);
     const sort = searchParams.get("sort") || "id";
     const [sortField, sortOrder] = sort.split(",");
 
@@ -65,7 +65,9 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await create("group_memberships", {
-      ...body,
+      group_id: body.group_id,
+      user_id: body.user_id,
+      user_role: body.user_role || "member",
       created_by: userId,
     });
 

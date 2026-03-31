@@ -1,7 +1,8 @@
 import { createErrorResponse, createSuccessResponse } from "@/lib/api/handlers";
 import { requireAuth } from "@/lib/api/auth";
-import { BadRequestAlertException } from "@/lib/api/errors";
+import { BadRequestAlertException, ForbiddenException } from "@/lib/api/errors";
 import { paginate, create } from "@/lib/supabase/queries";
+import { createClient } from "@/lib/supabase/server";
 import { NextRequest } from "next/server";
 
 export async function GET(
@@ -21,8 +22,8 @@ export async function GET(
     }
 
     const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get("page") || "0");
-    const size = parseInt(searchParams.get("size") || "20");
+    const page = Math.max(0, parseInt(searchParams.get("page") || "0") || 0);
+    const size = Math.max(1, parseInt(searchParams.get("size") || "20") || 20);
 
     const result = await paginate("group_invites", {
       group_id: groupId,
@@ -41,7 +42,7 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    await requireAuth();
+    const { userId } = await requireAuth();
     const { id: groupId } = await params;
 
     if (!groupId) {
@@ -49,6 +50,20 @@ export async function POST(
         "Group ID is required",
         "groupInvites",
         "groupIdRequired",
+      );
+    }
+
+    const supabase = await createClient();
+    const { data: membership } = await supabase
+      .from("group_memberships")
+      .select("user_role")
+      .eq("group_id", groupId)
+      .eq("user_id", userId)
+      .single();
+
+    if (!membership || membership.user_role !== "admin") {
+      throw new ForbiddenException(
+        "You don't have permission to invite members to this group",
       );
     }
 

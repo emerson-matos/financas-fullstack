@@ -10,8 +10,8 @@ export async function GET(request: NextRequest) {
     await requireAuth();
     const { searchParams } = new URL(request.url);
 
-    const page = parseInt(searchParams.get("page") || "0");
-    const size = parseInt(searchParams.get("size") || "20");
+    const page = Math.max(0, parseInt(searchParams.get("page") || "0") || 0);
+    const size = Math.max(1, parseInt(searchParams.get("size") || "20") || 20);
     const sort = searchParams.get("sort") || "id,asc";
 
     const result = await paginate("app_groups", {

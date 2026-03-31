@@ -39,8 +39,8 @@ export async function GET(
       return createSuccessResponse(account);
     }
 
-    const page = parseInt(searchParams.get("page") || "0");
-    const size = parseInt(searchParams.get("size") || "20");
+    const page = Math.max(0, parseInt(searchParams.get("page") || "0") || 0);
+    const size = Math.max(1, parseInt(searchParams.get("size") || "20") || 20);
 
     // Get accounts from view
     const {

@@ -34,17 +34,14 @@ export function createErrorResponse(
     );
   }
 
-  const message =
-    error instanceof Error ? error.message : "Internal server error";
-
-  // Log stack trace if available
+  // Log stack trace server-side only, never expose to client
   if (error instanceof Error && error.stack) {
     console.error("[API Error Stack]", error.stack);
   }
 
   return NextResponse.json(
     {
-      error: message,
+      error: "Internal server error",
       statusCode,
     },
     { status: statusCode },

@@ -1,9 +1,33 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createErrorResponse, createSuccessResponse } from "@/lib/api/handlers";
 import { requireAuth } from "@/lib/api/auth";
-import { BadRequestAlertException, NotFoundException } from "@/lib/api/errors";
+import {
+  BadRequestAlertException,
+  ForbiddenException,
+  NotFoundException,
+} from "@/lib/api/errors";
 import { update, deleteById } from "@/lib/supabase/queries";
 import { createClient } from "@/lib/supabase/server";
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function requireGroupAdmin(
+  supabase: any,
+  groupId: string,
+  userId: string,
+) {
+  const { data: membership } = await supabase
+    .from("group_memberships")
+    .select("user_role")
+    .eq("group_id", groupId)
+    .eq("user_id", userId)
+    .single();
+
+  if (!membership || membership.user_role !== "admin") {
+    throw new ForbiddenException(
+      "You don't have permission to modify this group",
+    );
+  }
+}
 
 export async function GET(
   _request: NextRequest,
@@ -30,7 +54,8 @@ export async function GET(
         members:group_memberships(
           id,
           user_id,
-          user_role
+          user_role,
+          profile:user_profiles(name, email)
         )
       `,
       )
@@ -66,10 +91,14 @@ export async function PUT(
       );
     }
 
+    const supabase = await createClient();
+    await requireGroupAdmin(supabase, id, userId);
+
     const body = await request.json();
     const group = await update("app_groups", id, {
-      ...body,
-      updated_by: userId,
+      name: body.name,
+      description: body.description,
+      last_modified_by: userId,
     });
 
     return createSuccessResponse(group);
@@ -94,10 +123,14 @@ export async function PATCH(
       );
     }
 
+    const supabase = await createClient();
+    await requireGroupAdmin(supabase, id, userId);
+
     const body = await request.json();
     const group = await update("app_groups", id, {
-      ...body,
-      updated_by: userId,
+      name: body.name,
+      description: body.description,
+      last_modified_by: userId,
     });
 
     return createSuccessResponse(group);
@@ -111,7 +144,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    await requireAuth();
+    const { userId } = await requireAuth();
     const { id } = await params;
 
     if (!id) {
@@ -121,6 +154,9 @@ export async function DELETE(
         "idrequired",
       );
     }
+
+    const supabase = await createClient();
+    await requireGroupAdmin(supabase, id, userId);
 
     await deleteById("app_groups", id);
 
