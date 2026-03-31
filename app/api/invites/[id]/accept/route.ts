@@ -5,11 +5,11 @@ import { createClient } from "@/lib/supabase/server";
 
 export async function POST(
   _request: NextRequest,
-  { params }: { params: Promise<{ token: string }> },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { userId } = await requireAuth();
-    const { token } = await params;
+    const { id: token } = await params;
 
     const supabase = await createClient();
 
