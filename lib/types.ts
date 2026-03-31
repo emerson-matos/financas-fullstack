@@ -595,10 +595,9 @@ export interface GroupMembership {
   user_id: string;
   user_role: "admin" | "member";
   created_at: string;
-  user?: {
-    id: string;
-    email: string;
-    name: string;
+  profile?: {
+    name: string | null;
+    email: string | null;
   };
 }
 

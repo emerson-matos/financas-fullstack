@@ -136,7 +136,7 @@ export default function GroupDetailsPage({ params }: PageProps) {
                     >
                       <div>
                         <p className="font-medium">
-                          {member.user?.name || member.user?.email || member.user_id}
+                          {member.profile?.name || member.profile?.email || member.user_id}
                         </p>
                         <p className="text-xs text-muted-foreground capitalize">
                           {member.user_role === "admin" ? "Administrador" : "Membro"}
