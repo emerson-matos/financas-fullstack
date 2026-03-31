@@ -48,9 +48,16 @@ Views must be created with `WITH (security_invoker = on)` so RLS is enforced usi
 
 ## Migrations
 
+**Always create migrations with the Supabase CLI — never create migration files manually:**
+
+```bash
+supabase migration new <name>   # e.g. supabase migration new fix_accounts_rls
+```
+
+This guarantees a unique timestamp and prevents duplicate-version conflicts.
+
 Migration files are **append-only and immutable** once committed to git.
 
 - **Never rename, delete, or modify a migration file after it has been committed.**
 - Once a migration is pushed to any database (remote or CI), its filename is recorded in `schema_migrations`. Removing or renaming the file orphans that record and breaks `db:push`.
 - To fix a migration error, add a new migration that corrects it — do not touch the original.
-- Fix timestamp conflicts (two files with the same numeric prefix) **before** the first push. After a push, use `supabase migration repair` to reconcile history.
