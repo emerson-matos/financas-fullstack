@@ -38,7 +38,6 @@
             bun
             yarn
             pnpm
-            chromium
 
             # --- Supabase ---
             supabase-cli
@@ -58,6 +57,7 @@
             claude-code
             opencode
             antigravity-fhs
+            google-chrome
 
             # --- Utilities ---
             jq
