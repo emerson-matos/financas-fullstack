@@ -618,6 +618,19 @@ export interface CreateGroupInviteRequest {
   role: "admin" | "member";
 }
 
+export interface PendingInvite {
+  id: string;
+  token: string;
+  role: "admin" | "member";
+  expires_at: string;
+  status: "pending";
+  group: {
+    id: string;
+    name: string;
+    description?: string | null;
+  };
+}
+
 export interface SplitProposal {
   id: string;
   transaction_id: string;

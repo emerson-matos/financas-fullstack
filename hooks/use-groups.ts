@@ -110,3 +110,21 @@ export function useSettleDebt(groupId: string) {
     },
   });
 }
+
+export function useMyInvites() {
+  return useQuery({
+    queryKey: ["invites", "mine"],
+    queryFn: () => groupsService.getMyInvites(),
+  });
+}
+
+export function useAcceptInvite() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (token: string) => groupsService.acceptInvite(token),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["invites", "mine"] });
+      queryClient.invalidateQueries({ queryKey: ["groups"] });
+    },
+  });
+}

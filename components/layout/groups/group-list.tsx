@@ -6,20 +6,22 @@ import { Plus, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
 import { GroupCreateDialog } from "@/components/layout/groups/group-create-dialog";
 import { useGroups } from "@/hooks/use-groups";
 import type { Group } from "@/lib/types";
 
+function accentColor(name: string): string {
+  const hue = name.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0) % 360;
+  return `hsl(${hue}, 65%, 55%)`;
+}
+
 export function GroupList() {
   const [isInviteOpen, setIsInviteOpen] = useState(false);
   const router = useRouter();
-
-  const { data: groups, isLoading, error } = useGroups();
+  const { data: groups, isError } = useGroups();
 
   const sortedGroups = useMemo(() => {
-    const list = groups?.content ?? groups ?? [];
-    if (!Array.isArray(list)) return [] as Array<Group>;
+    const list = groups?.content ?? [];
     return [...list].sort((a, b) =>
       (b.updated_at || "").localeCompare(a.updated_at || ""),
     );
@@ -35,30 +37,6 @@ export function GroupList() {
     return `${count} ${label}`;
   };
 
-  if (isLoading) {
-    return (
-      <div className="space-y-4">
-        <div className="flex justify-end">
-          <Button disabled>
-            <Plus className="mr-2 h-4 w-4" />
-            Novo Grupo
-          </Button>
-        </div>
-        {[1, 2, 3].map((item) => (
-          <Card key={item} className="p-4">
-            <div className="flex items-center justify-between gap-4">
-              <div className="space-y-2">
-                <Skeleton className="h-5 w-40" />
-                <Skeleton className="h-4 w-64" />
-              </div>
-              <Skeleton className="h-6 w-20" />
-            </div>
-          </Card>
-        ))}
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
@@ -68,7 +46,7 @@ export function GroupList() {
         </Button>
       </div>
 
-      {error ? (
+      {isError ? (
         <Card className="p-4 text-center text-sm text-destructive">
           Não foi possível carregar os grupos. Tente novamente.
         </Card>
@@ -81,7 +59,8 @@ export function GroupList() {
           {sortedGroups.map((group) => (
             <Card
               key={group.id}
-              className="p-4 transition hover:-translate-y-0.5 hover:shadow-sm"
+              className="cursor-pointer border-l-2 p-4 transition hover:-translate-y-0.5 hover:shadow-md"
+              style={{ borderLeftColor: accentColor(group.name) }}
               onClick={() => handleCardClick(group.id)}
             >
               <div className="flex items-start justify-between gap-3">

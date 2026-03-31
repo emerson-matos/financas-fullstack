@@ -6,6 +6,7 @@ import type {
   GroupTransaction,
   MemberDebt,
   PageResponse,
+  PendingInvite,
 } from "@/lib/types";
 
 export const groupsService = {
@@ -75,5 +76,17 @@ export const groupsService = {
       status: "paid",
     });
     return response;
+  },
+
+  getMyInvites: async () => {
+    const response = await api.get<PendingInvite[]>("/invites/mine");
+    return response.data;
+  },
+
+  acceptInvite: async (token: string) => {
+    const response = await api.post<{ group_id: string; message: string }>(
+      `/invites/${token}/accept`,
+    );
+    return response.data;
   },
 };

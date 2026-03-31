@@ -13,9 +13,7 @@ export function Groups() {
           </p>
         </div>
       </div>
-      <div className="space-y-4">
-        <GroupList />
-      </div>
+      <GroupList />
     </div>
   );
 }
