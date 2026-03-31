@@ -43,3 +43,14 @@ Never rely on `created_by` for data isolation — RLS policies filter by `user_i
 ## RLS Requirements
 
 Every new table that holds per-user data must have a SELECT policy that filters by `user_id = auth.uid()` (or equivalent). A policy of `USING (TRUE)` exposes all rows to all authenticated users.
+
+Views must be created with `WITH (security_invoker = on)` so RLS is enforced using the querying user's role. Without it, views run as the owner (`postgres` superuser) and bypass RLS entirely.
+
+## Migrations
+
+Migration files are **append-only and immutable** once committed to git.
+
+- **Never rename, delete, or modify a migration file after it has been committed.**
+- Once a migration is pushed to any database (remote or CI), its filename is recorded in `schema_migrations`. Removing or renaming the file orphans that record and breaks `db:push`.
+- To fix a migration error, add a new migration that corrects it — do not touch the original.
+- Fix timestamp conflicts (two files with the same numeric prefix) **before** the first push. After a push, use `supabase migration repair` to reconcile history.
