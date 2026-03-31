@@ -18,7 +18,7 @@ export async function GET() {
 
     const { data: invites, error } = await supabase
       .from("group_invites")
-      .select("id, token, role, expires_at, status, group:groups(id, name, description)")
+      .select("id, token, role, expires_at, status, group:app_groups(id, name, description)")
       .eq("email", user.email)
       .eq("status", "pending");
 
